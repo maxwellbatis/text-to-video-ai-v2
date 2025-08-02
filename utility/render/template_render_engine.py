@@ -11,6 +11,14 @@ from moviepy.editor import AudioFileClip, CompositeVideoClip, CompositeAudioClip
 from moviepy.audio.fx.audio_normalize import audio_normalize
 from moviepy.audio.fx.audio_loop import audio_loop
 
+# Importar AssetManager
+try:
+    from utility.assets.asset_manager import asset_manager
+    ASSETS_AVAILABLE = True
+except ImportError:
+    print("⚠️ AssetManager não disponível - usando configurações padrão")
+    ASSETS_AVAILABLE = False
+
 class TemplateRenderEngine:
     def __init__(self):
         self.templates = {}
@@ -24,12 +32,12 @@ class TemplateRenderEngine:
             # Aplicar configurações visuais
             video = self._apply_visual_settings(video, template_config.get('visual_settings', {}))
             
-            # Aplicar configurações de áudio
+            # Aplicar configurações de áudio com assets
             if audio_path and os.path.exists(audio_path):
-                video = self._apply_audio_settings(video, audio_path, template_config.get('audio_settings', {}))
+                video = self._apply_audio_settings_with_assets(video, audio_path, template_config)
             
-            # Aplicar efeitos
-            video = self._apply_effects(video, template_config.get('effects', {}))
+            # Aplicar efeitos visuais com assets
+            video = self._apply_effects_with_assets(video, template_config)
             
             # Salvar vídeo processado
             output_path = f"template_processed_{os.path.basename(video_path)}"
@@ -64,25 +72,51 @@ class TemplateRenderEngine:
             print(f"⚠️ Erro ao aplicar configurações visuais: {e}")
             return video
     
-    def _apply_audio_settings(self, video: VideoFileClip, audio_path: str, audio_settings: Dict) -> VideoFileClip:
-        """Aplica configurações de áudio do template"""
+    def _apply_audio_settings_with_assets(self, video: VideoFileClip, audio_path: str, template_config: Dict) -> VideoFileClip:
+        """Aplica configurações de áudio com assets do template"""
         try:
-            # Carregar áudio
+            # Carregar áudio principal
             audio = AudioFileClip(audio_path)
             
-            # Normalizar áudio se especificado
-            if audio_settings.get('voice_processing', {}).get('normalize', False):
-                audio = audio_normalize(audio)
+            # Obter assets para o template
+            template_id = template_config.get('template_id', 'default')
+            if ASSETS_AVAILABLE:
+                assets = asset_manager.get_assets_for_template(template_id)
+                
+                # Adicionar música de fundo
+                if assets.get('background_music') and os.path.exists(assets['background_music']):
+                    bg_music = AudioFileClip(assets['background_music'])
+                    # Loop da música de fundo para cobrir toda a duração
+                    bg_music = audio_loop(bg_music, duration=audio.duration)
+                    # Volume reduzido para não competir com a narração
+                    bg_music = bg_music.volumex(0.1)
+                    
+                    # Combinar áudio principal com música de fundo
+                    audio = CompositeAudioClip([audio, bg_music])
+                    print(f"✅ Música de fundo aplicada: {os.path.basename(assets['background_music'])}")
+                
+                # Adicionar efeitos sonoros
+                audio_clips = [audio]
+                
+                # Efeito de tensão
+                if assets.get('tension_effect') and os.path.exists(assets['tension_effect']):
+                    tension = AudioFileClip(assets['tension_effect'])
+                    tension = tension.volumex(0.3)
+                    audio_clips.append(tension)
+                    print(f"✅ Efeito de tensão aplicado: {os.path.basename(assets['tension_effect'])}")
+                
+                # Efeito de impacto
+                if assets.get('impact_effect') and os.path.exists(assets['impact_effect']):
+                    impact = AudioFileClip(assets['impact_effect'])
+                    impact = impact.volumex(0.2)
+                    audio_clips.append(impact)
+                    print(f"✅ Efeito de impacto aplicado: {os.path.basename(assets['impact_effect'])}")
+                
+                if len(audio_clips) > 1:
+                    audio = CompositeAudioClip(audio_clips)
             
-            # Aplicar volume de música de fundo
-            if 'background_music' in audio_settings:
-                bg_volume = audio_settings['background_music'].get('volume', 0.15)
-                # Reduzir volume do áudio principal para dar espaço à música
-                audio = audio.volumex(1.0 - bg_volume)
-            
-            # Aplicar efeitos de áudio
-            if 'sound_effects' in audio_settings:
-                audio = self._apply_audio_effects(audio, audio_settings['sound_effects'])
+            # Normalizar áudio final
+            audio = audio_normalize(audio)
             
             # Combinar áudio com vídeo
             video = video.set_audio(audio)
@@ -90,7 +124,7 @@ class TemplateRenderEngine:
             return video
             
         except Exception as e:
-            print(f"⚠️ Erro ao aplicar configurações de áudio: {e}")
+            print(f"⚠️ Erro ao aplicar configurações de áudio com assets: {e}")
             return video
     
     def _apply_transitions(self, video: VideoFileClip, transitions: List[str]) -> VideoFileClip:
@@ -121,22 +155,39 @@ class TemplateRenderEngine:
             print(f"⚠️ Erro ao aplicar efeitos de áudio: {e}")
             return audio
     
-    def _apply_effects(self, video: VideoFileClip, effects: Dict) -> VideoFileClip:
-        """Aplica efeitos visuais e de áudio"""
+    def _apply_effects_with_assets(self, video: VideoFileClip, template_config: Dict) -> VideoFileClip:
+        """Aplica efeitos visuais com assets do template"""
         try:
-            # Implementar efeitos visuais básicos
-            if 'visual' in effects:
-                for effect in effects['visual']:
-                    if effect == 'slow_motion':
-                        video = video.speedx(0.5)
-                    elif effect == 'color_grading':
-                        # Implementar gradiente de cores básico
-                        pass
+            template_id = template_config.get('template_id', 'default')
+            if ASSETS_AVAILABLE:
+                assets = asset_manager.get_assets_for_template(template_id)
+                video_clips = [video]
+                
+                # Adicionar overlay de filme antigo
+                if assets.get('film_overlay') and os.path.exists(assets['film_overlay']):
+                    overlay = VideoFileClip(assets['film_overlay'])
+                    overlay = overlay.resize(video.size)
+                    overlay = overlay.set_duration(video.duration)
+                    overlay = overlay.set_opacity(0.3)  # 30% de opacidade
+                    video_clips.append(overlay)
+                    print(f"✅ Overlay de filme aplicado: {os.path.basename(assets['film_overlay'])}")
+                
+                # Adicionar light leak
+                if assets.get('light_leak') and os.path.exists(assets['light_leak']):
+                    light_leak = VideoFileClip(assets['light_leak'])
+                    light_leak = light_leak.resize(video.size)
+                    light_leak = light_leak.set_duration(video.duration)
+                    light_leak = light_leak.set_opacity(0.2)  # 20% de opacidade
+                    video_clips.append(light_leak)
+                    print(f"✅ Light leak aplicado: {os.path.basename(assets['light_leak'])}")
+                
+                if len(video_clips) > 1:
+                    video = CompositeVideoClip(video_clips)
             
             return video
             
         except Exception as e:
-            print(f"⚠️ Erro ao aplicar efeitos: {e}")
+            print(f"⚠️ Erro ao aplicar efeitos visuais com assets: {e}")
             return video
     
     def apply_strategic_pauses(self, audio_path: str, pauses_config: Dict) -> str:

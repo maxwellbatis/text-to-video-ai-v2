@@ -2,6 +2,7 @@
   "name": "Cinematográfico Religioso",
   "description": "Template para vídeos religiosos com estilo cinematográfico, pausas estratégicas e efeitos dramáticos",
   "category": "religioso",
+  "template_id": "cinematic_religious",
   "script_pattern": {
     "style": "dramatic",
     "tone": "reverent",
@@ -65,6 +66,14 @@
       "compression": true,
       "reverb": 0.1
     }
+  },
+  "assets_config": {
+    "use_local_assets": true,
+    "background_music": "assets/TRILHA SONORA/CINEMATIC/Cinematic_principal.mp3",
+    "tension_effect": "assets/EFEITOS SONOROS/CINEMATIC/Cinematic_Tension_coração.wav",
+    "impact_effect": "assets/EFEITOS SONOROS/CINEMATIC/Cinematic_impact02.wav",
+    "film_overlay": "assets/EFEITOS DE VÍDEO/TRANSIÇÕES_AMOSTRA/OverlayFilm_sfx15.mp4",
+    "light_leak": "assets/EFEITOS DE VÍDEO/TRANSIÇÕES_AMOSTRA/LightLeak02_sfx18.mp4"
   },
   "content_guidelines": {
     "topics": ["biblical", "religious", "spiritual", "prophecy", "faith"],
