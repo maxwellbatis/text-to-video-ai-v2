@@ -412,4 +412,5 @@ if __name__ == '__main__':
     print("📱 Interface web disponível em: http://localhost:5000")
     print("🎬 API disponível em: http://localhost:5000/api")
     
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True, allow_unsafe_werkzeug=True) 
+    # Configuração para produção - desabilitar debug e usar configurações mais seguras
+    socketio.run(app, host='0.0.0.0', port=5000, debug=False, allow_unsafe_werkzeug=True) 

@@ -20,7 +20,9 @@ class AssetManager:
             "tension": [],
             "glitch": [],
             "heartbeat": [],
-            "explosions": []
+            "explosions": [],
+            "drones": [],
+            "reverse": []
         }
         
         cinematic_dir = self.assets_root / "EFEITOS SONOROS" / "CINEMATIC"
@@ -36,8 +38,25 @@ class AssetManager:
                     effects["heartbeat"].append(str(file))
                 elif "explosion" in file.name.lower():
                     effects["explosions"].append(str(file))
+                elif "drone" in file.name.lower():
+                    effects["drones"].append(str(file))
+                elif "reverse" in file.name.lower():
+                    effects["reverse"].append(str(file))
                 else:
                     effects["cinematic"].append(str(file))
+            
+            # Incluir arquivos .mp3 também
+            for file in cinematic_dir.glob("*.mp3"):
+                if "heartbeat" in file.name.lower():
+                    effects["heartbeat"].append(str(file))
+                elif "orchestra" in file.name.lower():
+                    effects["cinematic"].append(str(file))
+                elif "radio" in file.name.lower():
+                    effects["cinematic"].append(str(file))
+                elif "wind" in file.name.lower():
+                    effects["cinematic"].append(str(file))
+                elif "weird" in file.name.lower():
+                    effects["glitch"].append(str(file))
         
         return effects
     
@@ -138,19 +157,24 @@ class AssetManager:
                 "tension_effect": self.get_audio_effect("tension", 0),      # Cinematic_Tension_coração.wav
                 "impact_effect": self.get_audio_effect("impacts", 0),       # Cinematic_impact02.wav
                 "film_overlay": self.get_video_effect("overlays", 0),       # OverlayFilm_sfx15.mp4
-                "light_leak": self.get_video_effect("light_leaks", 0)       # LightLeak02_sfx18.mp4
+                "light_leak": self.get_video_effect("light_leaks", 0),      # LightLeak02_sfx18.mp4
+                "drones": self.get_audio_effect("drones", 0),               # Cinematic_drones01.wav
+                "reverse": self.get_audio_effect("reverse", 0)              # Cinematic_reverse02.wav
             }
         elif template_id == "dramatic":
             return {
                 "background_music": self.get_music_track("suspense", 0),    # cinematic_suspense01.mp3
                 "explosion_effect": self.get_audio_effect("explosions", 0), # Explosion_Debris.wav
                 "glitch_effect": self.get_audio_effect("glitch", 0),        # Cinematic_Glitch04.wav
-                "vibrant_overlay": self.get_video_effect("overlays", 2)     # Overlay_vibrante_sfx16.mp4
+                "vibrant_overlay": self.get_video_effect("overlays", 2),    # Overlay_vibrante_sfx16.mp4
+                "heartbeat": self.get_audio_effect("heartbeat", 0),         # Heartbeat.mp3
+                "tension": self.get_audio_effect("tension", 1)              # Cinematic_Tension03.wav
             }
         else:
             return {
                 "background_music": self.get_music_track("cinematic", 0),
-                "tension_effect": self.get_audio_effect("tension", 0)
+                "tension_effect": self.get_audio_effect("tension", 0),
+                "atmospheric": self.get_music_track("atmospheric", 0)        # cinematic_atmosphera.mp3
             }
 
 # Instância global do asset manager

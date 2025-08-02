@@ -62,6 +62,17 @@ The list must always contain the most relevant and appropriate query searches.
 ['Fast car'] <= GOOD, because it's 1 string.
 ['Un chien', 'une voiture rapide', 'une maison rouge'] <= BAD, because the text query is NOT in English.
 
+CRITICAL: For religious/biblical content, use more general, visually appealing terms that are likely to be found on stock video sites:
+- Instead of "apocalypse", use "storm clouds", "dark sky", "lightning", "fire", "smoke"
+- Instead of "bible", use "old book", "ancient text", "manuscript", "parchment"
+- Instead of "religious", use "church", "cathedral", "stained glass", "candles", "prayer"
+- Instead of "virgin mary", use "statue", "sculpture", "religious art", "portrait"
+- Instead of "fatima", use "portugal landscape", "church building", "pilgrimage"
+- Instead of "666", use "numbers", "symbols", "mysterious", "dark"
+- Instead of "antichrist", use "dark figure", "shadow", "mysterious person"
+
+Focus on visual elements that are commonly available in stock video libraries.
+
 Note: Your response should be the response only and no extra text or data.
   """
 
@@ -108,12 +119,12 @@ def getVideoSearchQueriesTimed(script,captions_timed):
                 except Exception as e2:
                     print(f"❌ Erro crítico ao processar JSON: {e2}")
                     # Retornar estrutura padrão em caso de falha
-                    return [[[0, end], ["bible", "apocalypse", "religious"]]]
+                    return [[[0, end], ["storm clouds", "dark sky", "church"]]]
         return out
     except Exception as e:
         print("error in response",e)
         # Retornar estrutura padrão em caso de falha
-        return [[[0, end], ["bible", "apocalypse", "religious"]]]
+        return [[[0, end], ["storm clouds", "dark sky", "church"]]]
 
 def call_OpenAI(script,captions_timed):
     user_content = """Script: {}
