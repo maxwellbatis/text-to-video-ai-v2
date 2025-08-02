@@ -47,7 +47,12 @@ class TemplateRenderEngine:
             # Aplicar resolução se especificada
             if 'resolution' in visual_settings:
                 width, height = map(int, visual_settings['resolution'].split('x'))
-                video = video.resize((width, height))
+                # Usar método de redimensionamento compatível
+                try:
+                    video = video.resize((width, height))
+                except AttributeError:
+                    # Fallback para versões mais antigas do PIL
+                    video = video.resize((width, height), resample='bicubic')
             
             # Aplicar efeitos de transição
             if 'transition_effects' in visual_settings:
@@ -135,45 +140,67 @@ class TemplateRenderEngine:
             return video
     
     def apply_strategic_pauses(self, audio_path: str, pauses_config: Dict) -> str:
-        """Aplica pausas estratégicas ao áudio"""
+        """Aplica pausas estratégicas ao áudio de forma mais suave"""
         try:
             audio = AudioFileClip(audio_path)
             duration = audio.duration
             
-            # Criar segmentos de áudio com pausas
+            # Verificar se há pausas configuradas
+            impact_pauses = pauses_config.get('impact_pauses', [])
+            if not impact_pauses:
+                print("⚠️ Nenhuma pausa estratégica configurada")
+                return audio_path
+            
+            # Criar segmentos de áudio com pausas mais suaves
             segments = []
             current_time = 0
             
-            # Aplicar pausas de impacto
-            impact_pauses = pauses_config.get('impact_pauses', [])
             for pause in impact_pauses:
                 pause_time = duration * pause['position']
                 pause_duration = pause['duration']
+                
+                # Verificar se a pausa está dentro dos limites
+                if pause_time >= duration:
+                    continue
                 
                 # Adicionar segmento antes da pausa
                 if pause_time > current_time:
                     segment = audio.subclip(current_time, pause_time)
                     segments.append(segment)
                 
-                # Adicionar silêncio (pausa)
-                silence = AudioFileClip(audio_path).subclip(0, pause_duration).volumex(0)
-                # Definir fps para evitar erro
-                silence.fps = audio.fps
-                segments.append(silence)
-                
-                current_time = pause_time + pause_duration
+                # Criar silêncio mais suave
+                try:
+                    import numpy as np
+                    sample_rate = int(audio.fps)
+                    silence_samples = int(pause_duration * sample_rate)
+                    silence_array = np.zeros(silence_samples)
+                    
+                    # Criar AudioClip do silêncio
+                    from moviepy.audio.AudioClip import AudioArrayClip
+                    silence = AudioArrayClip(silence_array.reshape(-1, 1), fps=sample_rate)
+                    segments.append(silence)
+                    
+                    current_time = pause_time + pause_duration
+                except Exception as e:
+                    print(f"⚠️ Erro ao criar pausa: {e}")
+                    continue
             
             # Adicionar segmento final
             if current_time < duration:
                 final_segment = audio.subclip(current_time, duration)
                 segments.append(final_segment)
             
-            # Combinar segmentos
-            if segments:
-                final_audio = CompositeAudioClip(segments)
-                output_path = f"paused_{os.path.basename(audio_path)}"
-                final_audio.write_audiofile(output_path)
-                return output_path
+            # Combinar segmentos apenas se houver segmentos válidos
+            if segments and len(segments) > 1:
+                try:
+                    final_audio = CompositeAudioClip(segments)
+                    output_path = f"paused_{os.path.basename(audio_path)}"
+                    final_audio.write_audiofile(output_path)
+                    print(f"✅ Pausas estratégicas aplicadas com sucesso")
+                    return output_path
+                except Exception as e:
+                    print(f"⚠️ Erro ao combinar segmentos: {e}")
+                    return audio_path
             
             return audio_path
             
