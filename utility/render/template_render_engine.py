@@ -77,43 +77,70 @@ class TemplateRenderEngine:
         try:
             # Carregar áudio principal
             audio = AudioFileClip(audio_path)
+            print(f"🎵 Áudio principal carregado: {os.path.basename(audio_path)}")
             
             # Obter assets para o template
             template_id = template_config.get('template_id', 'default')
+            print(f"🎵 Aplicando áudio para template: {template_id}")
+            
             if ASSETS_AVAILABLE:
                 assets = asset_manager.get_assets_for_template(template_id)
+                print(f"🎵 Assets de áudio encontrados: {list(assets.keys())}")
                 
                 # Adicionar música de fundo
                 if assets.get('background_music') and os.path.exists(assets['background_music']):
-                    bg_music = AudioFileClip(assets['background_music'])
-                    # Loop da música de fundo para cobrir toda a duração
-                    bg_music = audio_loop(bg_music, duration=audio.duration)
-                    # Volume reduzido para não competir com a narração
-                    bg_music = bg_music.volumex(0.1)
-                    
-                    # Combinar áudio principal com música de fundo
-                    audio = CompositeAudioClip([audio, bg_music])
-                    print(f"✅ Música de fundo aplicada: {os.path.basename(assets['background_music'])}")
+                    print(f"🎵 Tentando aplicar música de fundo: {assets['background_music']}")
+                    try:
+                        bg_music = AudioFileClip(assets['background_music'])
+                        # Loop da música de fundo para cobrir toda a duração
+                        bg_music = audio_loop(bg_music, duration=audio.duration)
+                        # Volume reduzido para não competir com a narração
+                        bg_music = bg_music.volumex(0.1)
+                        
+                        # Combinar áudio principal com música de fundo
+                        audio = CompositeAudioClip([audio, bg_music])
+                        print(f"✅ Música de fundo aplicada: {os.path.basename(assets['background_music'])}")
+                    except Exception as e:
+                        print(f"❌ Erro ao aplicar música de fundo: {e}")
+                else:
+                    print(f"⚠️ Música de fundo não encontrada ou não existe")
                 
                 # Adicionar efeitos sonoros
                 audio_clips = [audio]
                 
                 # Efeito de tensão
                 if assets.get('tension_effect') and os.path.exists(assets['tension_effect']):
-                    tension = AudioFileClip(assets['tension_effect'])
-                    tension = tension.volumex(0.3)
-                    audio_clips.append(tension)
-                    print(f"✅ Efeito de tensão aplicado: {os.path.basename(assets['tension_effect'])}")
+                    print(f"🎵 Tentando aplicar efeito de tensão: {assets['tension_effect']}")
+                    try:
+                        tension = AudioFileClip(assets['tension_effect'])
+                        tension = tension.volumex(0.3)
+                        audio_clips.append(tension)
+                        print(f"✅ Efeito de tensão aplicado: {os.path.basename(assets['tension_effect'])}")
+                    except Exception as e:
+                        print(f"❌ Erro ao aplicar efeito de tensão: {e}")
+                else:
+                    print(f"⚠️ Efeito de tensão não encontrado ou não existe")
                 
                 # Efeito de impacto
                 if assets.get('impact_effect') and os.path.exists(assets['impact_effect']):
-                    impact = AudioFileClip(assets['impact_effect'])
-                    impact = impact.volumex(0.2)
-                    audio_clips.append(impact)
-                    print(f"✅ Efeito de impacto aplicado: {os.path.basename(assets['impact_effect'])}")
+                    print(f"🎵 Tentando aplicar efeito de impacto: {assets['impact_effect']}")
+                    try:
+                        impact = AudioFileClip(assets['impact_effect'])
+                        impact = impact.volumex(0.2)
+                        audio_clips.append(impact)
+                        print(f"✅ Efeito de impacto aplicado: {os.path.basename(assets['impact_effect'])}")
+                    except Exception as e:
+                        print(f"❌ Erro ao aplicar efeito de impacto: {e}")
+                else:
+                    print(f"⚠️ Efeito de impacto não encontrado ou não existe")
                 
                 if len(audio_clips) > 1:
+                    print(f"🎵 Combinando {len(audio_clips)} clips de áudio")
                     audio = CompositeAudioClip(audio_clips)
+                else:
+                    print(f"⚠️ Nenhum efeito de áudio aplicado")
+            else:
+                print(f"⚠️ AssetManager não disponível")
             
             # Normalizar áudio final
             audio = audio_normalize(audio)
@@ -125,6 +152,8 @@ class TemplateRenderEngine:
             
         except Exception as e:
             print(f"⚠️ Erro ao aplicar configurações de áudio com assets: {e}")
+            import traceback
+            traceback.print_exc()
             return video
     
     def _apply_transitions(self, video: VideoFileClip, transitions: List[str]) -> VideoFileClip:
@@ -159,35 +188,57 @@ class TemplateRenderEngine:
         """Aplica efeitos visuais com assets do template"""
         try:
             template_id = template_config.get('template_id', 'default')
+            print(f"🎬 Aplicando efeitos visuais para template: {template_id}")
+            
             if ASSETS_AVAILABLE:
                 assets = asset_manager.get_assets_for_template(template_id)
+                print(f"📋 Assets encontrados: {list(assets.keys())}")
                 video_clips = [video]
                 
                 # Adicionar overlay de filme antigo
                 if assets.get('film_overlay') and os.path.exists(assets['film_overlay']):
-                    overlay = VideoFileClip(assets['film_overlay'])
-                    overlay = overlay.resize(video.size)
-                    overlay = overlay.set_duration(video.duration)
-                    overlay = overlay.set_opacity(0.3)  # 30% de opacidade
-                    video_clips.append(overlay)
-                    print(f"✅ Overlay de filme aplicado: {os.path.basename(assets['film_overlay'])}")
+                    print(f"🎬 Tentando aplicar overlay de filme: {assets['film_overlay']}")
+                    try:
+                        overlay = VideoFileClip(assets['film_overlay'])
+                        overlay = overlay.resize(video.size)
+                        overlay = overlay.set_duration(video.duration)
+                        overlay = overlay.set_opacity(0.3)  # 30% de opacidade
+                        video_clips.append(overlay)
+                        print(f"✅ Overlay de filme aplicado: {os.path.basename(assets['film_overlay'])}")
+                    except Exception as e:
+                        print(f"❌ Erro ao aplicar overlay de filme: {e}")
+                else:
+                    print(f"⚠️ Overlay de filme não encontrado ou não existe")
                 
                 # Adicionar light leak
                 if assets.get('light_leak') and os.path.exists(assets['light_leak']):
-                    light_leak = VideoFileClip(assets['light_leak'])
-                    light_leak = light_leak.resize(video.size)
-                    light_leak = light_leak.set_duration(video.duration)
-                    light_leak = light_leak.set_opacity(0.2)  # 20% de opacidade
-                    video_clips.append(light_leak)
-                    print(f"✅ Light leak aplicado: {os.path.basename(assets['light_leak'])}")
+                    print(f"🎬 Tentando aplicar light leak: {assets['light_leak']}")
+                    try:
+                        light_leak = VideoFileClip(assets['light_leak'])
+                        light_leak = light_leak.resize(video.size)
+                        light_leak = light_leak.set_duration(video.duration)
+                        light_leak = light_leak.set_opacity(0.2)  # 20% de opacidade
+                        video_clips.append(light_leak)
+                        print(f"✅ Light leak aplicado: {os.path.basename(assets['light_leak'])}")
+                    except Exception as e:
+                        print(f"❌ Erro ao aplicar light leak: {e}")
+                else:
+                    print(f"⚠️ Light leak não encontrado ou não existe")
                 
                 if len(video_clips) > 1:
+                    print(f"🎬 Combinando {len(video_clips)} clips de vídeo")
                     video = CompositeVideoClip(video_clips)
+                else:
+                    print(f"⚠️ Nenhum efeito visual aplicado")
+            else:
+                print(f"⚠️ AssetManager não disponível")
             
             return video
             
         except Exception as e:
             print(f"⚠️ Erro ao aplicar efeitos visuais com assets: {e}")
+            import traceback
+            traceback.print_exc()
             return video
     
     def apply_strategic_pauses(self, audio_path: str, pauses_config: Dict) -> str:
