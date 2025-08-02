@@ -80,12 +80,12 @@ def fix_json(json_str):
     # Tentar encontrar JSON válido
     try:
         # Procurar por padrão JSON
-        import re
         json_pattern = r'\[\[\[.*?\]\]\]'
         matches = re.findall(json_pattern, json_str, re.DOTALL)
         if matches:
             return matches[0]
-    except:
+    except Exception as e:
+        print(f"⚠️ Erro ao processar JSON: {e}")
         pass
     
     return json_str
@@ -103,12 +103,17 @@ def getVideoSearchQueriesTimed(script,captions_timed):
                 print("content: \n", content, "\n\n")
                 print(e)
                 content = fix_json(content.replace("```json", "").replace("```", ""))
-                out = json.loads(content)
+                try:
+                    out = json.loads(content)
+                except Exception as e2:
+                    print(f"❌ Erro crítico ao processar JSON: {e2}")
+                    # Retornar estrutura padrão em caso de falha
+                    return [[[0, end], ["bible", "apocalypse", "religious"]]]
         return out
     except Exception as e:
         print("error in response",e)
-   
-    return None
+        # Retornar estrutura padrão em caso de falha
+        return [[[0, end], ["bible", "apocalypse", "religious"]]]
 
 def call_OpenAI(script,captions_timed):
     user_content = """Script: {}
