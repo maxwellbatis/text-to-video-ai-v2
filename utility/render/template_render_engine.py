@@ -246,70 +246,145 @@ class TemplateRenderEngine:
             return video
     
     def apply_strategic_pauses(self, audio_path: str, pauses_config: Dict) -> str:
-        """Aplica pausas estratégicas ao áudio de forma mais suave"""
+        """Aplica pausas estratégicas ao áudio"""
         try:
             audio = AudioFileClip(audio_path)
             duration = audio.duration
             
-            # Verificar se há pausas configuradas
+            # Aplicar pausas baseadas na configuração
             impact_pauses = pauses_config.get('impact_pauses', [])
-            if not impact_pauses:
-                print("⚠️ Nenhuma pausa estratégica configurada")
-                return audio_path
-            
-            # Criar segmentos de áudio com pausas mais suaves
-            segments = []
-            current_time = 0
             
             for pause in impact_pauses:
-                pause_time = duration * pause['position']
+                position = pause['position']
                 pause_duration = pause['duration']
+                purpose = pause.get('purpose', 'drama')
                 
-                # Verificar se a pausa está dentro dos limites
-                if pause_time >= duration:
-                    continue
+                # Calcular tempo real da pausa
+                pause_time = duration * position
                 
-                # Adicionar segmento antes da pausa
-                if pause_time > current_time:
-                    segment = audio.subclip(current_time, pause_time)
-                    segments.append(segment)
+                # Criar silêncio para a pausa
+                silence = AudioFileClip(audio_path).set_duration(pause_duration)
+                silence = silence.volumex(0)  # Silêncio total
                 
-                # Criar silêncio mais suave
-                try:
-                    import numpy as np
-                    sample_rate = int(audio.fps)
-                    silence_samples = int(pause_duration * sample_rate)
-                    silence_array = np.zeros(silence_samples)
-                    
-                    # Criar AudioClip do silêncio
-                    from moviepy.audio.AudioClip import AudioArrayClip
-                    silence = AudioArrayClip(silence_array.reshape(-1, 1), fps=sample_rate)
-                    segments.append(silence)
-                    
-                    current_time = pause_time + pause_duration
-                except Exception as e:
-                    print(f"⚠️ Erro ao criar pausa: {e}")
-                    continue
+                # Inserir pausa no áudio
+                audio = audio.set_start(0)
+                audio = audio.set_end(pause_time)
+                
+                # Combinar com silêncio
+                from moviepy.editor import concatenate_audioclips
+                audio = concatenate_audioclips([audio, silence])
             
-            # Adicionar segmento final
-            if current_time < duration:
-                final_segment = audio.subclip(current_time, duration)
-                segments.append(final_segment)
+            # Salvar áudio com pausas
+            output_path = f"paused_{os.path.basename(audio_path)}"
+            audio.write_audiofile(output_path)
             
-            # Combinar segmentos apenas se houver segmentos válidos
-            if segments and len(segments) > 1:
-                try:
-                    final_audio = CompositeAudioClip(segments)
-                    output_path = f"paused_{os.path.basename(audio_path)}"
-                    final_audio.write_audiofile(output_path)
-                    print(f"✅ Pausas estratégicas aplicadas com sucesso")
-                    return output_path
-                except Exception as e:
-                    print(f"⚠️ Erro ao combinar segmentos: {e}")
-                    return audio_path
-            
-            return audio_path
+            return output_path
             
         except Exception as e:
             print(f"❌ Erro ao aplicar pausas estratégicas: {e}")
-            return audio_path 
+            return audio_path
+    
+    def generate_vsl_text_overlays(self, script: str, template_config: Dict) -> List[Dict]:
+        """Gera overlays de texto para VSL baseado no script e template"""
+        try:
+            # Estrutura VSL: Hook → Problema → Solução → Oferta → CTA
+            vsl_structure = template_config.get('script_pattern', {}).get('structure', {})
+            text_settings = template_config.get('text_display', {})
+            
+            # Dividir script em frases
+            sentences = script.split('. ')
+            overlays = []
+            
+            # Configurações de texto
+            typography = text_settings.get('typography', {})
+            animations = text_settings.get('animations', {})
+            timing = text_settings.get('timing', {})
+            
+            # Duração total estimada (45-60 segundos para VSL)
+            total_duration = 50  # segundos
+            segment_duration = total_duration / len(sentences) if sentences else 10
+            
+            for i, sentence in enumerate(sentences):
+                if not sentence.strip():
+                    continue
+                
+                # Calcular timing
+                start_time = i * segment_duration
+                end_time = (i + 1) * segment_duration
+                
+                # Determinar tipo de texto baseado na posição
+                text_type = self._determine_vsl_text_type(i, len(sentences))
+                
+                # Criar overlay de texto
+                overlay = {
+                    'text': sentence.strip(),
+                    'start_time': start_time,
+                    'end_time': end_time,
+                    'type': text_type,
+                    'style': self._get_vsl_text_style(text_type, typography),
+                    'animation': self._get_vsl_animation(text_type, animations),
+                    'position': self._get_vsl_position(text_type, text_settings)
+                }
+                
+                overlays.append(overlay)
+            
+            return overlays
+            
+        except Exception as e:
+            print(f"❌ Erro ao gerar overlays VSL: {e}")
+            return []
+    
+    def _determine_vsl_text_type(self, index: int, total_sentences: int) -> str:
+        """Determina o tipo de texto baseado na posição na estrutura VSL"""
+        if index == 0:
+            return 'hook'  # Primeira frase - Hook
+        elif index < total_sentences * 0.2:
+            return 'problem'  # 20% - Problema
+        elif index < total_sentences * 0.4:
+            return 'solution'  # 40% - Solução
+        elif index < total_sentences * 0.8:
+            return 'offer'  # 80% - Oferta
+        else:
+            return 'cta'  # Últimas frases - CTA
+    
+    def _get_vsl_text_style(self, text_type: str, typography: Dict) -> Dict:
+        """Retorna estilo de texto baseado no tipo VSL"""
+        base_style = {
+            'font': typography.get('font', 'Arial-Bold'),
+            'size': typography.get('size', '120-150'),
+            'color': typography.get('color', 'white'),
+            'stroke': typography.get('stroke', 'black'),
+            'stroke_width': typography.get('stroke_width', 6)
+        }
+        
+        # Personalizar baseado no tipo
+        if text_type == 'hook':
+            base_style['size'] = '150-180'  # Maior para impacto
+            base_style['color'] = '#FFD700'  # Dourado para chamar atenção
+        elif text_type == 'cta':
+            base_style['size'] = '140-160'
+            base_style['color'] = '#FF4444'  # Vermelho para urgência
+        elif text_type == 'offer':
+            base_style['color'] = '#00FF00'  # Verde para benefícios
+        
+        return base_style
+    
+    def _get_vsl_animation(self, text_type: str, animations: Dict) -> str:
+        """Retorna tipo de animação baseado no tipo VSL"""
+        if text_type == 'hook':
+            return 'fade_in_zoom'  # Entrada dramática
+        elif text_type == 'cta':
+            return 'pulse_glow'  # Pulsação para urgência
+        else:
+            return 'fade_in_slide'  # Entrada suave
+    
+    def _get_vsl_position(self, text_type: str, text_settings: Dict) -> str:
+        """Retorna posição do texto baseado no tipo VSL"""
+        positioning = text_settings.get('positioning', {})
+        
+        if text_type == 'hook':
+            return positioning.get('primary', 'center')  # Centro para hook
+        elif text_type == 'cta':
+            return positioning.get('secondary', 'bottom')  # Baixo para CTA
+        else:
+            return positioning.get('primary', 'center')  # Centro para outros 

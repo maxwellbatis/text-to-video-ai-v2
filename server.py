@@ -149,10 +149,18 @@ async def generate_video_async(job_id, topic, template_id=None, use_db=False):
         # 6. Renderizar vídeo final
         update_job_progress(job_id, 90)
         if background_video_urls:
-            output_video = get_output_media(audio_file, timed_captions, background_video_urls, "pexel")
+            # Verificar se é template VSL
+            if template_id == "vsl_cinematographic":
+                # Usar renderização VSL sem legendas
+                from utility.render.render_engine import get_output_media_vsl
+                output_video = get_output_media_vsl(audio_file, response, background_video_urls, "pexel", template_config)
+                print(f"Vídeo VSL renderizado sem legendas tradicionais")
+            else:
+                # Usar renderização normal com legendas
+                output_video = get_output_media(audio_file, timed_captions, background_video_urls, "pexel")
             
-            # 6.5. Aplicar template se especificado
-            if template_id and template_config:
+            # 6.5. Aplicar template se especificado (apenas para não-VSL)
+            if template_id and template_config and template_id != "vsl_cinematographic":
                 update_job_progress(job_id, 95)
                 output_video = template_render_engine.apply_template_to_video(output_video, template_config, audio_file)
                 print(f"Template '{template_id}' aplicado ao vídeo")
