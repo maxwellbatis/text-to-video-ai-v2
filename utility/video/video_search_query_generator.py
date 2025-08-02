@@ -90,13 +90,38 @@ def fix_json(json_str):
     
     # Tentar encontrar JSON válido
     try:
-        # Procurar por padrão JSON
+        # Procurar por padrão JSON mais específico
         json_pattern = r'\[\[\[.*?\]\]\]'
         matches = re.findall(json_pattern, json_str, re.DOTALL)
         if matches:
             return matches[0]
+        
+        # Se não encontrar, tentar extrair apenas arrays válidos
+        array_pattern = r'\[\[\[.*?\]\]'
+        matches = re.findall(array_pattern, json_str, re.DOTALL)
+        if matches:
+            # Tentar completar o JSON
+            for match in matches:
+                try:
+                    # Adicionar fechamento se necessário
+                    if not match.endswith(']]'):
+                        match += ']]'
+                    # Testar se é JSON válido
+                    json.loads(match)
+                    return match
+                except:
+                    continue
     except Exception as e:
         print(f"⚠️ Erro ao processar JSON: {e}")
+        pass
+    
+    # Se tudo falhar, tentar limpar e retornar
+    try:
+        # Remover caracteres problemáticos e tentar novamente
+        cleaned = re.sub(r'[^\x00-\x7F]+', '', json_str)  # Remover caracteres não-ASCII
+        cleaned = re.sub(r'[^\w\s\[\],".:-]', '', cleaned)  # Manter apenas caracteres seguros
+        return cleaned
+    except:
         pass
     
     return json_str
