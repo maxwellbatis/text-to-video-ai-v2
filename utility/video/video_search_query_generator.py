@@ -88,6 +88,9 @@ def fix_json(json_str):
     json_str = json_str.replace('\n', ' ').replace('\r', ' ')
     json_str = re.sub(r'\s+', ' ', json_str)
     
+    # Corrigir aspas problemáticas dentro das strings
+    json_str = re.sub(r'([^\\])"([^"]*)"([^"]*)"([^"]*)"', r'\1"\2\3\4"', json_str)
+    
     # Tentar encontrar JSON válido
     try:
         # Procurar por padrão JSON mais específico
@@ -120,6 +123,11 @@ def fix_json(json_str):
         # Remover caracteres problemáticos e tentar novamente
         cleaned = re.sub(r'[^\x00-\x7F]+', '', json_str)  # Remover caracteres não-ASCII
         cleaned = re.sub(r'[^\w\s\[\],".:-]', '', cleaned)  # Manter apenas caracteres seguros
+        
+        # Corrigir aspas duplas problemáticas
+        cleaned = re.sub(r'""+', '"', cleaned)  # Múltiplas aspas duplas
+        cleaned = re.sub(r'([^\\])"([^"]*)"([^"]*)"', r'\1"\2\3"', cleaned)  # Aspas aninhadas
+        
         return cleaned
     except:
         pass
