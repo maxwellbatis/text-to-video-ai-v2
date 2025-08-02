@@ -28,6 +28,8 @@ class TemplateScriptGenerator:
         # Aplicar adaptações específicas do template
         if template_id == "cinematic_religious":
             script = self._adapt_for_religious_template(script, template)
+        elif template_id == "vsl_cinematographic":
+            script = self._adapt_for_vsl_template(script, template)
         
         return {
             'script': script,
@@ -77,6 +79,60 @@ class TemplateScriptGenerator:
         
         return '. '.join(sentences)
     
+    def _adapt_for_vsl_template(self, script: str, template: Dict) -> str:
+        """Adapta script para template VSL cinematográfico"""
+        # Estrutura VSL: Hook → Problema → Solução → Oferta → CTA
+        script_pattern = template.get('script_pattern', {})
+        structure = script_pattern.get('structure', {})
+        
+        # Dividir script em frases
+        sentences = script.split('. ')
+        if len(sentences) < 5:
+            # Se não há frases suficientes, criar estrutura VSL
+            return self._create_vsl_structure(topic, template)
+        
+        # Adaptar para estrutura VSL
+        vsl_script = []
+        
+        # Hook (primeira frase)
+        if sentences:
+            hook = sentences[0]
+            vsl_script.append(f"Você sabe por que {hook.lower()}")
+        
+        # Problema (segunda frase)
+        if len(sentences) > 1:
+            problem = sentences[1]
+            vsl_script.append(f"O problema é que {problem.lower()}")
+        
+        # Solução (terceira frase)
+        if len(sentences) > 2:
+            solution = sentences[2]
+            vsl_script.append(f"Com nossa solução, {solution.lower()}")
+        
+        # Oferta (quarta frase)
+        if len(sentences) > 3:
+            offer = sentences[3]
+            vsl_script.append(f"Por tempo limitado, {offer.lower()}")
+        
+        # CTA (última frase)
+        if len(sentences) > 4:
+            cta = sentences[4]
+            vsl_script.append(f"Clique agora e {cta.lower()}")
+        
+        return '. '.join(vsl_script)
+    
+    def _create_vsl_structure(self, topic: str, template: Dict) -> str:
+        """Cria estrutura VSL completa para um tópico"""
+        vsl_elements = [
+            f"Você sabe por que {topic} é um problema real?",
+            f"O problema é que a maioria das pessoas não consegue resolver isso.",
+            f"Com nossa solução exclusiva, você terá resultados imediatos.",
+            f"Por tempo limitado, oferecemos um desconto especial.",
+            f"Clique agora e descubra como transformar sua situação."
+        ]
+        
+        return '. '.join(vsl_elements)
+    
     def get_template_suggestions(self, topic: str) -> List[Dict]:
         """Sugere templates apropriados para um tópico"""
         templates = self.template_manager.list_templates()
@@ -100,6 +156,18 @@ class TemplateScriptGenerator:
                 if 'curioso' in template['name'].lower() or 'fatos' in template['name'].lower():
                     score += 2
                     reasons.append("Conteúdo educativo detectado")
+            
+            # Verificar se é conteúdo de vendas/VSL
+            if any(word in topic_lower for word in ['venda', 'produto', 'serviço', 'oferta', 'desconto', 'solução', 'problema']):
+                if 'vsl' in template['name'].lower() or 'cinematográfico' in template['name'].lower():
+                    score += 3
+                    reasons.append("Conteúdo de vendas detectado")
+            
+            # Verificar se é conteúdo empresarial/profissional
+            if any(word in topic_lower for word in ['negócio', 'empresa', 'profissional', 'sucesso', 'resultado']):
+                if 'vsl' in template['name'].lower() or 'cinematográfico' in template['name'].lower():
+                    score += 2
+                    reasons.append("Conteúdo empresarial detectado")
             
             if score > 0:
                 suggestions.append({

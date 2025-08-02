@@ -1,0 +1,195 @@
+{
+  "template_id": "vsl_cinematographic",
+  "name": "VSL Cinematográfico Pro",
+  "description": "Template para vídeos VSL com estrutura narrativa otimizada, elementos visuais dramáticos e ritmo cinematográfico",
+  "category": "vsl",
+  "version": "1.0",
+  
+  "script_pattern": {
+    "structure": {
+      "hook": {
+        "duration": "0-10s",
+        "description": "Apresentação do problema/oportunidade",
+        "style": "impactante e direto",
+        "keywords": ["você sabe", "imagine", "problema", "diferença"]
+      },
+      "problem": {
+        "duration": "10-20s",
+        "description": "Identificação da dor",
+        "style": "dramático e emocional",
+        "keywords": ["por que", "problema", "frustração", "falha"]
+      },
+      "solution": {
+        "duration": "20-30s",
+        "description": "Apresentação do produto/serviço",
+        "style": "confiante e transformador",
+        "keywords": ["com", "agora", "solução", "transformação"]
+      },
+      "offer": {
+        "duration": "30-40s",
+        "description": "Benefícios específicos e oferta",
+        "style": "persuasivo e urgente",
+        "keywords": ["desconto", "oferta", "exclusivo", "limitado"]
+      },
+      "cta": {
+        "duration": "40-50s",
+        "description": "Call-to-action claro",
+        "style": "urgente e direto",
+        "keywords": ["clique", "agora", "saiba mais", "comece"]
+      }
+    },
+    "language_style": {
+      "tone": "direto e impactante",
+      "emotion": "alto",
+      "urgency": "médio-alto",
+      "repetition": "palavras-chave estratégicas",
+      "examples": [
+        "Você sabe por que...",
+        "Imagine uma solução...",
+        "Com [PRODUTO], você tem...",
+        "Por tempo limitado...",
+        "Clique agora e descubra..."
+      ]
+    },
+    "pauses_strategy": {
+      "impact_pauses": [
+        {"position": 0.15, "duration": 0.5, "purpose": "drama"},
+        {"position": 0.35, "duration": 0.8, "purpose": "impacto"},
+        {"position": 0.65, "duration": 0.6, "purpose": "reflexão"},
+        {"position": 0.85, "duration": 0.4, "purpose": "urgência"}
+      ]
+    }
+  },
+  
+  "visual_settings": {
+    "resolution": "720x1280",
+    "fps": 30,
+    "style": "cinematográfico",
+    "contrast": {
+      "brightness_range": [5, 100],
+      "contrast_level": "alto",
+      "dark_frames_percentage": 90,
+      "light_frames_percentage": 10
+    },
+    "color_palette": {
+      "primary": "azul/frio",
+      "secondary": "vermelho/quente",
+      "accent": "branco",
+      "background": "preto"
+    },
+    "transitions": {
+      "type": "suaves e dinâmicas",
+      "frequency": "8-10 mudanças",
+      "style": "crossfade e zoom"
+    },
+    "text_animations": {
+      "entrance": "fade_in com zoom",
+      "exit": "fade_out com slide",
+      "emphasis": "pulse e glow",
+      "duration": "2-3 segundos"
+    }
+  },
+  
+  "audio_settings": {
+    "narration_speed": "150-180 WPM",
+    "voice_tone": "confiante e emocional",
+    "background_music": {
+      "style": "cinematográfico épico",
+      "volume": 0.3,
+      "purpose": "drama e impacto"
+    },
+    "sound_effects": {
+      "impact": "volume 0.5",
+      "tension": "volume 0.4",
+      "transitions": "volume 0.3"
+    },
+    "pauses": {
+      "strategic": "2-3 segundos",
+      "emphasis": "0.5-1 segundo",
+      "drama": "1-2 segundos"
+    }
+  },
+  
+  "content_guidelines": {
+    "target_audience": "compradores online",
+    "purpose": "vendas e conversão",
+    "emotion": "urgência e desejo",
+    "length": "45-60 segundos",
+    "key_elements": [
+      "Hook impactante nos primeiros 3 segundos",
+      "Problema identificado claramente",
+      "Solução apresentada como transformadora",
+      "Oferta específica com urgência",
+      "CTA claro e direto"
+    ]
+  },
+  
+  "search_terms": {
+    "visual_keywords": [
+      "dramatic lighting",
+      "cinematic atmosphere",
+      "professional business",
+      "modern technology",
+      "success achievement",
+      "transformation change",
+      "luxury premium",
+      "innovation future",
+      "confidence power",
+      "solution problem"
+    ],
+    "style_preferences": [
+      "high contrast",
+      "dramatic shadows",
+      "professional setting",
+      "modern aesthetic",
+      "cinematic quality"
+    ]
+  },
+  
+  "assets_config": {
+    "background_music": "cinematic_epic",
+    "sound_effects": {
+      "impact": "dramatic_impact",
+      "tension": "build_up",
+      "transition": "smooth_fade"
+    },
+    "visual_effects": {
+      "overlay": "cinematic_gradient",
+      "text_animation": "professional_glow",
+      "transition": "smooth_zoom"
+    }
+  },
+  
+  "text_display": {
+    "typography": {
+      "font": "Arial-Bold",
+      "size": "120-150",
+      "color": "white",
+      "stroke": "black",
+      "stroke_width": 6
+    },
+    "animations": {
+      "entrance": "fade_in_zoom",
+      "emphasis": "pulse_glow",
+      "exit": "fade_out_slide"
+    },
+    "positioning": {
+      "primary": "center",
+      "secondary": "bottom",
+      "margin": "150px"
+    },
+    "timing": {
+      "display_duration": "3-5 segundos",
+      "transition_time": "0.3 segundos",
+      "emphasis_duration": "1-2 segundos"
+    }
+  },
+  
+  "optimization": {
+    "conversion_focused": true,
+    "urgency_creation": true,
+    "emotional_connection": true,
+    "clear_value_proposition": true,
+    "strong_call_to_action": true
+  }
+} 
