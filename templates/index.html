@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text-to-Video AI</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: white;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .btn {
+            background: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #218838;
+        }
+        .btn-primary {
+            background: #007bff;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        .progress {
+            background: #f0f0f0;
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Layout em duas colunas */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        /* Chat de sugestões */
+        .chat-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .chat-messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .message.user {
+            background: rgba(0,123,255,0.2);
+            margin-left: 20%;
+        }
+        .message.ai {
+            background: rgba(40,167,69,0.2);
+            margin-right: 20%;
+        }
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .chat-input input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        
+        /* Status section */
+        .status-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-block;
+        }
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-processing { background: #cce5ff; color: #004085; }
+        .status-failed { background: #f8d7da; color: #721c24; }
+        .video-card {
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            backdrop-filter: blur(10px);
+        }
+        .video-thumbnail {
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .video-thumbnail:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Modal para visualização de vídeo */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+        .modal-content {
+            background: rgba(255,255,255,0.95);
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 800px;
+            position: relative;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: #000;
+        }
+        .video-player {
+            width: 100%;
+            max-height: 70vh;
+            border-radius: 10px;
+        }
+        .modal-title {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Text-to-Video AI</h1>
+        <p>Transforme qualquer tópico em vídeos incríveis com IA</p>
+        
+        <form id="videoForm">
+            <div>
+                <label for="topic">Tópico do Vídeo:</label>
+                <textarea id="topic" rows="3" placeholder="Ex: Fatos sobre o Brasil, História do Carnaval..." required></textarea>
+            </div>
+            <button type="submit" class="btn">🚀 Gerar Vídeo</button>
+        </form>
+        
+        <div id="progress" style="display: none;">
+            <h3>Gerando vídeo...</h3>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <p id="status">Iniciando...</p>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <a href="/gallery" class="btn">📁 Galeria</a>
+            <a href="/api/jobs" class="btn" target="_blank">🔧 API</a>
+        </div>
+
+        <!-- Layout em duas colunas -->
+        <div class="main-content">
+            <!-- Chat de Sugestões -->
+            <div class="chat-container">
+                <h3>💡 Chat com IA - Sugestões de Tópicos</h3>
+                <p>Peça sugestões de tópicos para seus próximos vídeos!</p>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message ai">
+                        <strong>IA:</strong> Olá! Posso ajudar você a encontrar tópicos interessantes para seus vídeos. Que tipo de conteúdo você gostaria de criar?
+                    </div>
+                </div>
+                
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="Ex: Sugira tópicos sobre história do Brasil..." onkeypress="handleChatKeyPress(event)">
+                    <button onclick="sendChatMessage()" class="btn">💬 Enviar</button>
+                </div>
+            </div>
+
+            <!-- Status e Vídeos Recentes -->
+            <div class="status-section">
+                <h3>📊 Status e Vídeos Recentes</h3>
+                <div id="recentVideos">
+                    <div style="text-align: center; padding: 20px; opacity: 0.7;">
+                        <div>📹</div>
+                        <p>Nenhum vídeo gerado ainda</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para visualização de vídeo -->
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeVideoModal()">&times;</span>
+            <h2 class="modal-title" id="modalTitle">Visualizar Vídeo</h2>
+            <video id="videoPlayer" class="video-player" controls>
+                Seu navegador não suporta o elemento de vídeo.
+            </video>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        let socket = io();
+        let currentJobId = null;
+
+        // Load recent videos on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRecentVideos();
+        });
+
+        document.getElementById('videoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const topic = document.getElementById('topic').value.trim();
+            if (!topic) {
+                alert('Por favor, insira um tópico');
+                return;
+            }
+
+            document.getElementById('progress').style.display = 'block';
+            document.querySelector('button[type="submit"]').disabled = true;
+            
+            try {
+                const response = await fetch('/api/jobs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic: topic })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentJobId = data.job_id;
+                    socket.emit('subscribe_job', { job_id: currentJobId });
+                    updateProgress(0, 'Iniciando...');
+                } else {
+                    throw new Error(data.error || 'Erro ao criar job');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao criar job: ' + error.message);
+                hideProgress();
+            }
+        });
+
+        socket.on('job_update', function(data) {
+            if (data.job_id === currentJobId) {
+                updateProgress(data.progress, getStatusText(data.status));
+            }
+        });
+
+        socket.on('job_completed', function(data) {
+            if (data.job_id === currentJobId) {
+                updateProgress(100, 'Vídeo gerado com sucesso!');
+                setTimeout(() => {
+                    alert('🎉 Vídeo gerado com sucesso!');
+                    hideProgress();
+                    loadRecentVideos(); // Recarregar vídeos recentes
+                }, 2000);
+            }
+        });
+
+        socket.on('job_failed', function(data) {
+            if (data.job_id === currentJobId) {
+                updateProgress(0, 'Erro na geração: ' + data.error);
+                setTimeout(() => {
+                    alert('❌ Erro na geração do vídeo: ' + data.error);
+                    hideProgress();
+                }, 3000);
+            }
+        });
+
+        function updateProgress(progress, text) {
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('status').textContent = text;
+        }
+
+        function getStatusText(status) {
+            const texts = {
+                'PENDING': 'Aguardando',
+                'PROCESSING': 'Processando',
+                'COMPLETED': 'Concluído',
+                'FAILED': 'Falhou'
+            };
+            return texts[status] || status;
+        }
+
+        function hideProgress() {
+            document.getElementById('progress').style.display = 'none';
+            document.querySelector('button[type="submit"]').disabled = false;
+            document.getElementById('videoForm').reset();
+        }
+
+        // Chat com IA
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Adicionar mensagem do usuário
+            addChatMessage('user', message);
+            input.value = '';
+            
+            // Mostrar loading
+            addChatMessage('ai', '🤔 Pensando...');
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                // Remover mensagem de loading
+                removeLastMessage();
+                
+                if (response.ok) {
+                    addChatMessage('ai', data.response);
+                } else {
+                    addChatMessage('ai', '❌ Erro ao processar sua mensagem. Tente novamente.');
+                }
+            } catch (error) {
+                removeLastMessage();
+                addChatMessage('ai', '❌ Erro de conexão. Verifique sua internet.');
+            }
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function addChatMessage(type, text) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = `<strong>${type === 'user' ? 'Você' : 'IA'}:</strong> ${text}`;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeLastMessage() {
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages.children.length > 0) {
+                chatMessages.removeChild(chatMessages.lastChild);
+            }
+        }
+
+        // Carregar vídeos recentes
+        async function loadRecentVideos() {
+            try {
+                const response = await fetch('/api/jobs');
+                const data = await response.json();
+                
+                const container = document.getElementById('recentVideos');
+                
+                if (data.jobs && data.jobs.length > 0) {
+                    const completedVideos = data.jobs.filter(job => job.status === 'COMPLETED').slice(0, 3); // Apenas os 3 mais recentes
+                    
+                    if (completedVideos.length === 0) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 20px; opacity: 0.7;">
+                                <div>📹</div>
+                                <p>Nenhum vídeo gerado ainda</p>
+                            </div>
+                        `;
+                    } else {
+                        const videosHtml = completedVideos.map(video => createVideoCard(video)).join('');
+                        container.innerHTML = videosHtml;
+                    }
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 20px; opacity: 0.7;">
+                            <div>📹</div>
+                            <p>Nenhum vídeo gerado ainda</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar vídeos:', error);
+                document.getElementById('recentVideos').innerHTML = `
+                    <div style="text-align: center; padding: 20px; opacity: 0.7;">
+                        <div>⚠️</div>
+                        <p>Erro ao carregar vídeos</p>
+                    </div>
+                `;
+            }
+        }
+
+        function createVideoCard(video) {
+            const createdDate = new Date(video.created_at).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            return `
+                <div class="video-card">
+                    <div class="video-thumbnail" onclick="openVideoModal('${video.id}', '${video.topic}')">
+                        🎬
+                    </div>
+                    <div>
+                        <h4 style="margin: 5px 0;">${video.topic}</h4>
+                        <div style="margin: 10px 0;">
+                            <span class="status-badge status-${video.status.toLowerCase()}">
+                                ✅ Concluído
+                            </span>
+                        </div>
+                        <div style="font-size: 12px; opacity: 0.8; margin: 10px 0;">
+                            <div>📅 ${createdDate}</div>
+                            <div>⏱️ ${video.duration || '~47'}s</div>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <a href="/api/videos/${video.id}" class="btn" style="padding: 8px 15px; font-size: 12px;">⬇️ Baixar</a>
+                            <button onclick="openVideoModal('${video.id}', '${video.topic}')" class="btn btn-primary" style="padding: 8px 15px; font-size: 12px;">👁️ Ver</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openVideoModal(videoId, title) {
+            const modal = document.getElementById('videoModal');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            modalTitle.textContent = title;
+            videoPlayer.src = `/api/videos/${videoId}`;
+            modal.style.display = 'block';
+            
+            // Focar no vídeo
+            videoPlayer.focus();
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const videoPlayer = document.getElementById('videoPlayer');
+            
+            videoPlayer.pause();
+            videoPlayer.src = '';
+            modal.style.display = 'none';
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('videoModal');
+            if (event.target === modal) {
+                closeVideoModal();
+            }
+        }
+
+        // Auto-refresh vídeos recentes a cada 30 segundos
+        setInterval(loadRecentVideos, 30000);
+    </script>
+</body>
+</html> 

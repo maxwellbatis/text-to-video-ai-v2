@@ -1,0 +1,96 @@
+{
+  "name": "Cinematográfico Religioso",
+  "description": "Template para vídeos religiosos com estilo cinematográfico, pausas estratégicas e efeitos dramáticos",
+  "category": "religioso",
+  "script_pattern": {
+    "style": "dramatic",
+    "tone": "reverent",
+    "structure": "narrative",
+    "pauses_strategy": {
+      "impact_pauses": [
+        {"position": 0.2, "duration": 0.5, "purpose": "dramatic_effect"},
+        {"position": 0.4, "duration": 0.3, "purpose": "reflection"},
+        {"position": 0.7, "duration": 0.4, "purpose": "emphasis"},
+        {"position": 0.9, "duration": 0.6, "purpose": "climax"}
+      ],
+      "natural_pauses": [
+        {"position": 0.15, "duration": 0.2},
+        {"position": 0.35, "duration": 0.2},
+        {"position": 0.55, "duration": 0.2},
+        {"position": 0.75, "duration": 0.2}
+      ]
+    },
+    "voice_settings": {
+      "voice": "pt-BR-FranciscoNeural",
+      "rate": "slow",
+      "volume": 1.0,
+      "pitch": "low"
+    }
+  },
+  "visual_settings": {
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920",
+    "background_style": "cinematic",
+    "color_palette": "warm",
+    "transition_effects": [
+      "fade_in",
+      "crossfade",
+      "fade_out"
+    ],
+    "text_style": {
+      "font": "Arial-Bold",
+      "font_size": 90,
+      "color": "white",
+      "stroke_color": "black",
+      "stroke_width": 4,
+      "position": "bottom",
+      "margin": 100,
+      "fade_in": 0.3,
+      "fade_out": 0.3
+    }
+  },
+  "audio_settings": {
+    "background_music": {
+      "type": "ambient",
+      "volume": 0.15,
+      "fade_in": 2.0,
+      "fade_out": 3.0
+    },
+    "sound_effects": {
+      "volume": 0.3,
+      "types": ["impact", "atmospheric"]
+    },
+    "voice_processing": {
+      "normalize": true,
+      "compression": true,
+      "reverb": 0.1
+    }
+  },
+  "content_guidelines": {
+    "topics": ["biblical", "religious", "spiritual", "prophecy", "faith"],
+    "keywords": ["deus", "jesus", "bíblia", "profecia", "apocalipse", "fé", "salvação"],
+    "avoid": ["controversial", "political", "offensive"],
+    "tone": "reverent",
+    "duration_target": 45
+  },
+  "search_terms": {
+    "biblical": ["biblical scenes", "ancient jerusalem", "bible stories", "religious art"],
+    "nature": ["dramatic clouds", "sunset sky", "mountain landscape", "forest path"],
+    "abstract": ["light rays", "golden light", "divine light", "heavenly glow"],
+    "people": ["praying hands", "worship", "religious ceremony", "faithful people"]
+  },
+  "effects": {
+    "visual": [
+      "slow_motion",
+      "color_grading",
+      "light_rays",
+      "atmospheric_fog"
+    ],
+    "audio": [
+      "reverb",
+      "echo",
+      "ambient_sounds",
+      "emotional_music"
+    ]
+  }
+} 
