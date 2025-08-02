@@ -94,8 +94,8 @@ class TemplateRenderEngine:
                         bg_music = AudioFileClip(assets['background_music'])
                         # Loop da música de fundo para cobrir toda a duração
                         bg_music = audio_loop(bg_music, duration=audio.duration)
-                        # Volume reduzido para não competir com a narração
-                        bg_music = bg_music.volumex(0.1)
+                        # Volume aumentado para melhor audibilidade
+                        bg_music = bg_music.volumex(0.3)
                         
                         # Combinar áudio principal com música de fundo
                         audio = CompositeAudioClip([audio, bg_music])
@@ -113,7 +113,7 @@ class TemplateRenderEngine:
                     print(f"🎵 Tentando aplicar efeito de tensão: {assets['tension_effect']}")
                     try:
                         tension = AudioFileClip(assets['tension_effect'])
-                        tension = tension.volumex(0.3)
+                        tension = tension.volumex(0.5)
                         audio_clips.append(tension)
                         print(f"✅ Efeito de tensão aplicado: {os.path.basename(assets['tension_effect'])}")
                     except Exception as e:
@@ -126,7 +126,7 @@ class TemplateRenderEngine:
                     print(f"🎵 Tentando aplicar efeito de impacto: {assets['impact_effect']}")
                     try:
                         impact = AudioFileClip(assets['impact_effect'])
-                        impact = impact.volumex(0.2)
+                        impact = impact.volumex(0.4)
                         audio_clips.append(impact)
                         print(f"✅ Efeito de impacto aplicado: {os.path.basename(assets['impact_effect'])}")
                     except Exception as e:
