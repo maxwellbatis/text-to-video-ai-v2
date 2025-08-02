@@ -143,7 +143,11 @@ class TemplateRenderEngine:
                 print(f"⚠️ AssetManager não disponível")
             
             # Normalizar áudio final
-            audio = audio_normalize(audio)
+            try:
+                audio = audio_normalize(audio)
+            except AttributeError:
+                # CompositeAudioClip não tem atributo fps, pular normalização
+                print("⚠️ Pulando normalização do áudio (CompositeAudioClip)")
             
             # Combinar áudio com vídeo
             video = video.set_audio(audio)
