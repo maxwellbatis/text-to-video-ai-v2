@@ -56,16 +56,18 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
 
     for (t1, t2), text in timed_captions:
         text_clip = (TextClip(txt=text,
-                              fontsize=90,
+                              fontsize=120,  # Aumentado de 90 para 120
                               font="Arial-Bold",
                               color="white",
                               stroke_color="black",
-                              stroke_width=4,
-                              method="label")
+                              stroke_width=6,  # Aumentado de 4 para 6
+                              method="label",
+                              bg_color="rgba(0,0,0,0.7)",  # Fundo semi-transparente
+                              size=(1920, None))  # Largura fixa para melhor legibilidade
                   .set_start(t1)
                   .set_end(t2)
                   .set_position(("center", "bottom"))
-                  .margin(bottom=100)
+                  .margin(bottom=150)  # Aumentado de 100 para 150
                   .crossfadein(0.3)
                   .crossfadeout(0.3))
         visual_clips.append(text_clip)
