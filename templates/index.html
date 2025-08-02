@@ -37,13 +37,24 @@
         .btn-primary:hover {
             background: #0056b3;
         }
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 15px;
             margin: 10px 0;
             border: none;
             border-radius: 10px;
             font-size: 16px;
+        }
+        
+        select {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+        }
+        
+        select option {
+            background: #333;
+            color: white;
         }
         .progress {
             background: #f0f0f0;
@@ -210,6 +221,17 @@
                 <label for="topic">Tópico do Vídeo:</label>
                 <textarea id="topic" rows="3" placeholder="Ex: Fatos sobre o Brasil, História do Carnaval..." required></textarea>
             </div>
+            
+            <div style="margin: 15px 0;">
+                <label for="templateSelect">Template (Opcional):</label>
+                <select id="templateSelect" onchange="showTemplateInfo()">
+                    <option value="">🎬 Template Padrão</option>
+                    <option value="cinematic_religious">⛪ Cinematográfico Religioso</option>
+                </select>
+                <small style="opacity: 0.8;">Deixe vazio para usar o template padrão</small>
+                <div id="templateInfo" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; display: none;"></div>
+            </div>
+            
             <button type="submit" class="btn">🚀 Gerar Vídeo</button>
         </form>
         
@@ -288,14 +310,27 @@
                 return;
             }
 
+            // Sugerir template automaticamente se não foi selecionado
+            const templateSelect = document.getElementById('templateSelect');
+            if (!templateSelect.value) {
+                await suggestTemplateForTopic(topic);
+            }
+
             document.getElementById('progress').style.display = 'block';
             document.querySelector('button[type="submit"]').disabled = true;
             
             try {
+                const templateId = document.getElementById('templateSelect').value;
+                const requestBody = { topic: topic };
+                
+                if (templateId) {
+                    requestBody.template_id = templateId;
+                }
+                
                 const response = await fetch('/api/jobs', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ topic: topic })
+                    body: JSON.stringify(requestBody)
                 });
 
                 const data = await response.json();
@@ -525,6 +560,75 @@
             const modal = document.getElementById('videoModal');
             if (event.target === modal) {
                 closeVideoModal();
+            }
+        }
+
+        // Função para sugerir template baseado no tópico
+        async function suggestTemplateForTopic(topic) {
+            try {
+                const response = await fetch('/api/templates/suggest', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ topic: topic })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.suggestions && data.suggestions.length > 0) {
+                    const bestSuggestion = data.suggestions[0];
+                    const templateSelect = document.getElementById('templateSelect');
+                    
+                    // Encontrar a opção correspondente
+                    for (let option of templateSelect.options) {
+                        if (option.value === bestSuggestion.template_id) {
+                            templateSelect.value = bestSuggestion.template_id;
+                            console.log(`🎯 Template sugerido: ${bestSuggestion.name}`);
+                            break;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('Não foi possível sugerir template automaticamente');
+            }
+        }
+
+        // Função para mostrar informações do template
+        function showTemplateInfo() {
+            const templateSelect = document.getElementById('templateSelect');
+            const templateInfo = document.getElementById('templateInfo');
+            const selectedValue = templateSelect.value;
+            
+            if (!selectedValue) {
+                templateInfo.style.display = 'none';
+                return;
+            }
+            
+            const templateDescriptions = {
+                'cinematic_religious': {
+                    name: 'Cinematográfico Religioso',
+                    description: 'Template para vídeos religiosos com estilo cinematográfico, pausas estratégicas e efeitos dramáticos',
+                    features: ['🎬 Efeitos cinematográficos', '⏱️ Pausas estratégicas', '🎵 Música de fundo', '📖 Conteúdo religioso']
+                }
+            };
+            
+            const template = templateDescriptions[selectedValue];
+            if (template) {
+                templateInfo.innerHTML = `
+                    <div style="margin-bottom: 8px;">
+                        <strong>${template.name}</strong>
+                    </div>
+                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">
+                        ${template.description}
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.8;">
+                        ${template.features.join(' • ')}
+                    </div>
+                `;
+                templateInfo.style.display = 'block';
+            } else {
+                templateInfo.style.display = 'none';
             }
         }
 
