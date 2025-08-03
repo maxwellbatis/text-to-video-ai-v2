@@ -56,23 +56,24 @@ class VSLScriptGenerator:
             }
         }
     
-    def generate_vsl_script(self, topic: str, niche: str = "general") -> Dict:
+    def generate_vsl_script(self, topic: str, niche: str = "general", template_config: Dict = None) -> str:
         """
         Gera script VSL magnética com estrutura de 5 blocos
         
         Args:
             topic: Tópico principal
             niche: Nicho (saas, maternity, fitness, etc.)
+            template_config: Configuração do template (opcional)
         
         Returns:
-            Dict com script estruturado
+            String com script completo
         """
         
         # Selecionar templates baseado no nicho
         templates = self.template.get("text_templates", {})
         
         # Gerar script estruturado
-        script = {
+        script_structure = {
             "topic": topic,
             "niche": niche,
             "duration_target": 30,
@@ -98,8 +99,8 @@ class VSLScriptGenerator:
                 "proof": {
                     "text": self._select_template(templates.get("proof", [])),
                     "duration": "20-25s",
-                    "emotion": "inspiration",
-                    "style": "testimonial"
+                    "emotion": "confidence",
+                    "style": "social_proof"
                 },
                 "cta": {
                     "text": self._select_template(templates.get("cta", [])),
@@ -107,13 +108,18 @@ class VSLScriptGenerator:
                     "emotion": "urgency",
                     "style": "action"
                 }
-            },
-            "full_script": self._combine_blocks(templates),
-            "visual_instructions": self._get_visual_instructions(),
-            "audio_instructions": self._get_audio_instructions()
+            }
         }
         
-        return script
+        # Combinar blocos em texto contínuo
+        combined_text = self._combine_blocks(script_structure["blocks"])
+        
+        # Adicionar contexto do tópico se fornecido
+        if topic and len(topic) > 10:
+            # Inserir o tópico no início do script
+            combined_text = f"Fatos surpreendentes sobre {topic}: {combined_text}"
+        
+        return combined_text
     
     def _select_template(self, templates: List[str]) -> str:
         """Seleciona template aleatório"""
