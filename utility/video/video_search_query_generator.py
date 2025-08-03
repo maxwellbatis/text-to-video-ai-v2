@@ -77,6 +77,10 @@ Note: Your response should be the response only and no extra text or data.
   """
 
 def fix_json(json_str):
+    """Corrige JSON malformado de várias formas"""
+    if not json_str or not isinstance(json_str, str):
+        return "[[[0, 10], [\"storm clouds\", \"dark sky\", \"church\"]]]"
+    
     # Replace typographical apostrophes with straight quotes
     json_str = json_str.replace("'", "'")
     # Replace any incorrect quotes (e.g., mixed single and double quotes)
@@ -128,11 +132,15 @@ def fix_json(json_str):
         cleaned = re.sub(r'""+', '"', cleaned)  # Múltiplas aspas duplas
         cleaned = re.sub(r'([^\\])"([^"]*)"([^"]*)"', r'\1"\2\3"', cleaned)  # Aspas aninhadas
         
+        # Testar se o JSON limpo é válido
+        json.loads(cleaned)
         return cleaned
     except:
         pass
     
-    return json_str
+    # Se tudo falhar, retornar JSON padrão
+    print("⚠️ Não foi possível corrigir JSON, usando padrão")
+    return "[[[0, 10], [\"storm clouds\", \"dark sky\", \"church\"]]]"
 
 def getVideoSearchQueriesTimed(script,captions_timed):
     end = captions_timed[-1][0][1]

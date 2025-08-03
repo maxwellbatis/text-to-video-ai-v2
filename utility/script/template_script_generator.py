@@ -98,13 +98,14 @@ class TemplateScriptGenerator:
             from utility.script.vsl_script_generator import VSLScriptGenerator
             
             vsl_generator = VSLScriptGenerator()
-            vsl_script = vsl_generator.generate_vsl_script(topic=script[:50], template_config=template)
+            # Usar o script original completo em vez de truncar
+            vsl_script = vsl_generator.generate_vsl_script(topic=script, template_config=template)
             
             return vsl_script
             
-        except ImportError:
+        except Exception as e:
             # Fallback se o gerador VSL não estiver disponível
-            print("⚠️ Gerador VSL não disponível, usando adaptação básica")
+            print(f"⚠️ Erro no gerador VSL: {e}, usando adaptação básica")
             
             # Adicionar elementos de VSL ao script
             vsl_elements = [
