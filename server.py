@@ -120,14 +120,6 @@ async def generate_video_async(job_id, topic, template_id=None, use_db=False):
         job.audio_path = audio_file
         print(f"Áudio gerado: {audio_file}")
         
-        # 2.5. Aplicar pausas estratégicas se template especificado
-        if template_id and template_config:
-            update_job_progress(job_id, 45)
-            pauses_config = template_config.get('script_pattern', {}).get('pauses_strategy', {})
-            if pauses_config:
-                audio_file = template_render_engine.apply_strategic_pauses(audio_file, pauses_config)
-                print(f"Pausas estratégicas aplicadas ao áudio")
-        
         # 3. Gerar legendas
         update_job_progress(job_id, 60)
         timed_captions = generate_timed_captions(audio_file)
