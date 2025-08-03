@@ -88,36 +88,44 @@ class TemplateScriptGenerator:
         # Dividir script em frases
         sentences = script.split('. ')
         if len(sentences) < 5:
-            # Se não há frases suficientes, criar estrutura VSL
+            # Se não há frases suficientes, criar estrutura VSL completa
             return self._create_vsl_structure(topic, template)
         
-        # Adaptar para estrutura VSL
+        # Adaptar para estrutura VSL garantindo todos os elementos
         vsl_script = []
         
-        # Hook (primeira frase)
+        # Hook (primeira frase) - sempre presente
         if sentences:
             hook = sentences[0]
             vsl_script.append(f"Você sabe por que {hook.lower()}")
         
-        # Problema (segunda frase)
+        # Problema (segunda frase) - sempre presente
         if len(sentences) > 1:
             problem = sentences[1]
             vsl_script.append(f"O problema é que {problem.lower()}")
+        else:
+            vsl_script.append("O problema é que a maioria das pessoas não consegue resolver isso.")
         
-        # Solução (terceira frase)
+        # Solução (terceira frase) - sempre presente
         if len(sentences) > 2:
             solution = sentences[2]
             vsl_script.append(f"Com nossa solução, {solution.lower()}")
+        else:
+            vsl_script.append("Com nossa solução exclusiva, você terá resultados imediatos.")
         
-        # Oferta (quarta frase)
+        # Oferta (quarta frase) - sempre presente
         if len(sentences) > 3:
             offer = sentences[3]
             vsl_script.append(f"Por tempo limitado, {offer.lower()}")
+        else:
+            vsl_script.append("Por tempo limitado, oferecemos um desconto especial de 50%.")
         
-        # CTA (última frase)
+        # CTA (última frase) - sempre presente
         if len(sentences) > 4:
             cta = sentences[4]
             vsl_script.append(f"Clique agora e {cta.lower()}")
+        else:
+            vsl_script.append("Clique agora e descubra como transformar sua situação.")
         
         return '. '.join(vsl_script)
     
@@ -127,7 +135,7 @@ class TemplateScriptGenerator:
             f"Você sabe por que {topic} é um problema real?",
             f"O problema é que a maioria das pessoas não consegue resolver isso.",
             f"Com nossa solução exclusiva, você terá resultados imediatos.",
-            f"Por tempo limitado, oferecemos um desconto especial.",
+            f"Por tempo limitado, oferecemos um desconto especial de 50%.",
             f"Clique agora e descubra como transformar sua situação."
         ]
         

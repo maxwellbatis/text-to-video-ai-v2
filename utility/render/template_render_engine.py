@@ -302,13 +302,27 @@ class TemplateRenderEngine:
             
             # Duração total estimada (45-60 segundos para VSL)
             total_duration = 50  # segundos
-            segment_duration = total_duration / len(sentences) if sentences else 10
+            
+            # Garantir pelo menos 5 frases para estrutura VSL completa
+            if len(sentences) < 5:
+                # Criar frases VSL padrão se necessário
+                vsl_sentences = [
+                    "Você sabe por que este problema existe?",
+                    "O problema é que a maioria das pessoas não consegue resolver isso.",
+                    "Com nossa solução exclusiva, você terá resultados imediatos.",
+                    "Por tempo limitado, oferecemos um desconto especial de 50%.",
+                    "Clique agora e descubra como transformar sua situação."
+                ]
+                sentences = vsl_sentences
+            
+            # Distribuir frases ao longo da duração
+            segment_duration = total_duration / len(sentences)
             
             for i, sentence in enumerate(sentences):
                 if not sentence.strip():
                     continue
                 
-                # Calcular timing
+                # Calcular timing com distribuição melhor
                 start_time = i * segment_duration
                 end_time = (i + 1) * segment_duration
                 
