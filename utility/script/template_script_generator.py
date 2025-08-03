@@ -17,28 +17,32 @@ class TemplateScriptGenerator:
         self.template_manager = TemplateManager()
     
     def generate_script_for_template(self, topic: str, template_id: str) -> Dict:
-        """Gera script baseado em um template específico"""
-        template = self.template_manager.get_template(template_id)
-        if not template:
-            raise ValueError(f"Template '{template_id}' não encontrado")
-        
-        # Gerar script usando IA
-        script = self._generate_script_with_ai(topic, template)
-        
-        # Aplicar adaptações específicas do template
-        if template_id == "cinematic_religious":
-            script = self._adapt_for_religious_template(script, template)
-        elif template_id == "vsl_cinematographic":
-            script = self._adapt_for_vsl_template(script, template)
-        
-        return {
-            'script': script,
-            'template': template,
-            'pauses': template.get('script_pattern', {}).get('pauses_strategy', {}),
-            'voice_settings': template.get('script_pattern', {}).get('voice_settings', {}),
-            'visual_settings': template.get('visual_settings', {}),
-            'audio_settings': template.get('audio_settings', {})
-        }
+        """Gera script baseado no template selecionado"""
+        try:
+            # Carregar template
+            template = self.load_template(template_id)
+            if not template:
+                raise Exception(f"Template '{template_id}' não encontrado")
+            
+            # Gerar script base
+            script = generate_script(topic)
+            
+            # Aplicar adaptações específicas do template
+            if template_id == "cinematic_religious":
+                script = self._adapt_for_religious_template(script, template)
+            
+            return {
+                'script': script,
+                'template': template
+            }
+            
+        except Exception as e:
+            print(f"❌ Erro ao gerar script para template: {e}")
+            # Fallback para script normal
+            return {
+                'script': generate_script(topic),
+                'template': None
+            }
     
     def _generate_script_with_ai(self, topic: str, template: Dict) -> str:
         """Gera script usando IA com base no template"""
@@ -60,132 +64,41 @@ class TemplateScriptGenerator:
             return f"Fatos interessantes sobre {topic}. Este é um conteúdo gerado automaticamente seguindo o estilo {template.get('name', '')}."
     
     def _adapt_for_religious_template(self, script: str, template: Dict) -> str:
-        """Adapta script para template religioso"""
-        # Adicionar elementos religiosos ao script
+        """Adapta script para template religioso cinematográfico"""
+        # Adicionar elementos religiosos e cinematográficos
         religious_elements = [
-            "De acordo com as escrituras",
-            "Como nos ensina a Bíblia",
-            "Segundo a palavra de Deus",
-            "Em nome da fé",
-            "Através da graça divina"
+            "De acordo com as escrituras,",
+            "Segundo a tradição sagrada,",
+            "Como revelado nas escrituras,",
+            "Conforme ensinam os textos sagrados,"
         ]
         
-        # Inserir elementos religiosos em pontos estratégicos
-        sentences = script.split('. ')
-        if len(sentences) > 2:
-            # Inserir elemento religioso no meio
-            mid_point = len(sentences) // 2
-            sentences.insert(mid_point, f"{religious_elements[0]}, ")
+        # Inserir elemento religioso no início
+        import random
+        religious_intro = random.choice(religious_elements)
+        script = f"{religious_intro} {script}"
         
-        return '. '.join(sentences)
-    
-    def _adapt_for_vsl_template(self, script: str, template: Dict) -> str:
-        """Adapta script para template VSL cinematográfico"""
-        # Estrutura VSL: Hook → Problema → Solução → Oferta → CTA
-        script_pattern = template.get('script_pattern', {})
-        structure = script_pattern.get('structure', {})
-        
-        # Dividir script em frases
-        sentences = script.split('. ')
-        if len(sentences) < 5:
-            # Se não há frases suficientes, criar estrutura VSL completa
-            return self._create_vsl_structure(topic, template)
-        
-        # Adaptar para estrutura VSL garantindo todos os elementos
-        vsl_script = []
-        
-        # Hook (primeira frase) - sempre presente
-        if sentences:
-            hook = sentences[0]
-            vsl_script.append(f"Você sabe por que {hook.lower()}")
-        
-        # Problema (segunda frase) - sempre presente
-        if len(sentences) > 1:
-            problem = sentences[1]
-            vsl_script.append(f"O problema é que {problem.lower()}")
-        else:
-            vsl_script.append("O problema é que a maioria das pessoas não consegue resolver isso.")
-        
-        # Solução (terceira frase) - sempre presente
-        if len(sentences) > 2:
-            solution = sentences[2]
-            vsl_script.append(f"Com nossa solução, {solution.lower()}")
-        else:
-            vsl_script.append("Com nossa solução exclusiva, você terá resultados imediatos.")
-        
-        # Oferta (quarta frase) - sempre presente
-        if len(sentences) > 3:
-            offer = sentences[3]
-            vsl_script.append(f"Por tempo limitado, {offer.lower()}")
-        else:
-            vsl_script.append("Por tempo limitado, oferecemos um desconto especial de 50%.")
-        
-        # CTA (última frase) - sempre presente
-        if len(sentences) > 4:
-            cta = sentences[4]
-            vsl_script.append(f"Clique agora e {cta.lower()}")
-        else:
-            vsl_script.append("Clique agora e descubra como transformar sua situação.")
-        
-        return '. '.join(vsl_script)
-    
-    def _create_vsl_structure(self, topic: str, template: Dict) -> str:
-        """Cria estrutura VSL completa para um tópico"""
-        # Script VSL mais longo e detalhado (140+ palavras)
-        vsl_script = [
-            f"Você sabe por que {topic} é um problema que afeta milhões de pessoas todos os dias?",
-            f"O problema é que a maioria das pessoas não consegue resolver isso de forma eficaz, perdendo tempo e dinheiro.",
-            f"Com nossa solução exclusiva e comprovada, você terá resultados imediatos e transformadores em sua vida.",
-            f"Por tempo limitado, oferecemos um desconto especial de 50% mais bônus exclusivos que valem mais de R$ 500.",
-            f"Clique agora e descubra como transformar sua situação de forma definitiva e permanente."
-        ]
-        
-        return '. '.join(vsl_script)
+        return script
     
     def get_template_suggestions(self, topic: str) -> List[Dict]:
         """Sugere templates apropriados para um tópico"""
-        templates = self.template_manager.list_templates()
         suggestions = []
         
-        # Análise simples baseada em palavras-chave
+        # Análise de palavras-chave no tópico
         topic_lower = topic.lower()
         
-        for template in templates:
-            score = 0
-            reasons = []
-            
-            # Verificar se é conteúdo religioso/bíblico
-            if any(word in topic_lower for word in ['bíblico', 'religioso', 'profecia', 'apocalipse', 'deus', 'jesus', 'bíblia']):
-                if 'religioso' in template['name'].lower() or 'cinematográfico' in template['name'].lower():
-                    score += 3
-                    reasons.append("Conteúdo religioso detectado")
-            
-            # Verificar se é conteúdo educativo/curioso
-            if any(word in topic_lower for word in ['curioso', 'interessante', 'fato', 'descoberta', 'ciência', 'história']):
-                if 'curioso' in template['name'].lower() or 'fatos' in template['name'].lower():
-                    score += 2
-                    reasons.append("Conteúdo educativo detectado")
-            
-            # Verificar se é conteúdo de vendas/VSL
-            if any(word in topic_lower for word in ['venda', 'produto', 'serviço', 'oferta', 'desconto', 'solução', 'problema']):
-                if 'vsl' in template['name'].lower() or 'cinematográfico' in template['name'].lower():
-                    score += 3
-                    reasons.append("Conteúdo de vendas detectado")
-            
-            # Verificar se é conteúdo empresarial/profissional
-            if any(word in topic_lower for word in ['negócio', 'empresa', 'profissional', 'sucesso', 'resultado']):
-                if 'vsl' in template['name'].lower() or 'cinematográfico' in template['name'].lower():
-                    score += 2
-                    reasons.append("Conteúdo empresarial detectado")
-            
-            if score > 0:
-                suggestions.append({
-                    'template_id': template['id'],
-                    'name': template['name'],
-                    'description': template['description'],
-                    'score': score,
-                    'reasons': reasons
-                })
+        # Template Religioso Cinematográfico
+        religious_keywords = ['religioso', 'bíblia', 'deus', 'fé', 'igreja', 'sagrado', 'espiritual', 'cristão', 'cristã']
+        religious_score = sum(1 for keyword in religious_keywords if keyword in topic_lower)
+        
+        if religious_score > 0:
+            suggestions.append({
+                'template_id': 'cinematic_religious',
+                'name': 'Cinematográfico Religioso',
+                'description': 'Template para conteúdo religioso com elementos cinematográficos',
+                'score': religious_score,
+                'reasons': [f'Detectado conteúdo religioso: {religious_score} palavras-chave']
+            })
         
         # Ordenar por score
         suggestions.sort(key=lambda x: x['score'], reverse=True)

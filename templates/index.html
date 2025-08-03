@@ -225,9 +225,8 @@
             <div style="margin: 15px 0;">
                 <label for="templateSelect">Template (Opcional):</label>
                 <select id="templateSelect" onchange="showTemplateInfo()">
-                    <option value="">🎬 Template Padrão</option>
+                    <option value="">🎬 Sem Template</option>
                     <option value="cinematic_religious">⛪ Cinematográfico Religioso</option>
-                    <option value="vsl_cinematographic">🎯 VSL Cinematográfico Pro</option>
                 </select>
                 <small style="opacity: 0.8;">Deixe vazio para usar o template padrão</small>
                 <div id="templateInfo" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; display: none;"></div>
@@ -611,11 +610,6 @@
                     name: 'Cinematográfico Religioso',
                     description: 'Template para vídeos religiosos com estilo cinematográfico, pausas estratégicas e efeitos dramáticos',
                     features: ['🎬 Efeitos cinematográficos', '⏱️ Pausas estratégicas', '🎵 Música de fundo', '📖 Conteúdo religioso']
-                },
-                'vsl_cinematographic': {
-                    name: 'VSL Cinematográfico Pro',
-                    description: 'Template para vídeos VSL com estrutura narrativa otimizada, elementos visuais dramáticos e ritmo cinematográfico',
-                    features: ['🎯 Estrutura VSL', '🎬 Contraste dramático', '⏱️ Pausas estratégicas', '💼 Focado em conversão']
                 }
             };
             

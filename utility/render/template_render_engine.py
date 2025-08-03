@@ -245,201 +245,44 @@ class TemplateRenderEngine:
             traceback.print_exc()
             return video
     
-    def apply_strategic_pauses(self, audio_path: str, pauses_config: Dict) -> str:
+    def apply_strategic_pauses(self, audio_file_path: str, pauses_config: Dict) -> str:
         """Aplica pausas estratégicas ao áudio"""
         try:
-            audio = AudioFileClip(audio_path)
-            duration = audio.duration
+            # Carregar áudio
+            audio = AudioFileClip(audio_file_path)
             
-            # Aplicar pausas baseadas na configuração
-            impact_pauses = pauses_config.get('impact_pauses', [])
+            # Configurações de pausas
+            pause_duration = pauses_config.get('duration', 2.0)
+            pause_count = pauses_config.get('count', 3)
             
-            for pause in impact_pauses:
-                position = pause['position']
-                pause_duration = pause['duration']
-                purpose = pause.get('purpose', 'drama')
+            # Dividir áudio em segmentos
+            total_duration = audio.duration
+            segment_duration = total_duration / (pause_count + 1)
+            
+            # Criar segmentos de áudio
+            audio_segments = []
+            for i in range(pause_count + 1):
+                start_time = i * segment_duration
+                end_time = (i + 1) * segment_duration
                 
-                # Calcular tempo real da pausa
-                pause_time = duration * position
+                segment = audio.subclip(start_time, end_time)
+                audio_segments.append(segment)
                 
-                # Criar silêncio para a pausa
-                silence = AudioFileClip(audio_path).set_duration(pause_duration)
-                silence = silence.volumex(0)  # Silêncio total
-                
-                # Inserir pausa no áudio
-                audio = audio.set_start(0)
-                audio = audio.set_end(pause_time)
-                
-                # Combinar com silêncio
-                from moviepy.editor import concatenate_audioclips
-                audio = concatenate_audioclips([audio, silence])
+                # Adicionar pausa (exceto após o último segmento)
+                if i < pause_count:
+                    silence = AudioFileClip(audio_file_path).subclip(0, pause_duration).volumex(0)
+                    audio_segments.append(silence)
+            
+            # Combinar segmentos
+            from moviepy.editor import concatenate_audioclips
+            final_audio = concatenate_audioclips(audio_segments)
             
             # Salvar áudio com pausas
-            output_path = f"paused_{os.path.basename(audio_path)}"
-            audio.write_audiofile(output_path)
+            output_path = f"paused_{audio_file_path}"
+            final_audio.write_audiofile(output_path, verbose=False, logger=None)
             
             return output_path
             
         except Exception as e:
             print(f"❌ Erro ao aplicar pausas estratégicas: {e}")
-            return audio_path
-    
-    def generate_vsl_text_overlays(self, script: str, template_config: Dict) -> List[Dict]:
-        """Gera overlays de texto para VSL baseado no script e template"""
-        try:
-            # Estrutura VSL: Hook → Problema → Solução → Oferta → CTA
-            vsl_structure = template_config.get('script_pattern', {}).get('structure', {})
-            text_settings = template_config.get('text_display', {})
-            
-            # Dividir script em frases
-            sentences = script.split('. ')
-            overlays = []
-            
-            # Configurações de texto para vídeo vertical
-            typography = text_settings.get('typography', {})
-            animations = text_settings.get('animations', {})
-            timing = text_settings.get('timing', {})
-            
-            # Duração total para VSL (50-60 segundos)
-            total_duration = 55  # segundos
-            
-            # Garantir pelo menos 5 frases para estrutura VSL completa
-            if len(sentences) < 5:
-                # Criar frases VSL padrão se necessário
-                vsl_sentences = [
-                    "Você sabe por que este problema afeta milhões de pessoas todos os dias?",
-                    "O problema é que a maioria das pessoas não consegue resolver isso de forma eficaz.",
-                    "Com nossa solução exclusiva e comprovada, você terá resultados imediatos.",
-                    "Por tempo limitado, oferecemos um desconto especial de 50% mais bônus exclusivos.",
-                    "Clique agora e descubra como transformar sua situação de forma definitiva."
-                ]
-                sentences = vsl_sentences
-            
-            # Distribuir frases com timing melhor para VSL
-            segment_duration = total_duration / len(sentences)
-            
-            for i, sentence in enumerate(sentences):
-                if not sentence.strip():
-                    continue
-                
-                # Calcular timing com pausas estratégicas
-                start_time = i * segment_duration + (i * 0.5)  # Pausa entre frases
-                end_time = (i + 1) * segment_duration + (i * 0.5)
-                
-                # Determinar tipo de texto baseado na posição
-                text_type = self._determine_vsl_text_type(i, len(sentences))
-                
-                # Criar overlay de texto com tamanho apropriado para vertical
-                overlay = {
-                    'text': sentence.strip(),
-                    'start_time': start_time,
-                    'end_time': end_time,
-                    'type': text_type,
-                    'style': self._get_vsl_text_style_vertical(text_type, typography),
-                    'animation': self._get_vsl_animation(text_type, animations),
-                    'position': self._get_vsl_position_vertical(text_type, text_settings)
-                }
-                
-                overlays.append(overlay)
-            
-            return overlays
-            
-        except Exception as e:
-            print(f"❌ Erro ao gerar overlays VSL: {e}")
-            return []
-    
-    def _determine_vsl_text_type(self, index: int, total_sentences: int) -> str:
-        """Determina o tipo de texto baseado na posição na estrutura VSL"""
-        if index == 0:
-            return 'hook'  # Primeira frase - Hook
-        elif index < total_sentences * 0.2:
-            return 'problem'  # 20% - Problema
-        elif index < total_sentences * 0.4:
-            return 'solution'  # 40% - Solução
-        elif index < total_sentences * 0.8:
-            return 'offer'  # 80% - Oferta
-        else:
-            return 'cta'  # Últimas frases - CTA
-    
-    def _get_vsl_text_style(self, text_type: str, typography: Dict) -> Dict:
-        """Retorna estilo de texto baseado no tipo VSL"""
-        base_style = {
-            'font': typography.get('font', 'Arial-Bold'),
-            'size': typography.get('size', '120-150'),
-            'color': typography.get('color', 'white'),
-            'stroke': typography.get('stroke', 'black'),
-            'stroke_width': typography.get('stroke_width', 6)
-        }
-        
-        # Personalizar baseado no tipo
-        if text_type == 'hook':
-            base_style['size'] = '150-180'  # Maior para impacto
-            base_style['color'] = '#FFD700'  # Dourado para chamar atenção
-        elif text_type == 'cta':
-            base_style['size'] = '140-160'
-            base_style['color'] = '#FF4444'  # Vermelho para urgência
-        elif text_type == 'offer':
-            base_style['color'] = '#00FF00'  # Verde para benefícios
-        
-        return base_style
-    
-    def _get_vsl_animation(self, text_type: str, animations: Dict) -> str:
-        """Retorna tipo de animação baseado no tipo VSL"""
-        if text_type == 'hook':
-            return 'fade_in_zoom'  # Entrada dramática
-        elif text_type == 'cta':
-            return 'pulse_glow'  # Pulsação para urgência
-        else:
-            return 'fade_in_slide'  # Entrada suave
-    
-    def _get_vsl_position(self, text_type: str, text_settings: Dict) -> str:
-        """Retorna posição do texto baseado no tipo VSL"""
-        positioning = text_settings.get('positioning', {})
-        
-        if text_type == 'hook':
-            return positioning.get('primary', 'center')  # Centro para hook
-        elif text_type == 'cta':
-            return positioning.get('secondary', 'bottom')  # Baixo para CTA
-        else:
-            return positioning.get('primary', 'center')  # Centro para outros 
-    
-    def _get_vsl_text_style_vertical(self, text_type: str, typography: Dict) -> Dict:
-        """Retorna estilo de texto otimizado para vídeo vertical"""
-        base_style = {
-            'font': 'Arial-Bold',
-            'color': 'white',
-            'stroke': 'black',
-            'stroke_width': 4,
-            'bg_color': 'rgba(0,0,0,0.8)'
-        }
-        
-        # Tamanhos otimizados para vertical (1080x1920)
-        if text_type == 'hook':
-            base_style['size'] = '80-120'  # Menor para vertical
-        elif text_type == 'problem':
-            base_style['size'] = '70-100'
-        elif text_type == 'solution':
-            base_style['size'] = '70-100'
-        elif text_type == 'offer':
-            base_style['size'] = '80-120'
-        elif text_type == 'cta':
-            base_style['size'] = '90-130'
-        else:
-            base_style['size'] = '80-110'
-        
-        return base_style
-    
-    def _get_vsl_position_vertical(self, text_type: str, text_settings: Dict) -> str:
-        """Retorna posição otimizada para vídeo vertical"""
-        if text_type == 'hook':
-            return 'center'  # Centro da tela
-        elif text_type == 'problem':
-            return 'center'
-        elif text_type == 'solution':
-            return 'center'
-        elif text_type == 'offer':
-            return 'center'
-        elif text_type == 'cta':
-            return 'bottom'  # CTA na parte inferior
-        else:
-            return 'center' 
+            return audio_file_path 
