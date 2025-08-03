@@ -5,6 +5,7 @@ import zipfile
 import platform
 import subprocess
 import re
+import random
 from moviepy.editor import (AudioFileClip, CompositeVideoClip, CompositeAudioClip, ImageClip,
                             TextClip, VideoFileClip)
 from moviepy.audio.fx.audio_loop import audio_loop
@@ -67,6 +68,67 @@ def process_text_for_captions(text):
     
     return '\n'.join(lines)
 
+def generate_colored_text_clips(processed_text, start_time, end_time):
+    """
+    Gera clips de texto palavra por palavra, sincronizados com o áudio
+    """
+    words = processed_text.split()
+    clips = []
+    
+    if not words:
+        return clips
+    
+    # Calcular duração por palavra
+    total_duration = end_time - start_time
+    word_duration = total_duration / len(words)
+    
+    for i, word in enumerate(words):
+        # Calcular timing para esta palavra
+        word_start = start_time + (i * word_duration)
+        word_end = min(start_time + ((i + 1) * word_duration), end_time)
+        
+        # Garantir que não ultrapasse o tempo total
+        if word_start >= end_time:
+            break
+        
+        # Criar clip para cada palavra individual
+        txt = word.upper()
+        
+        # Criar múltiplas camadas para texto mais grosso
+        # Camada 1: Contorno preto espesso
+        txt_clip_bg = (TextClip(txt=txt,
+                                fontsize=90,  # Fonte grande e impactante
+                                font="Impact",  # Fonte Impact (mais chamativa)
+                                color="white",  # Cor preta para contorno
+                                stroke_color="black",  # Contorno preto
+                                stroke_width=12,  # Contorno muito espesso
+                                method="label")
+                       .set_start(word_start)
+                       .set_end(word_end)
+                       .fadein(0.1)  # Fade-in rápido
+                       .fadeout(0.1)  # Fade-out rápido
+                       .set_position(("center", "center")))  # Centralizado na tela
+        
+        # Camada 2: Texto branco principal
+        txt_clip_main = (TextClip(txt=txt,
+                                  fontsize=90,  # Fonte grande e impactante
+                                  font="Impact",  # Fonte Impact (mais chamativa)
+                                  color="white",  # Cor branca
+                                  stroke_color="white",  # Contorno preto
+                                  stroke_width=8,  # Contorno espesso
+                                  method="label")
+                         .set_start(word_start)
+                         .set_end(word_end)
+                         .fadein(0.1)  # Fade-in rápido
+                         .fadeout(0.1)  # Fade-out rápido
+                         .set_position(("center", "center")))  # Centralizado na tela
+        
+        # Adicionar ambas as camadas
+        clips.append(txt_clip_bg)
+        clips.append(txt_clip_main)
+    
+    return clips
+
 def download_file(url, filename):
     with open(filename, 'wb') as f:
         headers = {
@@ -113,35 +175,34 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
 
     for (t1, t2), text in timed_captions:
         # Pular legendas muito curtas ou vazias
-        if len(text.strip()) < 3:
+        if len(text.strip()) < 2:
             continue
             
         # Calcular duração do segmento
         segment_duration = t2 - t1
         
-        # Ajustar timing para melhor distribuição
-        if segment_duration < 1.0:  # Segmentos muito curtos
+        # Ajustar timing para melhor distribuição - reduzir limite mínimo
+        if segment_duration < 0.5:  # Segmentos muito curtos
             continue
         
-        # Processar texto para quebra de linhas adequada (máximo 42 caracteres por linha)
+        # Processar texto para quebra de linhas adequada
         processed_text = process_text_for_captions(text)
-            
-        text_clip = (TextClip(txt=processed_text,
-                              fontsize=48,  # ~3.8% da altura do frame (1280px)
-                              font="Arial-Bold",  # Sans-serif moderna
-                              color="white",  # Branco puro #FFFFFF
-                              stroke_color="black",  # Contorno preto
-                              stroke_width=4,  # Contorno espesso (3-4px)
-                              method="label",
-                              bg_color="rgba(0,0,0,0.0)",  # Sem fundo (apenas contorno)
-                              size=(720, None))  # Largura para vídeo vertical (720px)
-                  .set_start(t1)
-                  .set_end(t2)
-                  .set_position(("center", "bottom"))  # Centralizado horizontalmente
-                  .margin(bottom=60)  # 60px acima da borda inferior
-                  .crossfadein(0.1)  # Cortes secos (fade mínimo)
-                  .crossfadeout(0.1))
-        visual_clips.append(text_clip)
+        
+        # Limpar texto de caracteres especiais que podem causar problemas
+        processed_text = processed_text.replace('\n', ' ').strip()
+        
+        # Filtrar palavras muito curtas ou irrelevantes
+        words = processed_text.split()
+        if len(words) < 1:  # Pular se não tiver palavras
+            continue
+        
+        # Gerar clips de texto palavra por palavra
+        text_clips = generate_colored_text_clips(processed_text, t1, t2)
+        if text_clips:  # Só adicionar se houver clips gerados
+            visual_clips.extend(text_clips)
+            print(f"✅ Legendas geradas para '{processed_text[:30]}...' ({len(text_clips)} palavras)")
+        else:
+            print(f"⚠️ Nenhuma legenda gerada para '{processed_text[:30]}...'")
 
     video = CompositeVideoClip(visual_clips)
     

@@ -39,6 +39,8 @@ class TemplateScriptGenerator:
             # Aplicar adaptações específicas do template
             if template_id == "cinematic_religious":
                 script = self._adapt_for_religious_template(script, template)
+            elif template_id == "vsl_magnetic":
+                script = self._adapt_for_vsl_magnetic_template(script, template)
             
             return {
                 'script': script,
@@ -89,6 +91,46 @@ class TemplateScriptGenerator:
         
         return script
     
+    def _adapt_for_vsl_magnetic_template(self, script: str, template: Dict) -> str:
+        """Adapta script para template VSL magnético"""
+        try:
+            # Usar o gerador específico de VSL se disponível
+            from utility.script.vsl_script_generator import VSLScriptGenerator
+            
+            vsl_generator = VSLScriptGenerator()
+            vsl_script = vsl_generator.generate_vsl_script(topic=script[:50], template_config=template)
+            
+            return vsl_script
+            
+        except ImportError:
+            # Fallback se o gerador VSL não estiver disponível
+            print("⚠️ Gerador VSL não disponível, usando adaptação básica")
+            
+            # Adicionar elementos de VSL ao script
+            vsl_elements = [
+                "Você já se perguntou sobre",
+                "Descubra agora",
+                "A verdade sobre",
+                "O que ninguém te conta sobre"
+            ]
+            
+            import random
+            vsl_intro = random.choice(vsl_elements)
+            script = f"{vsl_intro} {script}"
+            
+            # Adicionar CTA no final
+            cta_options = [
+                "Clique agora e descubra mais!",
+                "Veja o que você está perdendo!",
+                "Não perca mais tempo, acesse agora!",
+                "A decisão está nas suas mãos!"
+            ]
+            
+            cta = random.choice(cta_options)
+            script = f"{script} {cta}"
+            
+            return script
+    
     def get_template_suggestions(self, topic: str) -> List[Dict]:
         """Sugere templates apropriados para um tópico"""
         suggestions = []
@@ -108,6 +150,28 @@ class TemplateScriptGenerator:
                 'score': religious_score,
                 'reasons': [f'Detectado conteúdo religioso: {religious_score} palavras-chave']
             })
+        
+        # Template VSL Magnético
+        vsl_keywords = ['venda', 'vender', 'produto', 'serviço', 'oferta', 'promoção', 'desconto', 'negócio', 'empresa', 'marketing', 'vendas', 'comercial']
+        vsl_score = sum(1 for keyword in vsl_keywords if keyword in topic_lower)
+        
+        if vsl_score > 0:
+            suggestions.append({
+                'template_id': 'vsl_magnetic',
+                'name': 'VSL Magnético',
+                'description': 'Template para vídeos de vendas magnéticos (formato vertical)',
+                'score': vsl_score,
+                'reasons': [f'Detectado conteúdo comercial: {vsl_score} palavras-chave']
+            })
+        
+        # Template VSL para qualquer tópico (score baixo mas sempre disponível)
+        suggestions.append({
+            'template_id': 'vsl_magnetic',
+            'name': 'VSL Magnético',
+            'description': 'Template para vídeos de vendas magnéticos (formato vertical)',
+            'score': 1,
+            'reasons': ['Template versátil para qualquer tópico']
+        })
         
         # Ordenar por score
         suggestions.sort(key=lambda x: x['score'], reverse=True)

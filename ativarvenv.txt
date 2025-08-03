@@ -1,1 +1,33 @@
 source venv/bin/activate  python3 server.py
+# 1. Conectar no VPS
+ssh root@31.97.93.197
+
+# 2. Navegar para o diretório do projeto
+cd /root/text-to-video-ai-v2
+
+# 3. Ativar o ambiente virtual
+source venv/bin/activate
+
+# 4. Parar qualquer processo anterior (se houver)
+pkill -f "python server.py"
+
+# 5. Iniciar o servidor em background
+nohup python server.py > server.log 2>&1 &
+
+# 6. Verificar se está rodando
+ps aux | grep "python server.py"
+
+# Ver logs em tempo real
+tail -f server.log
+
+# Verificar se a porta 5000 está em uso
+netstat -tlnp | grep :5000
+
+# Ver processos Python ativos
+ps aux | grep python
+
+# Parar o processo
+pkill -f "python server.py"
+
+# Ou se souber o PID
+kill [PID]

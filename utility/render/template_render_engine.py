@@ -29,8 +29,14 @@ class TemplateRenderEngine:
             # Carregar vídeo
             video = VideoFileClip(video_path)
             
-            # Aplicar configurações visuais
-            video = self._apply_visual_settings(video, template_config.get('visual_settings', {}))
+            # Aplicar configurações específicas do template
+            template_id = template_config.get('template_id', 'default')
+            
+            if template_id == "vsl_magnetic":
+                video = self._apply_vsl_magnetic_settings(video, template_config)
+            else:
+                # Aplicar configurações visuais padrão
+                video = self._apply_visual_settings(video, template_config.get('visual_settings', {}))
             
             # Aplicar configurações de áudio com assets
             if audio_path and os.path.exists(audio_path):
@@ -48,6 +54,94 @@ class TemplateRenderEngine:
         except Exception as e:
             print(f"❌ Erro ao aplicar template: {e}")
             return video_path
+    
+    def _apply_vsl_magnetic_settings(self, video: VideoFileClip, template_config: Dict) -> VideoFileClip:
+        """Aplica configurações específicas do template VSL magnético"""
+        try:
+            print("🎬 Aplicando configurações VSL Magnético...")
+            
+            # Configurações do template VSL
+            visual_settings = template_config.get('visual_settings', {})
+            
+            # Redimensionar para formato vertical (720x1280)
+            target_width = 720
+            target_height = 1280
+            
+            # Calcular proporção para manter aspecto
+            current_width, current_height = video.size
+            aspect_ratio = current_width / current_height
+            
+            if aspect_ratio > 1:  # Vídeo horizontal
+                # Cortar para formato vertical
+                new_width = int(current_height * (9/16))  # Proporção 9:16
+                crop_x = (current_width - new_width) // 2
+                video = video.crop(x1=crop_x, y1=0, x2=crop_x + new_width, y2=current_height)
+            
+            # Redimensionar para 720x1280
+            video = video.resize((target_width, target_height))
+            
+            print(f"✅ Vídeo redimensionado para {target_width}x{target_height}")
+            
+            # Aplicar efeitos visuais específicos do VSL
+            video = self._apply_vsl_visual_effects(video, visual_settings)
+            
+            return video
+            
+        except Exception as e:
+            print(f"⚠️ Erro ao aplicar configurações VSL: {e}")
+            return video
+    
+    def _apply_vsl_visual_effects(self, video: VideoFileClip, visual_settings: Dict) -> VideoFileClip:
+        """Aplica efeitos visuais específicos do VSL"""
+        try:
+            # Aplicar efeitos de transição dinâmicos
+            if visual_settings.get('transition_effects'):
+                video = self._apply_vsl_transitions(video, visual_settings['transition_effects'])
+            
+            # Aplicar efeitos de texto se especificados
+            text_style = visual_settings.get('text_style', {})
+            if text_style:
+                video = self._apply_vsl_text_effects(video, text_style)
+            
+            return video
+            
+        except Exception as e:
+            print(f"⚠️ Erro ao aplicar efeitos visuais VSL: {e}")
+            return video
+    
+    def _apply_vsl_transitions(self, video: VideoFileClip, transitions: List[str]) -> VideoFileClip:
+        """Aplica transições específicas do VSL"""
+        try:
+            # Transições rápidas e dinâmicas para VSL
+            if 'fast_cuts' in transitions:
+                # Implementar cortes rápidos
+                print("🎬 Aplicando cortes rápidos VSL")
+            
+            if 'zoom_effects' in transitions:
+                # Implementar efeitos de zoom
+                print("🎬 Aplicando efeitos de zoom VSL")
+            
+            return video
+            
+        except Exception as e:
+            print(f"⚠️ Erro ao aplicar transições VSL: {e}")
+            return video
+    
+    def _apply_vsl_text_effects(self, video: VideoFileClip, text_style: Dict) -> VideoFileClip:
+        """Aplica efeitos de texto específicos do VSL"""
+        try:
+            # Efeitos de texto para VSL (palavras-chave destacadas, etc.)
+            font = text_style.get('font', 'Impact')
+            font_size = text_style.get('font_size', 120)
+            stroke_width = text_style.get('stroke_width', 10)
+            
+            print(f"🎬 Configurações de texto VSL: {font}, {font_size}px, stroke {stroke_width}")
+            
+            return video
+            
+        except Exception as e:
+            print(f"⚠️ Erro ao aplicar efeitos de texto VSL: {e}")
+            return video
     
     def _apply_visual_settings(self, video: VideoFileClip, visual_settings: Dict) -> VideoFileClip:
         """Aplica configurações visuais do template"""

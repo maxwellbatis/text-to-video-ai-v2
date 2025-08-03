@@ -1,0 +1,239 @@
+{
+  "template_id": "vsl_magnetic",
+  "name": "VSL Magnética - Estilo Criativo",
+  "description": "Template para vídeos de vendas magnéticos estilo Reels/TikTok",
+  "category": "vsl",
+  "format": "vertical",
+  "duration_target": 30,
+  
+  "script_pattern": {
+    "style": "magnetic",
+    "tone": "energetic",
+    "structure": "vsl_5_blocks",
+    "pauses_strategy": {
+      "hook_pauses": [
+        {"position": 0.1, "duration": 0.3, "purpose": "impact"},
+        {"position": 0.3, "duration": 0.2, "purpose": "emphasis"},
+        {"position": 0.5, "duration": 0.4, "purpose": "reflection"},
+        {"position": 0.8, "duration": 0.3, "purpose": "transition"},
+        {"position": 0.95, "duration": 0.5, "purpose": "cta"}
+      ],
+      "natural_pauses": [
+        {"position": 0.15, "duration": 0.2},
+        {"position": 0.35, "duration": 0.2},
+        {"position": 0.55, "duration": 0.2},
+        {"position": 0.75, "duration": 0.2}
+      ]
+    },
+    "voice_settings": {
+      "voice": "pt-BR-AntonioNeural",
+      "rate": "fast",
+      "volume": 1.0,
+      "pitch": "high"
+    },
+    "blocks": {
+      "hook": {
+        "duration": "0-5s",
+        "style": "impact",
+        "text_pattern": "question_direct",
+        "emotion": "frustration"
+      },
+      "problem": {
+        "duration": "5-10s",
+        "style": "empathy",
+        "text_pattern": "emotional_keywords",
+        "emotion": "struggle"
+      },
+      "solution": {
+        "duration": "10-20s",
+        "style": "hope",
+        "text_pattern": "bullet_points",
+        "emotion": "relief"
+      },
+      "proof": {
+        "duration": "20-25s",
+        "style": "testimonial",
+        "text_pattern": "quotes",
+        "emotion": "inspiration"
+      },
+      "cta": {
+        "duration": "25-30s",
+        "style": "action",
+        "text_pattern": "direct_action",
+        "emotion": "urgency"
+      }
+    }
+  },
+  
+  "visual_settings": {
+    "aspect_ratio": "9:16",
+    "resolution": "720x1280",
+    "background_style": "energetic",
+    "color_palette": "warm_contrast",
+    "transition_effects": [
+      "zoom_in",
+      "shake",
+      "flash",
+      "bounce",
+      "slide_up"
+    ],
+    "text_style": {
+      "font": "Impact",
+      "font_size": 120,
+      "color": "white",
+      "stroke_color": "black",
+      "stroke_width": 10,
+      "position": "center",
+      "margin": 80,
+      "fade_in": 0.2,
+      "fade_out": 0.2,
+      "effects": [
+        "bounce",
+        "glow",
+        "zoom",
+        "shake"
+      ]
+    },
+    "emoji_style": {
+      "size": 80,
+      "position": "floating",
+      "animation": "bounce",
+      "frequency": "moderate"
+    }
+  },
+  
+  "audio_settings": {
+    "background_music": {
+      "type": "energetic",
+      "volume": 0.2,
+      "fade_in": 1.0,
+      "fade_out": 2.0,
+      "tempo": "fast"
+    },
+    "sound_effects": {
+      "volume": 0.4,
+      "types": [
+        "whoosh",
+        "pop",
+        "typing",
+        "impact",
+        "bell"
+      ]
+    },
+    "voice_processing": {
+      "normalize": true,
+      "compression": true,
+      "reverb": 0.05
+    }
+  },
+  
+  "content_guidelines": {
+    "topics": [
+      "saas",
+      "digital_marketing", 
+      "maternity",
+      "fitness",
+      "business",
+      "lifestyle"
+    ],
+    "keywords": [
+      "mudança",
+      "transformação",
+      "resultado",
+      "método",
+      "solução",
+      "diferente",
+      "simples",
+      "rápido"
+    ],
+    "avoid": [
+      "complex",
+      "boring",
+      "slow",
+      "technical"
+    ],
+    "tone": "energetic",
+    "duration_target": 30
+  },
+  
+  "search_terms": {
+    "hook": [
+      "frustrated person",
+      "confused face",
+      "stress emotion",
+      "tired person"
+    ],
+    "problem": [
+      "struggle scene",
+      "difficulty moment",
+      "frustration emotion",
+      "overwhelmed person"
+    ],
+    "solution": [
+      "light bulb moment",
+      "breakthrough scene",
+      "success emotion",
+      "happy realization"
+    ],
+    "proof": [
+      "success story",
+      "transformation scene",
+      "before after",
+      "achievement moment"
+    ],
+    "cta": [
+      "action button",
+      "click gesture",
+      "decision moment",
+      "opportunity scene"
+    ]
+  },
+  
+  "effects": {
+    "visual": [
+      "zoom_effects",
+      "shake_animation",
+      "flash_highlights",
+      "bounce_text",
+      "glow_effects",
+      "color_transitions"
+    ],
+    "audio": [
+      "energetic_music",
+      "impact_sounds",
+      "whoosh_effects",
+      "typing_sounds",
+      "bell_notifications"
+    ]
+  },
+  
+  "text_templates": {
+    "hook": [
+      "Você também sente que está tentando de tudo e nada funciona?",
+      "Já tentou de tudo e continua no mesmo lugar?",
+      "Cansada de tentar e não ver resultado?",
+      "Frustrada porque nada parece dar certo?"
+    ],
+    "problem": [
+      "Frustração. Cansaço. Dúvida. Medo.",
+      "É difícil continuar quando nada parece dar resultado.",
+      "Você não está sozinha nessa situação.",
+      "Muitas pessoas passam por isso."
+    ],
+    "solution": [
+      "✅ Existe um jeito diferente.\n🧠 Com foco, clareza e resultado.\n💥 Sem complicação, sem enrolação.",
+      "A diferença está em parar de tentar tudo…\ne focar no que realmente transforma.",
+      "Não é mágica. É método.\nSimples, direto e eficaz."
+    ],
+    "proof": [
+      "\"Em poucos dias, comecei a ver mudanças reais.\"\n\"Era o que eu precisava — simples e direto.\"",
+      "Você não precisa de mágica.\nSó de direção certa.",
+      "Muitas pessoas já transformaram suas vidas.\nVocê pode ser a próxima."
+    ],
+    "cta": [
+      "A decisão está nas suas mãos.\n👉 Toque agora e veja o que pode mudar.",
+      "Você já viu o que não funciona.\nAgora veja o que funciona.",
+      "Não perca mais tempo.\nClique agora e transforme sua vida."
+    ]
+  }
+} 
