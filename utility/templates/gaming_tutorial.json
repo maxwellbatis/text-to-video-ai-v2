@@ -1,0 +1,56 @@
+{
+    "template_id": "gaming_tutorial",
+    "name": "Gaming Tutorial",
+    "description": "Template para tutoriais de jogos com passo a passo claro e visual",
+    "category": "gaming",
+    "format": "vertical",
+    "duration_target": 60,
+    "visual_settings": {
+        "resolution": "720x1280",
+        "font": "Impact",
+        "font_size": 80,
+        "stroke_width": 6,
+        "colors": {
+            "primary": "#00ff00",
+            "secondary": "#ffff00",
+            "background": "#000000",
+            "accent": "#ff00ff"
+        },
+        "effects": ["highlight", "arrow", "circle", "zoom"],
+        "transition_effects": ["fade_in", "slide_up", "bounce"]
+    },
+    "audio_settings": {
+        "background_music": "gaming_tutorial_bg.mp3",
+        "sound_effects": ["click", "success", "highlight"],
+        "voice_speed": "normal"
+    },
+    "script_pattern": {
+        "intro": "Aprenda como {técnica} em {jogo}",
+        "steps": [
+            "Passo 1: {primeira_etapa}",
+            "Passo 2: {segunda_etapa}",
+            "Passo 3: {terceira_etapa}",
+            "Passo 4: {quarta_etapa}"
+        ],
+        "tip": "Dica: {dica_importante}",
+        "outro": "Pratique e melhore suas habilidades!"
+    },
+    "content_guidelines": {
+        "tone": "educativo e motivacional",
+        "style": "passo a passo claro",
+        "target_audience": "gamers iniciantes e intermediários"
+    },
+    "assets_config": {
+        "background_music": "assets/audio/gaming_tutorial_bg.mp3",
+        "sound_effects": {
+            "click": "assets/audio/click.mp3",
+            "success": "assets/audio/success.mp3",
+            "highlight": "assets/audio/highlight.mp3"
+        },
+        "visual_effects": {
+            "arrow": "assets/video/arrow_effect.mp4",
+            "circle": "assets/video/circle_highlight.mp4",
+            "zoom": "assets/video/zoom_effect.mp4"
+        }
+    }
+} 

@@ -1,0 +1,55 @@
+{
+    "template_id": "gaming_highlights",
+    "name": "Gaming Highlights",
+    "description": "Template para vídeos de highlights épicos de jogos",
+    "category": "gaming",
+    "format": "vertical",
+    "duration_target": 30,
+    "visual_settings": {
+        "resolution": "720x1280",
+        "font": "Impact",
+        "font_size": 100,
+        "stroke_width": 8,
+        "colors": {
+            "primary": "#ff0000",
+            "secondary": "#00ffff",
+            "background": "#000000",
+            "accent": "#ffff00"
+        },
+        "effects": ["slow_motion", "zoom", "shake", "glitch", "flash"],
+        "transition_effects": ["fast_cuts", "zoom_effects", "shake"]
+    },
+    "audio_settings": {
+        "background_music": "gaming_highlights_bg.mp3",
+        "sound_effects": ["explosion", "victory", "dramatic"],
+        "voice_speed": "fast"
+    },
+    "script_pattern": {
+        "intro": "MOMENTOS ÉPICOS",
+        "highlights": [
+            "PLAY INCRÍVEL!",
+            "CLUTCH PERFEITO!",
+            "HEADSHOT MORTAL!",
+            "VICTORY ROYALE!"
+        ],
+        "outro": "INSCREVA-SE PARA MAIS!"
+    },
+    "content_guidelines": {
+        "tone": "dramático e emocionante",
+        "style": "highlights épicos",
+        "target_audience": "gamers e espectadores"
+    },
+    "assets_config": {
+        "background_music": "assets/audio/gaming_highlights_bg.mp3",
+        "sound_effects": {
+            "explosion": "assets/audio/explosion.mp3",
+            "victory": "assets/audio/victory.mp3",
+            "dramatic": "assets/audio/dramatic.mp3"
+        },
+        "visual_effects": {
+            "slow_motion": "assets/video/slow_motion.mp4",
+            "glitch": "assets/video/glitch_effect.mp4",
+            "flash": "assets/video/flash_effect.mp4"
+        }
+    }
+} 

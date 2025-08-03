@@ -41,6 +41,10 @@ class TemplateScriptGenerator:
                 script = self._adapt_for_religious_template(script, template)
             elif template_id == "vsl_magnetic":
                 script = self._adapt_for_vsl_magnetic_template(script, template)
+            elif template_id == "gaming_tutorial":
+                script = self._adapt_for_gaming_tutorial_template(topic, template)
+            elif template_id == "gaming_highlights":
+                script = self._adapt_for_gaming_highlights_template(topic, template)
             
             return {
                 'script': script,
@@ -132,6 +136,74 @@ class TemplateScriptGenerator:
             
             return script
     
+    def _adapt_for_gaming_tutorial_template(self, topic: str, template: Dict) -> str:
+        """Adapta script para template de tutorial gaming"""
+        try:
+            from utility.script.gaming_script_generator import generate_gaming_tutorial
+            
+            tutorial_script = generate_gaming_tutorial(topic)
+            return tutorial_script
+            
+        except Exception as e:
+            print(f"⚠️ Erro no gerador de tutorial gaming: {e}, usando adaptação básica")
+            
+            # Fallback básico
+            tutorial_elements = [
+                "Aprenda como",
+                "Domine a técnica de",
+                "Descubra como",
+                "Masterize"
+            ]
+            
+            import random
+            tutorial_intro = random.choice(tutorial_elements)
+            script = f"{tutorial_intro} {topic}.\n\n"
+            
+            # Adicionar passos básicos
+            steps = [
+                "Passo 1: Entenda o básico",
+                "Passo 2: Pratique regularmente", 
+                "Passo 3: Analise seus erros",
+                "Passo 4: Continue evoluindo"
+            ]
+            
+            for step in steps:
+                script += f"{step}\n"
+            
+            script += "\nDica: A prática leva à perfeição!\n"
+            script += "Continue praticando e você verá resultados!"
+            
+            return script
+    
+    def _adapt_for_gaming_highlights_template(self, topic: str, template: Dict) -> str:
+        """Adapta script para template de highlights gaming"""
+        try:
+            from utility.script.gaming_script_generator import generate_gaming_highlights
+            
+            highlights_script = generate_gaming_highlights(topic)
+            return highlights_script
+            
+        except Exception as e:
+            print(f"⚠️ Erro no gerador de highlights gaming: {e}, usando adaptação básica")
+            
+            # Fallback básico
+            highlights_elements = [
+                "MOMENTOS ÉPICOS!",
+                "PLAY INCRÍVEL!",
+                "VICTORY ROYALE!",
+                "DOMINAÇÃO TOTAL!"
+            ]
+            
+            import random
+            script = "MOMENTOS ÉPICOS\n\n"
+            
+            for highlight in highlights_elements:
+                script += f"{highlight}\n"
+            
+            script += "\nINSCREVA-SE PARA MAIS!"
+            
+            return script
+    
     def get_template_suggestions(self, topic: str) -> List[Dict]:
         """Sugere templates apropriados para um tópico"""
         suggestions = []
@@ -163,6 +235,32 @@ class TemplateScriptGenerator:
                 'description': 'Template para vídeos de vendas magnéticos (formato vertical)',
                 'score': vsl_score,
                 'reasons': [f'Detectado conteúdo comercial: {vsl_score} palavras-chave']
+            })
+        
+        # Template Gaming Tutorial
+        gaming_tutorial_keywords = ['tutorial', 'aprender', 'como fazer', 'dicas', 'passo a passo', 'técnica', 'melhorar', 'praticar']
+        gaming_tutorial_score = sum(1 for keyword in gaming_tutorial_keywords if keyword in topic_lower)
+        
+        if gaming_tutorial_score > 0:
+            suggestions.append({
+                'template_id': 'gaming_tutorial',
+                'name': 'Gaming Tutorial',
+                'description': 'Template para tutoriais de jogos com passo a passo claro',
+                'score': gaming_tutorial_score,
+                'reasons': [f'Detectado conteúdo tutorial: {gaming_tutorial_score} palavras-chave']
+            })
+        
+        # Template Gaming Highlights
+        gaming_highlights_keywords = ['highlights', 'momentos', 'épico', 'incrível', 'play', 'victory', 'clutch', 'headshot']
+        gaming_highlights_score = sum(1 for keyword in gaming_highlights_keywords if keyword in topic_lower)
+        
+        if gaming_highlights_score > 0:
+            suggestions.append({
+                'template_id': 'gaming_highlights',
+                'name': 'Gaming Highlights',
+                'description': 'Template para vídeos de highlights épicos de jogos',
+                'score': gaming_highlights_score,
+                'reasons': [f'Detectado conteúdo de highlights: {gaming_highlights_score} palavras-chave']
             })
         
         # Template VSL para qualquer tópico (score baixo mas sempre disponível)
