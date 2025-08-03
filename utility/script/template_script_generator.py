@@ -11,10 +11,19 @@ import sys
 sys.path.append(".")
 
 from utility.templates.template_manager import TemplateManager
+from utility.script.script_generator import generate_script
 
 class TemplateScriptGenerator:
     def __init__(self):
         self.template_manager = TemplateManager()
+    
+    def load_template(self, template_id: str) -> Optional[Dict]:
+        """Carrega template pelo ID"""
+        try:
+            return self.template_manager.get_template(template_id)
+        except Exception as e:
+            print(f"❌ Erro ao carregar template '{template_id}': {e}")
+            return None
     
     def generate_script_for_template(self, topic: str, template_id: str) -> Dict:
         """Gera script baseado no template selecionado"""
