@@ -131,15 +131,16 @@ class TemplateScriptGenerator:
     
     def _create_vsl_structure(self, topic: str, template: Dict) -> str:
         """Cria estrutura VSL completa para um tópico"""
-        vsl_elements = [
-            f"Você sabe por que {topic} é um problema real?",
-            f"O problema é que a maioria das pessoas não consegue resolver isso.",
-            f"Com nossa solução exclusiva, você terá resultados imediatos.",
-            f"Por tempo limitado, oferecemos um desconto especial de 50%.",
-            f"Clique agora e descubra como transformar sua situação."
+        # Script VSL mais longo e detalhado (140+ palavras)
+        vsl_script = [
+            f"Você sabe por que {topic} é um problema que afeta milhões de pessoas todos os dias?",
+            f"O problema é que a maioria das pessoas não consegue resolver isso de forma eficaz, perdendo tempo e dinheiro.",
+            f"Com nossa solução exclusiva e comprovada, você terá resultados imediatos e transformadores em sua vida.",
+            f"Por tempo limitado, oferecemos um desconto especial de 50% mais bônus exclusivos que valem mais de R$ 500.",
+            f"Clique agora e descubra como transformar sua situação de forma definitiva e permanente."
         ]
         
-        return '. '.join(vsl_elements)
+        return '. '.join(vsl_script)
     
     def get_template_suggestions(self, topic: str) -> List[Dict]:
         """Sugere templates apropriados para um tópico"""

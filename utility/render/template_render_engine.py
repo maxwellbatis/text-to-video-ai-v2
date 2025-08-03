@@ -295,49 +295,49 @@ class TemplateRenderEngine:
             sentences = script.split('. ')
             overlays = []
             
-            # Configurações de texto
+            # Configurações de texto para vídeo vertical
             typography = text_settings.get('typography', {})
             animations = text_settings.get('animations', {})
             timing = text_settings.get('timing', {})
             
-            # Duração total estimada (45-60 segundos para VSL)
-            total_duration = 50  # segundos
+            # Duração total para VSL (50-60 segundos)
+            total_duration = 55  # segundos
             
             # Garantir pelo menos 5 frases para estrutura VSL completa
             if len(sentences) < 5:
                 # Criar frases VSL padrão se necessário
                 vsl_sentences = [
-                    "Você sabe por que este problema existe?",
-                    "O problema é que a maioria das pessoas não consegue resolver isso.",
-                    "Com nossa solução exclusiva, você terá resultados imediatos.",
-                    "Por tempo limitado, oferecemos um desconto especial de 50%.",
-                    "Clique agora e descubra como transformar sua situação."
+                    "Você sabe por que este problema afeta milhões de pessoas todos os dias?",
+                    "O problema é que a maioria das pessoas não consegue resolver isso de forma eficaz.",
+                    "Com nossa solução exclusiva e comprovada, você terá resultados imediatos.",
+                    "Por tempo limitado, oferecemos um desconto especial de 50% mais bônus exclusivos.",
+                    "Clique agora e descubra como transformar sua situação de forma definitiva."
                 ]
                 sentences = vsl_sentences
             
-            # Distribuir frases ao longo da duração
+            # Distribuir frases com timing melhor para VSL
             segment_duration = total_duration / len(sentences)
             
             for i, sentence in enumerate(sentences):
                 if not sentence.strip():
                     continue
                 
-                # Calcular timing com distribuição melhor
-                start_time = i * segment_duration
-                end_time = (i + 1) * segment_duration
+                # Calcular timing com pausas estratégicas
+                start_time = i * segment_duration + (i * 0.5)  # Pausa entre frases
+                end_time = (i + 1) * segment_duration + (i * 0.5)
                 
                 # Determinar tipo de texto baseado na posição
                 text_type = self._determine_vsl_text_type(i, len(sentences))
                 
-                # Criar overlay de texto
+                # Criar overlay de texto com tamanho apropriado para vertical
                 overlay = {
                     'text': sentence.strip(),
                     'start_time': start_time,
                     'end_time': end_time,
                     'type': text_type,
-                    'style': self._get_vsl_text_style(text_type, typography),
+                    'style': self._get_vsl_text_style_vertical(text_type, typography),
                     'animation': self._get_vsl_animation(text_type, animations),
-                    'position': self._get_vsl_position(text_type, text_settings)
+                    'position': self._get_vsl_position_vertical(text_type, text_settings)
                 }
                 
                 overlays.append(overlay)
@@ -402,3 +402,44 @@ class TemplateRenderEngine:
             return positioning.get('secondary', 'bottom')  # Baixo para CTA
         else:
             return positioning.get('primary', 'center')  # Centro para outros 
+    
+    def _get_vsl_text_style_vertical(self, text_type: str, typography: Dict) -> Dict:
+        """Retorna estilo de texto otimizado para vídeo vertical"""
+        base_style = {
+            'font': 'Arial-Bold',
+            'color': 'white',
+            'stroke': 'black',
+            'stroke_width': 4,
+            'bg_color': 'rgba(0,0,0,0.8)'
+        }
+        
+        # Tamanhos otimizados para vertical (1080x1920)
+        if text_type == 'hook':
+            base_style['size'] = '80-120'  # Menor para vertical
+        elif text_type == 'problem':
+            base_style['size'] = '70-100'
+        elif text_type == 'solution':
+            base_style['size'] = '70-100'
+        elif text_type == 'offer':
+            base_style['size'] = '80-120'
+        elif text_type == 'cta':
+            base_style['size'] = '90-130'
+        else:
+            base_style['size'] = '80-110'
+        
+        return base_style
+    
+    def _get_vsl_position_vertical(self, text_type: str, text_settings: Dict) -> str:
+        """Retorna posição otimizada para vídeo vertical"""
+        if text_type == 'hook':
+            return 'center'  # Centro da tela
+        elif text_type == 'problem':
+            return 'center'
+        elif text_type == 'solution':
+            return 'center'
+        elif text_type == 'offer':
+            return 'center'
+        elif text_type == 'cta':
+            return 'bottom'  # CTA na parte inferior
+        else:
+            return 'center' 
