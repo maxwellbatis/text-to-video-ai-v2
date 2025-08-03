@@ -85,8 +85,12 @@ def fix_json(json_str):
     json_str = json_str.replace("'", "'")
     # Replace any incorrect quotes (e.g., mixed single and double quotes)
     json_str = json_str.replace(""", "\"").replace(""", "\"").replace("'", "\"").replace("'", "\"")
-    # Add escaping for quotes within the strings
-    json_str = json_str.replace('"you didn"t"', '"you didn\'t"')
+    
+    # Corrigir aspas problemáticas específicas
+    json_str = json_str.replace('"you"re"', '"you\'re"')
+    json_str = json_str.replace('"you"re missing"', '"you\'re missing"')
+    json_str = json_str.replace('"you"re missing out"', '"you\'re missing out"')
+    json_str = json_str.replace('"what you"re"', '"what you\'re"')
     
     # Remover caracteres problemáticos
     json_str = json_str.replace('\n', ' ').replace('\r', ' ')
@@ -131,6 +135,9 @@ def fix_json(json_str):
         # Corrigir aspas duplas problemáticas
         cleaned = re.sub(r'""+', '"', cleaned)  # Múltiplas aspas duplas
         cleaned = re.sub(r'([^\\])"([^"]*)"([^"]*)"', r'\1"\2\3"', cleaned)  # Aspas aninhadas
+        
+        # Corrigir aspas com apóstrofes
+        cleaned = re.sub(r'"([^"]*)"([^"]*)"', r'"\1\2"', cleaned)
         
         # Testar se o JSON limpo é válido
         json.loads(cleaned)

@@ -127,16 +127,18 @@ class VSLScriptGenerator:
             return "Texto padrão"
         return random.choice(templates)
     
-    def _combine_blocks(self, templates: Dict) -> str:
+    def _combine_blocks(self, blocks: Dict) -> str:
         """Combina todos os blocos em um script completo"""
-        blocks = []
+        combined_blocks = []
         
         for block_name in ["hook", "problem", "solution", "proof", "cta"]:
-            if block_name in templates:
-                text = self._select_template(templates[block_name])
-                blocks.append(text)
+            if block_name in blocks:
+                # Acessar o texto do bloco
+                block_text = blocks[block_name].get("text", "")
+                if block_text:
+                    combined_blocks.append(block_text)
         
-        return "\n\n".join(blocks)
+        return "\n\n".join(combined_blocks)
     
     def _get_visual_instructions(self) -> Dict:
         """Retorna instruções visuais para o template"""
