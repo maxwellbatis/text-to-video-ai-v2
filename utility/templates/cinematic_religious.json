@@ -7,6 +7,61 @@
     "style": "dramatic",
     "tone": "reverent",
     "structure": "narrative",
+    "video_structure": {
+      "opening": {
+        "duration": "5-15 segundos",
+        "elements": [
+          "Saudação calorosa (ex: 'A paz do Senhor!', 'Que Deus abençoe sua vida!')",
+          "Frase impactante, pergunta ou versículo (ex: 'Você já se perguntou por que Deus permite o sofrimento?')"
+        ]
+      },
+      "development": {
+        "duration": "40-70 segundos",
+        "elements": [
+          "Leitura bíblica ou citação sagrada",
+          "Explicação com clareza e amor",
+          "Exemplos práticos da vida cotidiana",
+          "Testemunhos ou reflexões reais"
+        ]
+      },
+      "closing": {
+        "duration": "10-15 segundos",
+        "elements": [
+          "Conclusão com ensinamento ou chamada à ação espiritual",
+          "Convite à oração, leitura bíblica ou mudança de vida",
+          "'Deixe seu comentário, compartilhe com alguém que precisa ouvir isso'"
+        ]
+      }
+    },
+    "voice_settings": {
+      "voice": "pt-BR-FranciscoNeural",
+      "rate": "slow",
+      "volume": 1.0,
+      "pitch": "low"
+    },
+    "content_types": {
+      "versiculo_dia": "Versículo do dia com breve reflexão",
+      "oracoes": "Orações curtas para temas específicos (ansiedade, família, enfermidade)",
+      "estudo_biblico": "Estudo bíblico de 3 a 10 minutos",
+      "curiosidades_biblicas": "Curiosidades bíblicas ('Sabia que Jesus chorou apenas uma vez na Bíblia?')",
+      "historias_biblicas": "Histórias bíblicas narradas (com trilha e emoção)",
+      "duvidas_comuns": "Respostas a dúvidas comuns ('É pecado sentir raiva?' 'O que é o Espírito Santo?')",
+      "conselhos_espirituais": "Conselhos espirituais práticos ('Como manter a fé nos tempos difíceis')"
+    },
+    "tone_guidelines": {
+      "leitura_biblica": {
+        "style": "Solene, pausada, com reverência",
+        "voices": ["Phillip", "Deep Ray"]
+      },
+      "ensino_reflexao": {
+        "style": "Acolhedor, leve, conversacional",
+        "voices": ["Drew", "James"]
+      },
+      "chamada_fe": {
+        "style": "Inspiradora, encorajadora, com emoção",
+        "note": "Faça pausas curtas para criar espaço de reflexão"
+      }
+    },
     "pauses_strategy": {
       "impact_pauses": [
         {"position": 0.2, "duration": 0.5, "purpose": "dramatic_effect"},
@@ -20,12 +75,6 @@
         {"position": 0.55, "duration": 0.2},
         {"position": 0.75, "duration": 0.2}
       ]
-    },
-    "voice_settings": {
-      "voice": "pt-BR-FranciscoNeural",
-      "rate": "slow",
-      "volume": 1.0,
-      "pitch": "low"
     }
   },
   "visual_settings": {
@@ -39,7 +88,7 @@
       "fade_out"
     ],
     "text_style": {
-      "font": "Arial-Bold",
+      "font": "Impact",
       "font_size": 90,
       "color": "white",
       "stroke_color": "black",
@@ -53,6 +102,8 @@
   "audio_settings": {
     "background_music": {
       "type": "ambient",
+      "style": "Suave, instrumental, espiritual - Tons de piano, harpa, violão ou coral leve",
+      "note": "Evite música com letra cantada enquanto fala (pode distrair)",
       "volume": 0.15,
       "fade_in": 2.0,
       "fade_out": 3.0
@@ -80,7 +131,13 @@
     "keywords": ["deus", "jesus", "bíblia", "profecia", "apocalipse", "fé", "salvação"],
     "avoid": ["controversial", "political", "offensive"],
     "tone": "reverent",
-    "duration_target": 45
+    "duration_target": 60,
+    "word_count": "200-300 palavras",
+    "structure_requirements": {
+      "opening": "Saudação + Frase impactante",
+      "development": "Tema principal + Exemplos + Reflexões",
+      "closing": "Conclusão + Chamada à ação"
+    }
   },
   "search_terms": {
     "biblical": ["biblical scenes", "ancient jerusalem", "bible stories", "religious art"],

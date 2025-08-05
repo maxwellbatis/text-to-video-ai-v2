@@ -89,7 +89,7 @@ def update_job_progress(job_id, progress, status=None):
             'status': jobs[job_id].status
         })
 
-async def generate_video_async(job_id, topic, template_id=None, use_db=False):
+async def generate_video_async(job_id, topic, template_id=None, voice_id=None, use_db=False):
     """Gera vídeo de forma assíncrona com suporte a templates"""
     try:
         job = jobs[job_id]
@@ -116,7 +116,7 @@ async def generate_video_async(job_id, topic, template_id=None, use_db=False):
         # 2. Gerar áudio
         update_job_progress(job_id, 40)
         audio_file = f"audio_tts_{job_id}.wav"
-        await generate_audio(response, audio_file)
+        await generate_audio(response, audio_file, voice_id)  # Usar voz selecionada ou detectar automaticamente
         job.audio_path = audio_file
         print(f"Áudio gerado: {audio_file}")
         
@@ -170,12 +170,12 @@ async def generate_video_async(job_id, topic, template_id=None, use_db=False):
         update_job_progress(job_id, 0, "FAILED")
         socketio.emit('job_failed', {'job_id': job_id, 'error': str(e)})
 
-def run_async_generation(job_id, topic, template_id=None, use_db=False):
+def run_async_generation(job_id, topic, template_id=None, voice_id=None, use_db=False):
     """Executa geração de vídeo em thread separada"""
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
-        loop.run_until_complete(generate_video_async(job_id, topic, template_id, use_db))
+        loop.run_until_complete(generate_video_async(job_id, topic, template_id, voice_id, use_db))
     finally:
         loop.close()
 
@@ -247,6 +247,7 @@ def create_job():
     data = request.get_json()
     topic = data.get('topic', '').strip()
     template_id = data.get('template_id', '').strip() or None
+    voice_id = data.get('voice_id', '').strip() or None
     
     if not topic:
         return jsonify({'error': 'Tópico é obrigatório'}), 400
@@ -258,7 +259,7 @@ def create_job():
     # Iniciar geração em thread separada
     thread = threading.Thread(
         target=run_async_generation,
-        args=(job.id, topic, template_id, DB_AVAILABLE)
+        args=(job.id, topic, template_id, voice_id, DB_AVAILABLE)
     )
     thread.daemon = True
     thread.start()
@@ -320,6 +321,17 @@ def suggest_templates():
         
     except Exception as e:
         print(f"Erro ao sugerir templates: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/voices', methods=['GET'])
+def list_voices():
+    """Lista todas as vozes disponíveis"""
+    try:
+        from utility.audio.audio_generator import list_available_voices
+        voices_info = list_available_voices()
+        return jsonify(voices_info)
+    except Exception as e:
+        print(f"Erro ao listar vozes: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/chat', methods=['POST'])

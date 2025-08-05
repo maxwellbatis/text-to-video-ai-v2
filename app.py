@@ -29,7 +29,7 @@ except Exception as e:
 template_script_generator = TemplateScriptGenerator()
 template_render_engine = TemplateRenderEngine()
 
-async def generate_video_with_db(topic: str, credentials_name: str = "default", use_db: bool = True, template_id: str = None):
+async def generate_video_with_db(topic: str, credentials_name: str = "default", use_db: bool = True, template_id: str = None, voice_name: str = None):
     """Gera vídeo e salva no banco de dados com suporte a templates"""
     
     db = None
@@ -89,7 +89,7 @@ async def generate_video_with_db(topic: str, credentials_name: str = "default", 
         
         # Gerar áudio
         SAMPLE_FILE_NAME = f"audio_tts_{video_id}.wav" if video_id else "audio_tts.wav"
-        await generate_audio(response, SAMPLE_FILE_NAME)
+        await generate_audio(response, SAMPLE_FILE_NAME, voice_name)
         
         # Aplicar pausas estratégicas se template especificado
         if template_id and template_config:
@@ -183,18 +183,53 @@ def suggest_templates_for_topic(topic: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate a video from a topic.")
-    parser.add_argument("topic", type=str, help="The topic for the video")
+    parser.add_argument("topic", type=str, nargs='?', help="The topic for the video")
     parser.add_argument("--credentials", type=str, default="default", help="Credentials name to use")
     parser.add_argument("--no-db", action="store_true", help="Disable database integration")
     parser.add_argument("--template", type=str, help="Template ID to use for video generation")
+    parser.add_argument("--voice", type=str, help="Voice to use (james, bill, neil, drew, phillip, deep_ray)")
     parser.add_argument("--suggest-templates", action="store_true", help="Suggest templates for the topic")
+    parser.add_argument("--list-voices", action="store_true", help="List available voices and their descriptions")
 
     args = parser.parse_args()
+    
+    # Se solicitado, apenas listar vozes
+    if args.list_voices:
+        from utility.audio.audio_generator import list_available_voices
+        voices_info = list_available_voices()
+        print("\n🎤 VOZES DISPONÍVEIS NO ELEVENLABS:")
+        print("=" * 50)
+        
+        for voice_name, voice_data in voices_info["voices"].items():
+            print(f"\n🎵 {voice_name.upper()}")
+            print(f"   📝 {voice_data['description']}")
+            print(f"   🏷️  Categoria: {voice_data['category']}")
+        
+        print("\n📊 RECOMENDAÇÕES POR TIPO DE CONTEÚDO:")
+        print("=" * 50)
+        for content_type, voices in voices_info["recommendations"].items():
+            print(f"\n📖 {content_type}:")
+            for voice in voices:
+                voice_data = voices_info["voices"][voice]
+                print(f"   • {voice}: {voice_data['description']}")
+        
+        print("\n💡 USO:")
+        print("   python app.py 'seu tópico' --voice james")
+        print("   python app.py 'seu tópico' --voice phillip")
+        exit(0)
     
     # Se solicitado, apenas sugerir templates
     if args.suggest_templates:
         suggest_templates_for_topic(args.topic)
         exit(0)
     
-    use_db = not args.no_db and DB_AVAILABLE
-    asyncio.run(generate_video_with_db(args.topic, args.credentials, use_db, args.template))
+    # Verificar se tópico foi fornecido (exceto para list-voices)
+    if not args.topic and not args.list_voices and not args.suggest_templates:
+        print("❌ Erro: Tópico é obrigatório para gerar vídeo")
+        print("💡 Use: python app.py 'seu tópico'")
+        print("💡 Ou: python app.py --list-voices")
+        exit(1)
+    
+    if args.topic:
+        use_db = not args.no_db and DB_AVAILABLE
+        asyncio.run(generate_video_with_db(args.topic, args.credentials, use_db, args.template, args.voice))

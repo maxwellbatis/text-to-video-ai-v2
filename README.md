@@ -18,7 +18,52 @@ If you enjoy using Text to Video AI, we'd appreciate your support with a star �
 
 [![GitHub star chart](https://img.shields.io/github/stars/SamurAIGPT/Text-To-Video-AI?style=social)](https://github.com/SamurAIGPT/Text-To-Video-AI/stargazers)
 
+## 🆕 Melhorias Implementadas
+
+### 📝 Prompts Aprimorados
+- **Vídeos mais longos**: 60-90 segundos (200-300 palavras)
+- **Estrutura profissional**: Abertura, desenvolvimento e fechamento claros
+- **Pausas estratégicas**: Para reflexão e melhor engajamento
+- **Linguagem acessível**: Mas respeitosa e envolvente
+
+### 🎬 Estrutura de Vídeo Religioso
+- **Abertura (5-15s)**: Saudação calorosa + frase impactante
+- **Desenvolvimento (40-70s)**: Tema principal + exemplos + reflexões
+- **Fechamento (10-15s)**: Conclusão inspiradora + chamada à ação
+
+### 🎙️ Sistema de Vozes Profissional
+- **ElevenLabs**: Vozes de alta qualidade
+- **Fallback automático**: Edge TTS se ElevenLabs falhar
+- **Detecção inteligente**: Escolhe voz baseada no conteúdo
+
 ### Steps to run
+
+#### 🎤 Vozes ElevenLabs (NOVO!)
+O sistema agora suporta vozes profissionais da ElevenLabs:
+
+```bash
+# Listar vozes disponíveis
+python app.py --list-voices
+
+# Gerar vídeo com voz específica
+python app.py "Fatos curiosos sobre o Brasil" --voice james
+
+# Vídeo espiritual
+python app.py "Versículos bíblicos" --voice phillip
+
+# Vídeo reflexivo
+python app.py "O significado da vida" --voice drew
+```
+
+**Vozes Disponíveis:**
+- 🇬🇧 **James**: Britânico profundo (fatos curiosos)
+- 🇺🇸 **Bill**: Americano clássico (documentários)
+- 🎙️ **Neil**: Equilibrado (explicações)
+- 🧘 **Drew**: Reflexivo (filosófico)
+- ⛪ **Phillip**: Espiritual (religioso)
+- 🙏 **Deep Ray**: Voz de Deus (bíblico)
+
+**Detecção Automática**: Se não especificar voz, o sistema detecta automaticamente o tipo de conteúdo e escolhe a voz apropriada.
 
 #### 🚀 Configuração Rápida (Recomendado)
 

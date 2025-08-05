@@ -235,6 +235,21 @@
                 <div id="templateInfo" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; display: none;"></div>
             </div>
             
+            <div style="margin: 15px 0;">
+                <label for="voiceSelect">🎤 Voz (Opcional):</label>
+                <select id="voiceSelect" onchange="showVoiceInfo()">
+                    <option value="">🎯 Detecção Automática</option>
+                    <option value="james">🇬🇧 James - Britânico Profundo</option>
+                    <option value="bill">🇺🇸 Bill - Americano Clássico</option>
+                    <option value="neil">🎙️ Neil - Equilibrado</option>
+                    <option value="drew">🧘 Drew - Reflexivo</option>
+                    <option value="phillip">⛪ Phillip - Espiritual</option>
+                    <option value="deep_ray">🙏 Deep Ray - Voz de Deus</option>
+                </select>
+                <small style="opacity: 0.8;">Deixe vazio para detecção automática baseada no conteúdo</small>
+                <div id="voiceInfo" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; display: none;"></div>
+            </div>
+            
             <button type="submit" class="btn">🚀 Gerar Vídeo</button>
         </form>
         
@@ -324,10 +339,15 @@
             
             try {
                 const templateId = document.getElementById('templateSelect').value;
+                const voiceId = document.getElementById('voiceSelect').value;
                 const requestBody = { topic: topic };
                 
                 if (templateId) {
                     requestBody.template_id = templateId;
+                }
+                
+                if (voiceId) {
+                    requestBody.voice_id = voiceId;
                 }
                 
                 const response = await fetch('/api/jobs', {
@@ -647,6 +667,78 @@
                 templateInfo.style.display = 'block';
             } else {
                 templateInfo.style.display = 'none';
+            }
+        }
+
+        // Função para mostrar informações da voz
+        function showVoiceInfo() {
+            const voiceSelect = document.getElementById('voiceSelect');
+            const voiceInfo = document.getElementById('voiceInfo');
+            const selectedValue = voiceSelect.value;
+            
+            if (!selectedValue) {
+                voiceInfo.style.display = 'none';
+                return;
+            }
+            
+            const voiceDescriptions = {
+                'james': {
+                    name: 'James - Britânico Profundo',
+                    description: 'Tom britânico calmo e profundo, excelente para narrativas históricas e curiosidades',
+                    category: 'Fatos curiosos / Documentários',
+                    features: ['🇬🇧 Sotaque britânico', '🎙️ Tom profundo', '📚 Histórico', '🎬 Documentários']
+                },
+                'bill': {
+                    name: 'Bill - Americano Clássico',
+                    description: 'Voz americana clássica, firme e clara — muito usada em vídeos explicativos e documentais',
+                    category: 'Fatos curiosos / Documentários',
+                    features: ['🇺🇸 Sotaque americano', '🎯 Firme e claro', '📖 Explicativo', '🎬 Documentários']
+                },
+                'neil': {
+                    name: 'Neil - Equilibrado',
+                    description: 'Equilibrado e confiável, ótimo para explicações e comentários informativos',
+                    category: 'Fatos curiosos / Documentários',
+                    features: ['⚖️ Equilibrado', '🎯 Confiável', '📝 Informativo', '🎙️ Comentários']
+                },
+                'drew': {
+                    name: 'Drew - Reflexivo',
+                    description: 'Voz calma e ligeiramente mística, ideal para conteúdo mais reflexivo ou filosófico',
+                    category: 'Reflexão / Mistério / Filosófico',
+                    features: ['🧘 Calmo', '🤔 Reflexivo', '🎭 Místico', '📚 Filosófico']
+                },
+                'phillip': {
+                    name: 'Phillip - Espiritual',
+                    description: 'Projetada para temas espirituais e de meditação, com presença emocional e calma profunda',
+                    category: 'Conteúdo religioso ou bíblico',
+                    features: ['⛪ Espiritual', '🙏 Meditativo', '💫 Emocional', '🎭 Presença']
+                },
+                'deep_ray': {
+                    name: 'Deep Ray - Voz de Deus',
+                    description: 'Voz muito profunda e suave, perfeita para "voz de Deus" em leituras bíblicas',
+                    category: 'Conteúdo religioso ou bíblico',
+                    features: ['🙏 Profunda', '⛪ Sagrada', '📖 Bíblica', '🎭 Solene']
+                }
+            };
+            
+            const voice = voiceDescriptions[selectedValue];
+            if (voice) {
+                voiceInfo.innerHTML = `
+                    <div style="margin-bottom: 8px;">
+                        <strong>${voice.name}</strong>
+                    </div>
+                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">
+                        ${voice.description}
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.8; margin-bottom: 4px;">
+                        <strong>Categoria:</strong> ${voice.category}
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.8;">
+                        ${voice.features.join(' • ')}
+                    </div>
+                `;
+                voiceInfo.style.display = 'block';
+            } else {
+                voiceInfo.style.display = 'none';
             }
         }
 

@@ -79,21 +79,100 @@ class TemplateScriptGenerator:
             return f"Fatos interessantes sobre {topic}. Este é um conteúdo gerado automaticamente seguindo o estilo {template.get('name', '')}."
     
     def _adapt_for_religious_template(self, script: str, template: Dict) -> str:
-        """Adapta script para template religioso cinematográfico"""
-        # Adicionar elementos religiosos e cinematográficos
-        religious_elements = [
-            "De acordo com as escrituras,",
-            "Segundo a tradição sagrada,",
-            "Como revelado nas escrituras,",
-            "Conforme ensinam os textos sagrados,"
-        ]
-        
-        # Inserir elemento religioso no início
-        import random
-        religious_intro = random.choice(religious_elements)
-        script = f"{religious_intro} {script}"
-        
-        return script
+        """Adapta script para template religioso cinematográfico seguindo estrutura profissional"""
+        try:
+            # Extrair diretrizes do template
+            structure_guidelines = template.get('script_pattern', {}).get('video_structure', {})
+            content_types = template.get('script_pattern', {}).get('content_types', {})
+            
+            # Estrutura profissional para vídeos religiosos
+            opening_elements = [
+                "A paz do Senhor! Que Deus abençoe sua vida!",
+                "Que a graça de Deus esteja com você!",
+                "Bem-vindo a mais um momento de reflexão espiritual!",
+                "Que o amor de Cristo ilumine seu caminho!"
+            ]
+            
+            # Perguntas impactantes para abertura
+            impact_questions = [
+                "Você já se perguntou por que Deus permite o sofrimento?",
+                "Sabe qual é o verdadeiro significado da fé?",
+                "Já parou para refletir sobre o propósito da sua vida?",
+                "O que realmente significa confiar em Deus?"
+            ]
+            
+            # Elementos de desenvolvimento
+            development_elements = [
+                "De acordo com as escrituras sagradas,",
+                "Como revelado nas palavras de Jesus,",
+                "Segundo a tradição cristã,",
+                "Conforme ensinam os textos sagrados,"
+            ]
+            
+            # Reflexões e exemplos práticos
+            practical_examples = [
+                "Assim como uma semente precisa de tempo para crescer, nossa fé também se desenvolve gradualmente.",
+                "Assim como um pai cuida de seus filhos, Deus cuida de cada um de nós com amor infinito.",
+                "Assim como a luz dissipa as trevas, a fé dissipa o medo e a dúvida.",
+                "Assim como uma âncora mantém o navio firme, nossa fé nos mantém firmes nas tempestades da vida."
+            ]
+            
+            # Conclusões inspiradoras
+            inspiring_conclusions = [
+                "Lembre-se: Deus não prometeu uma vida sem problemas, mas prometeu estar conosco em todos os momentos.",
+                "A fé não remove todas as dificuldades, mas nos dá força para enfrentá-las com coragem.",
+                "Deus não nos dá o que queremos, mas o que precisamos para crescer espiritualmente.",
+                "A verdadeira paz não vem da ausência de problemas, mas da presença de Deus em nossa vida."
+            ]
+            
+            # Chamadas à ação
+            call_to_action = [
+                "Deixe seu comentário, compartilhe com alguém que precisa ouvir isso!",
+                "Compartilhe este vídeo com quem precisa de esperança!",
+                "Deixe seu 'Amém' se esta mensagem tocou seu coração!",
+                "Compartilhe com alguém que precisa de força espiritual!"
+            ]
+            
+            import random
+            
+            # Construir script estruturado
+            structured_script = ""
+            
+            # ABERTURA (5-15 segundos)
+            opening = random.choice(opening_elements)
+            impact_question = random.choice(impact_questions)
+            structured_script += f"{opening} {impact_question}\n\n"
+            
+            # DESENVOLVIMENTO (40-70 segundos)
+            development_intro = random.choice(development_elements)
+            structured_script += f"{development_intro} {script}\n\n"
+            
+            # Adicionar exemplo prático
+            practical_example = random.choice(practical_examples)
+            structured_script += f"{practical_example}\n\n"
+            
+            # FECHAMENTO (10-15 segundos)
+            conclusion = random.choice(inspiring_conclusions)
+            cta = random.choice(call_to_action)
+            structured_script += f"{conclusion} {cta}"
+            
+            return structured_script
+            
+        except Exception as e:
+            print(f"⚠️ Erro ao adaptar script religioso: {e}")
+            # Fallback básico
+            religious_elements = [
+                "De acordo com as escrituras,",
+                "Segundo a tradição sagrada,",
+                "Como revelado nas escrituras,",
+                "Conforme ensinam os textos sagrados,"
+            ]
+            
+            import random
+            religious_intro = random.choice(religious_elements)
+            script = f"{religious_intro} {script}"
+            
+            return script
     
     def _adapt_for_vsl_magnetic_template(self, script: str, template: Dict) -> str:
         """Adapta script para template VSL magnético"""
