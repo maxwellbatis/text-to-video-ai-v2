@@ -77,14 +77,24 @@ Note: Your response should be the response only and no extra text or data.
   """
 
 def fix_json(json_str):
-    """Corrige JSON malformado de várias formas"""
+    """Corrige JSON malformado de várias formas - VERSÃO MELHORADA"""
     if not json_str or not isinstance(json_str, str):
         return "[[[0, 10], [\"storm clouds\", \"dark sky\", \"church\"]]]"
     
+    # Limpeza inicial
+    json_str = json_str.strip()
+    
+    # Remover marcadores de código se existirem
+    json_str = json_str.replace("```json", "").replace("```", "")
+    
     # Replace typographical apostrophes with straight quotes
     json_str = json_str.replace("'", "'")
-    # Replace any incorrect quotes (e.g., mixed single and double quotes)
-    json_str = json_str.replace(""", "\"").replace(""", "\"").replace("'", "\"").replace("'", "\"")
+    json_str = json_str.replace(""", "\"").replace(""", "\"")
+    json_str = json_str.replace("'", "\"").replace("'", "\"")
+    
+    # Remover caracteres problemáticos
+    json_str = json_str.replace('\n', ' ').replace('\r', ' ')
+    json_str = re.sub(r'\s+', ' ', json_str)
     
     # Corrigir aspas problemáticas específicas
     json_str = json_str.replace('"you"re"', '"you\'re"')
@@ -92,12 +102,12 @@ def fix_json(json_str):
     json_str = json_str.replace('"you"re missing out"', '"you\'re missing out"')
     json_str = json_str.replace('"what you"re"', '"what you\'re"')
     
-    # Remover caracteres problemáticos
-    json_str = json_str.replace('\n', ' ').replace('\r', ' ')
-    json_str = re.sub(r'\s+', ' ', json_str)
+    # Corrigir aspas com apóstrofes problemáticas
+    json_str = re.sub(r'"([^"]*)"([^"]*)"', r'"\1\2"', json_str)
+    json_str = re.sub(r'"([^"]*)"([^"]*)"([^"]*)"', r'"\1\2\3"', json_str)
     
-    # Corrigir aspas problemáticas dentro das strings
-    json_str = re.sub(r'([^\\])"([^"]*)"([^"]*)"([^"]*)"', r'\1"\2\3\4"', json_str)
+    # Corrigir aspas duplas múltiplas
+    json_str = re.sub(r'""+', '"', json_str)
     
     # Tentar encontrar JSON válido
     try:
@@ -105,7 +115,12 @@ def fix_json(json_str):
         json_pattern = r'\[\[\[.*?\]\]\]'
         matches = re.findall(json_pattern, json_str, re.DOTALL)
         if matches:
-            return matches[0]
+            for match in matches:
+                try:
+                    json.loads(match)
+                    return match
+                except:
+                    continue
         
         # Se não encontrar, tentar extrair apenas arrays válidos
         array_pattern = r'\[\[\[.*?\]\]'
@@ -126,17 +141,16 @@ def fix_json(json_str):
         print(f"⚠️ Erro ao processar JSON: {e}")
         pass
     
-    # Se tudo falhar, tentar limpar e retornar
+    # Limpeza mais agressiva
     try:
-        # Remover caracteres problemáticos e tentar novamente
-        cleaned = re.sub(r'[^\x00-\x7F]+', '', json_str)  # Remover caracteres não-ASCII
-        cleaned = re.sub(r'[^\w\s\[\],".:-]', '', cleaned)  # Manter apenas caracteres seguros
+        # Remover caracteres não-ASCII
+        cleaned = re.sub(r'[^\x00-\x7F]+', '', json_str)
         
-        # Corrigir aspas duplas problemáticas
-        cleaned = re.sub(r'""+', '"', cleaned)  # Múltiplas aspas duplas
-        cleaned = re.sub(r'([^\\])"([^"]*)"([^"]*)"', r'\1"\2\3"', cleaned)  # Aspas aninhadas
+        # Manter apenas caracteres seguros para JSON
+        cleaned = re.sub(r'[^\w\s\[\],".:-]', '', cleaned)
         
-        # Corrigir aspas com apóstrofes
+        # Corrigir aspas problemáticas
+        cleaned = re.sub(r'([^\\])"([^"]*)"([^"]*)"', r'\1"\2\3"', cleaned)
         cleaned = re.sub(r'"([^"]*)"([^"]*)"', r'"\1\2"', cleaned)
         
         # Testar se o JSON limpo é válido
@@ -150,29 +164,72 @@ def fix_json(json_str):
     return "[[[0, 10], [\"storm clouds\", \"dark sky\", \"church\"]]]"
 
 def getVideoSearchQueriesTimed(script,captions_timed):
-    end = captions_timed[-1][0][1]
+    """Gera termos de busca para vídeos de fundo com fallback robusto"""
     try:
+        end = captions_timed[-1][0][1]
         
-        out = [[[0,0],""]]
-        while out[-1][0][1] != end:
-            content = call_OpenAI(script,captions_timed).replace("'",'"')
-            try:
-                out = json.loads(content)
-            except Exception as e:
-                print("content: \n", content, "\n\n")
-                print(e)
-                content = fix_json(content.replace("```json", "").replace("```", ""))
-                try:
-                    out = json.loads(content)
-                except Exception as e2:
-                    print(f"❌ Erro crítico ao processar JSON: {e2}")
-                    # Retornar estrutura padrão em caso de falha
-                    return [[[0, end], ["storm clouds", "dark sky", "church"]]]
-        return out
-    except Exception as e:
-        print("error in response",e)
-        # Retornar estrutura padrão em caso de falha
+        # Tentar gerar termos de busca
+        content = call_OpenAI(script,captions_timed).replace("'",'"')
+        
+        # Primeira tentativa: JSON direto
+        try:
+            out = json.loads(content)
+            if out and len(out) > 0:
+                return out
+        except Exception as e:
+            print(f"⚠️ Erro no JSON direto: {e}")
+        
+        # Segunda tentativa: Limpar e tentar novamente
+        try:
+            cleaned_content = fix_json(content.replace("```json", "").replace("```", ""))
+            out = json.loads(cleaned_content)
+            if out and len(out) > 0:
+                return out
+        except Exception as e2:
+            print(f"❌ Erro crítico ao processar JSON: {e2}")
+            print(f"Content original: {content[:200]}...")
+            print(f"Content limpo: {cleaned_content[:200]}...")
+        
+        # Terceira tentativa: Gerar estrutura básica baseada no script
+        try:
+            # Extrair palavras-chave do script
+            words = script.lower().split()
+            keywords = []
+            
+            # Palavras-chave religiosas
+            religious_keywords = ['deus', 'jesus', 'bíblia', 'igreja', 'fé', 'espiritual', 'sagrado']
+            for word in words:
+                if any(keyword in word for keyword in religious_keywords):
+                    keywords.extend(['church', 'spiritual', 'religious'])
+                    break
+            
+            # Palavras-chave de natureza
+            nature_keywords = ['céu', 'terra', 'sol', 'lua', 'estrelas', 'montanha', 'mar']
+            for word in words:
+                if any(keyword in word for keyword in nature_keywords):
+                    keywords.extend(['nature', 'landscape', 'sky'])
+                    break
+            
+            # Se não encontrou palavras específicas, usar padrão
+            if not keywords:
+                keywords = ['storm clouds', 'dark sky', 'church']
+            
+            # Criar estrutura básica
+            basic_structure = [[[0, end], keywords]]
+            print(f"✅ Usando estrutura básica: {basic_structure}")
+            return basic_structure
+            
+        except Exception as e3:
+            print(f"❌ Erro ao gerar estrutura básica: {e3}")
+        
+        # Fallback final
+        print("⚠️ Usando fallback padrão")
         return [[[0, end], ["storm clouds", "dark sky", "church"]]]
+        
+    except Exception as e:
+        print(f"❌ Erro geral em getVideoSearchQueriesTimed: {e}")
+        # Retornar estrutura padrão em caso de falha
+        return [[[0, captions_timed[-1][0][1] if captions_timed else 10], ["storm clouds", "dark sky", "church"]]]
 
 def call_OpenAI(script,captions_timed):
     user_content = """Script: {}
