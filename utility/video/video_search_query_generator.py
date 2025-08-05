@@ -77,7 +77,7 @@ Note: Your response should be the response only and no extra text or data.
   """
 
 def fix_json(json_str):
-    """Corrige JSON malformado de várias formas - VERSÃO MELHORADA"""
+    """Corrige JSON malformado de várias formas - VERSÃO ULTRA MELHORADA"""
     if not json_str or not isinstance(json_str, str):
         return "[[[0, 10], [\"storm clouds\", \"dark sky\", \"church\"]]]"
     
@@ -109,7 +109,7 @@ def fix_json(json_str):
     # Corrigir aspas duplas múltiplas
     json_str = re.sub(r'""+', '"', json_str)
     
-    # Tentar encontrar JSON válido
+    # NOVA: Tentar encontrar JSON válido por partes
     try:
         # Procurar por padrão JSON mais específico
         json_pattern = r'\[\[\[.*?\]\]\]'
@@ -141,6 +141,38 @@ def fix_json(json_str):
         print(f"⚠️ Erro ao processar JSON: {e}")
         pass
     
+    # NOVA: Tentar reconstruir JSON cortado
+    try:
+        # Procurar por arrays individuais válidos
+        individual_arrays = re.findall(r'\[\[\[[^\]]+\],\s*\[[^\]]+\]\]', json_str)
+        if individual_arrays:
+            # Tentar reconstruir um JSON válido
+            reconstructed = "[" + ",".join(individual_arrays) + "]"
+            try:
+                json.loads(reconstructed)
+                return reconstructed
+            except:
+                pass
+    except Exception as e:
+        print(f"⚠️ Erro ao reconstruir JSON: {e}")
+        pass
+    
+    # NOVA: Tentar extrair apenas a parte válida do JSON
+    try:
+        # Procurar por padrões de array válidos
+        valid_patterns = re.findall(r'\[\[\[[^\]]+\],\s*\[[^\]]+\]\]', json_str)
+        if valid_patterns:
+            # Pegar apenas os primeiros padrões válidos
+            limited_json = "[" + ",".join(valid_patterns[:5]) + "]"
+            try:
+                json.loads(limited_json)
+                return limited_json
+            except:
+                pass
+    except Exception as e:
+        print(f"⚠️ Erro ao extrair JSON válido: {e}")
+        pass
+    
     # Limpeza mais agressiva
     try:
         # Remover caracteres não-ASCII
@@ -152,6 +184,24 @@ def fix_json(json_str):
         # Corrigir aspas problemáticas
         cleaned = re.sub(r'([^\\])"([^"]*)"([^"]*)"', r'\1"\2\3"', cleaned)
         cleaned = re.sub(r'"([^"]*)"([^"]*)"', r'"\1\2"', cleaned)
+        
+        # NOVA: Tentar cortar o JSON em um ponto válido
+        try:
+            # Procurar por fechamentos de array válidos
+            valid_endings = re.findall(r'\]\]', cleaned)
+            if len(valid_endings) > 1:
+                # Cortar no último fechamento válido
+                last_valid_pos = cleaned.rfind(']]')
+                if last_valid_pos > 0:
+                    cleaned = cleaned[:last_valid_pos + 2]
+                    # Adicionar fechamento final se necessário
+                    if not cleaned.endswith(']'):
+                        cleaned += ']'
+            
+            json.loads(cleaned)
+            return cleaned
+        except:
+            pass
         
         # Testar se o JSON limpo é válido
         json.loads(cleaned)
