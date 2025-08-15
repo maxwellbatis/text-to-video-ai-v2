@@ -5,11 +5,16 @@ import re
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import quote_plus
 import time
+try:
+    from .globo_actor_scraper import GloboActorScraper
+except ImportError:
+    from globo_actor_scraper import GloboActorScraper
 
 class CharacterImageGenerator:
     def __init__(self):
         self.pexels_key = os.environ.get('PEXELS_KEY')
         self.unsplash_key = os.environ.get('UNSPLASH_KEY')
+        self.globo_scraper = GloboActorScraper()
         
         # Mapeamento de atores/atrizes reais por novela - Baseado no site oficial da Globo
         self.actor_database = {
@@ -356,17 +361,25 @@ class CharacterImageGenerator:
         
         print(f"🎭 Buscando imagem para: {character_info['personagem']} ({character_info['tipo']})")
         
-        # Para atores reais, usar APENAS Google Images
+        # Para atores reais, usar PRIMEIRO o site da Globo, depois Google Images
         if character_info['personagem'] != "personagem":
             print(f"🔍 Buscando ator real: {character_info['personagem']}")
+            
+            # 1. Tentar primeiro no site oficial da Globo
+            globo_image = self.globo_scraper.get_actor_image_from_globo(character_info['personagem'])
+            if globo_image:
+                print(f"✅ Imagem encontrada no site da Globo: {character_info['personagem']}")
+                return globo_image
+            
+            # 2. Se não encontrou na Globo, tentar Google Images
             for query in queries[:5]:  # Mais consultas para atores reais
                 image_url = self.search_character_image_google(query)
                 if image_url:
                     print(f"✅ Imagem encontrada no Google: {query}")
                     return image_url
             
-            # Se não encontrou no Google, não usar Pexels/Unsplash para atores reais
-            print(f"❌ Nenhuma imagem encontrada no Google para: {character_info['personagem']}")
+            # Se não encontrou em nenhum lugar, não usar Pexels/Unsplash para atores reais
+            print(f"❌ Nenhuma imagem encontrada para: {character_info['personagem']}")
             return None
         
         # Para personagens genéricos, usar Pexels/Unsplash
