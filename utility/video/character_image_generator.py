@@ -51,7 +51,7 @@ class CharacterImageGenerator:
         
         # Detectar novela
         novela_name = None
-        for novela in self.character_database.keys():
+        for novela in self.actor_database.keys():
             if novela in text_lower:
                 novela_name = novela
                 break
