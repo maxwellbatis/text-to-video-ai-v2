@@ -143,29 +143,45 @@ class NovelaVideoGenerator:
             search_queries = getVideoSearchQueriesTimed(script, captions)
             print(f"✅ Consultas geradas: {len(search_queries)} segmentos")
             
-            # 5. Buscar imagens de personagens e criar vídeos baseados em imagens
-            print("🎭 Buscando imagens de personagens para criar vídeos...")
+            # 5. Buscar imagens de TODOS os personagens mencionados no script
+            print("🎭 Buscando imagens de TODOS os personagens mencionados no script...")
             character_videos = []
             
-            # Extrair personagens do script
-            character_segments = self._extract_character_segments(script)
-            print(f"🔍 Segmentos com personagens encontrados: {len(character_segments)}")
+            # Extrair TODOS os personagens do script usando o novo método
+            all_characters = self.character_generator.get_all_character_images_from_text(script)
+            print(f"🔍 Personagens encontrados no script: {len(all_characters)}")
             
-            for i, segment in enumerate(character_segments):
-                print(f"🎭 Buscando imagem para: {segment[:50]}...")
-                image_url = self.character_generator.get_character_image(segment)
-                if image_url:
+            # Criar vídeos para cada personagem encontrado
+            for i, character_info in enumerate(all_characters):
+                if character_info.get('image_url'):
+                    # Calcular tempo baseado na posição do personagem no script
+                    script_lower = script.lower()
+                    char_name_lower = character_info['original_name'].lower()
+                    
+                    # Encontrar posição do personagem no script
+                    char_position = script_lower.find(char_name_lower)
+                    if char_position != -1:
+                        # Calcular tempo baseado na posição (aproximadamente)
+                        time_per_char = len(script) / 70  # Assumir 70 segundos de áudio
+                        start_time = (char_position / len(script)) * 70
+                        end_time = start_time + 5  # 5 segundos de duração
+                    else:
+                        # Fallback: distribuir uniformemente
+                        start_time = i * 10
+                        end_time = start_time + 5
+                    
                     # Criar vídeo baseado na imagem do personagem
                     video_data = {
-                        'time_range': search_queries[i][0] if i < len(search_queries) else (i*5, (i+1)*5),
-                        'image_url': image_url,
-                        'character_name': self._extract_character_name(segment),
-                        'segment_text': segment
+                        'time_range': (start_time, end_time),
+                        'image_url': character_info['image_url'],
+                        'character_name': character_info['personagem'],
+                        'character_type': character_info['tipo'],
+                        'segment_text': f"Personagem: {character_info['personagem']}"
                     }
                     character_videos.append(video_data)
-                    print(f"✅ Vídeo de personagem criado: {video_data['character_name']}")
+                    print(f"✅ Vídeo de personagem criado: {video_data['character_name']} ({video_data['character_type']})")
                 else:
-                    print(f"⚠️ Imagem não encontrada para: {segment[:50]}")
+                    print(f"⚠️ Nenhuma imagem encontrada para: {character_info['personagem']}")
             
             print(f"✅ Vídeos de personagens criados: {len(character_videos)}")
             

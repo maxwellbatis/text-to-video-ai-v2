@@ -151,6 +151,65 @@ class CharacterImageGenerator:
             "tipo": tipo
         }
     
+    def extract_all_characters_from_text(self, text: str) -> List[Dict[str, str]]:
+        """
+        Extrai TODOS os personagens mencionados no texto
+        """
+        text_lower = text.lower()
+        characters_found = []
+        
+        # Detectar novela
+        novela_name = None
+        for novela in self.actor_database.keys():
+            if novela in text_lower:
+                novela_name = novela
+                break
+        
+        if not novela_name:
+            return [{"novela": "geral", "personagem": "personagem", "tipo": "genérico"}]
+        
+        # Buscar TODOS os personagens mencionados no texto
+        for char_name, actor_names in self.actor_database[novela_name].items():
+            if char_name in text_lower:
+                characters_found.append({
+                    "novela": novela_name,
+                    "personagem": actor_names[0],  # Nome real do ator
+                    "tipo": char_name,
+                    "original_name": char_name
+                })
+        
+        # Buscar por padrões específicos no texto
+        if "marina" in text_lower and "continuou" in text_lower:
+            # Verificar se já não foi adicionado
+            if not any(c["tipo"] == "marina" for c in characters_found):
+                characters_found.append({
+                    "novela": novela_name,
+                    "personagem": "Sheron Menezzes",
+                    "tipo": "marina",
+                    "original_name": "marina"
+                })
+        
+        if "ricardo" in text_lower and ("cuba" in text_lower or "cubba" in text_lower):
+            # Verificar se já não foi adicionado
+            if not any(c["tipo"] == "ricardo" for c in characters_found):
+                characters_found.append({
+                    "novela": novela_name,
+                    "personagem": "Marcos Pasquim",
+                    "tipo": "ricardo",
+                    "original_name": "ricardo"
+                })
+        
+        # Se não encontrou nenhum personagem específico, usar genéricos
+        if not characters_found:
+            characters_found.append({
+                "novela": novela_name,
+                "personagem": "personagem",
+                "tipo": "genérico",
+                "original_name": "personagem"
+            })
+        
+        return characters_found
+    
     def search_character_image_google(self, query: str) -> Optional[str]:
         """
         Busca imagem de personagem no Google Images
@@ -398,6 +457,62 @@ class CharacterImageGenerator:
         
         print(f"❌ Nenhuma imagem encontrada para: {character_info['personagem']}")
         return None
+    
+    def get_all_character_images_from_text(self, text: str) -> List[Dict[str, str]]:
+        """
+        Obtém imagens de TODOS os personagens mencionados no texto
+        """
+        characters = self.extract_all_characters_from_text(text)
+        results = []
+        
+        print(f"🎭 Encontrados {len(characters)} personagens no texto")
+        
+        for character in characters:
+            print(f"\n🔍 Processando: {character['personagem']} ({character['tipo']})")
+            
+            # Buscar imagem para este personagem
+            image_url = None
+            
+            if character['personagem'] != "personagem":
+                # Para atores reais, usar Globo primeiro
+                image_url = self.globo_scraper.get_actor_image_from_globo(character['personagem'])
+                if image_url:
+                    print(f"✅ Imagem encontrada no site da Globo: {character['personagem']}")
+                else:
+                    # Tentar Google Images
+                    queries = self.generate_character_search_queries(character)
+                    for query in queries[:3]:
+                        image_url = self.search_character_image_google(query)
+                        if image_url:
+                            print(f"✅ Imagem encontrada no Google: {query}")
+                            break
+            else:
+                # Para personagens genéricos, usar Pexels/Unsplash
+                queries = self.generate_character_search_queries(character)
+                for query in queries:
+                    image_url = self.search_character_image_pexels(query)
+                    if image_url:
+                        print(f"✅ Imagem encontrada no Pexels: {query}")
+                        break
+                
+                if not image_url:
+                    for query in queries:
+                        image_url = self.search_character_image_unsplash(query)
+                        if image_url:
+                            print(f"✅ Imagem encontrada no Unsplash: {query}")
+                            break
+            
+            # Adicionar resultado
+            result = character.copy()
+            result['image_url'] = image_url
+            results.append(result)
+            
+            if image_url:
+                print(f"✅ Imagem encontrada para {character['personagem']}")
+            else:
+                print(f"❌ Nenhuma imagem encontrada para {character['personagem']}")
+        
+        return results
     
     def get_multiple_character_images(self, text: str, count: int = 3) -> List[str]:
         """
