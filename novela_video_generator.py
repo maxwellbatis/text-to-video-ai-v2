@@ -8,7 +8,7 @@ import os
 import asyncio
 import argparse
 import json
-from typing import Optional
+from typing import Optional, List
 
 # Importar módulos do projeto principal
 from utility.script.novela_script_generator import generate_novela_script, extract_novela_info
