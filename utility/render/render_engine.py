@@ -173,7 +173,7 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
                 video_clip = video_clip.set_start(t1)
                 video_clip = video_clip.set_end(t2)
                 # Resize to vertical video dimensions (9:16 aspect ratio)
-                video_clip = video_clip.resize(width=1080, height=1920, resample='bicubic')
+                video_clip = video_clip.resize(width=1080, height=1920)
                 print(f"✅ Imagem convertida para vídeo: {video_filename}")
             except Exception as e:
                 print(f"❌ Erro ao processar imagem {video_filename}: {e}")
@@ -190,7 +190,7 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
                 video_clip = video_clip.set_start(t1)
                 video_clip = video_clip.set_end(t2)
                 # Resize to vertical video dimensions (9:16 aspect ratio)
-                video_clip = video_clip.resize(width=1080, height=1920, resample='bicubic')
+                video_clip = video_clip.resize(width=1080, height=1920)
             except Exception as e:
                 print(f"❌ Erro ao processar vídeo {video_filename}: {e}")
                 # Criar um clip de cor sólida como fallback

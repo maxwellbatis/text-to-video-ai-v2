@@ -157,7 +157,9 @@ class CharacterImageGenerator:
                 f"{query} ator atriz novela 2024",
                 f"{query} ator atriz novela",
                 f"{query} ator atriz",
-                f"{query} novela"
+                f"{query} novela",
+                f"{query} foto",
+                f"{query} imagem"
             ]
             
             headers = {
@@ -168,37 +170,50 @@ class CharacterImageGenerator:
                 'DNT': '1',
                 'Connection': 'keep-alive',
                 'Upgrade-Insecure-Requests': '1',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
             }
             
             for search_query in search_queries:
                 try:
                     # Construir URL do Google Images
                     encoded_query = quote_plus(search_query)
-                    url = f"https://www.google.com/search?q={encoded_query}&tbm=isch&tbs=isz:l,itp:face"
+                    url = f"https://www.google.com/search?q={encoded_query}&tbm=isch&tbs=isz:l"
                     
-                    response = requests.get(url, headers=headers, timeout=15)
+                    response = requests.get(url, headers=headers, timeout=20)
                     
                     if response.status_code == 200:
                         # Extrair URLs de imagens da resposta HTML
                         import re
-                        # Padrão mais específico para imagens do Google
+                        # Padrões mais abrangentes para imagens
                         img_patterns = [
                             r'https://[^"]*\.(?:jpg|jpeg|png|webp)(?:\?[^"]*)?',
                             r'https://[^"]*\.googleusercontent\.com/[^"]*',
-                            r'https://[^"]*\.gstatic\.com/[^"]*'
+                            r'https://[^"]*\.gstatic\.com/[^"]*',
+                            r'https://[^"]*\.(?:com|org|net)/[^"]*\.(?:jpg|jpeg|png|webp)',
+                            r'https://[^"]*\.(?:com|org|net)/[^"]*\.(?:jpg|jpeg|png|webp)(?:\?[^"]*)?'
                         ]
                         
                         for pattern in img_patterns:
                             img_urls = re.findall(pattern, response.text)
                             if img_urls:
                                 # Filtrar URLs válidas
-                                valid_urls = [url for url in img_urls if 'http' in url and not url.endswith('.js')]
+                                valid_urls = []
+                                for url in img_urls:
+                                    if ('http' in url and 
+                                        not url.endswith('.js') and 
+                                        not url.endswith('.css') and
+                                        not url.endswith('.html') and
+                                        len(url) > 20):
+                                        valid_urls.append(url)
+                                
                                 if valid_urls:
                                     print(f"🔍 Encontradas {len(valid_urls)} imagens para: {search_query}")
+                                    # Retornar a primeira URL válida
                                     return valid_urls[0]
                     
                     # Pequena pausa entre requisições
-                    time.sleep(1)
+                    time.sleep(2)
                     
                 except Exception as e:
                     print(f"⚠️ Erro na busca específica '{search_query}': {e}")
