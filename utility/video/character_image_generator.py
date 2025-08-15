@@ -11,20 +11,60 @@ class CharacterImageGenerator:
         self.pexels_key = os.environ.get('PEXELS_KEY')
         self.unsplash_key = os.environ.get('UNSPLASH_KEY')
         
-        # Mapeamento de atores/atrizes reais por novela
+        # Mapeamento de atores/atrizes reais por novela - Baseado no site oficial da Globo
         self.actor_database = {
             "dona de mim": {
+                # Personagens principais mencionados no resumo
                 "luana": ["Giulia Gayoso", "Giulia Gayoso atriz", "Giulia Gayoso novela"],
                 "marina": ["Sheron Menezzes", "Sheron Menezzes atriz", "Sheron Menezzes novela"],
-                "marina silva": ["Sheron Menezzes", "Sheron Menezzes atriz", "Sheron Menezzes novela"],
-                "ricardo": ["Gabriel Leone", "Gabriel Leone ator", "Gabriel Leone novela"],
-                "ricardo cuba": ["Gabriel Leone", "Gabriel Leone ator", "Gabriel Leone novela"],
-                "ricardo cubba": ["Gabriel Leone", "Gabriel Leone ator", "Gabriel Leone novela"],
+                "ricardo": ["Marcos Pasquim", "Marcos Pasquim ator", "Marcos Pasquim novela"],
+                "ricardo cuba": ["Marcos Pasquim", "Marcos Pasquim ator", "Marcos Pasquim novela"],
+                "ricardo cubba": ["Marcos Pasquim", "Marcos Pasquim ator", "Marcos Pasquim novela"],
+                
+                # Outros personagens importantes da novela
+                "abel": ["Tony Ramos", "Tony Ramos ator", "Tony Ramos novela"],
+                "alan": ["Hugo Resende", "Hugo Resende ator", "Hugo Resende novela"],
+                "ayla": ["Bel Lima", "Bel Lima atriz", "Bel Lima novela"],
+                "bárbara": ["Giovana Cordeiro", "Giovana Cordeiro atriz", "Giovana Cordeiro novela"],
+                "breno": ["Gabriel Sanches", "Gabriel Sanches ator", "Gabriel Sanches novela"],
+                "caco": ["Pedro Alves", "Pedro Alves ator", "Pedro Alves novela"],
+                "danilo": ["Felipe Simas", "Felipe Simas ator", "Felipe Simas novela"],
+                "dara": ["Cecília Chancez", "Cecília Chancez atriz", "Cecília Chancez novela"],
+                "davi": ["Rafael Vitti", "Rafael Vitti ator", "Rafael Vitti novela"],
+                "dedé": ["Lorenzo Reis", "Lorenzo Reis ator", "Lorenzo Reis novela"],
+                "denise": ["Cris Larin", "Cris Larin atriz", "Cris Larin novela"],
+                "ellen": ["Camila Pitanga", "Camila Pitanga atriz", "Camila Pitanga novela"],
+                "filipa": ["Cláudia Abreu", "Cláudia Abreu atriz", "Cláudia Abreu novela"],
+                "gisele": ["Luana Tanaka", "Luana Tanaka atriz", "Luana Tanaka novela"],
+                "isabela": ["Sylvia Bandeira", "Sylvia Bandeira atriz", "Sylvia Bandeira novela"],
+                "jaques": ["Marcello Novaes", "Marcello Novaes ator", "Marcello Novaes novela"],
+                "jeff": ["Faíska Alves", "Faíska Alves ator", "Faíska Alves novela"],
+                "jussara": ["Vilma Melo", "Vilma Melo atriz", "Vilma Melo novela"],
+                "kamila": ["Giovanna Lancellotti", "Giovanna Lancellotti atriz", "Giovanna Lancellotti novela"],
+                "leona": ["Clara Moneke", "Clara Moneke atriz", "Clara Moneke novela"],
+                "lucas": ["Pedro Henrique Ferreira", "Pedro Henrique Ferreira ator", "Pedro Henrique Ferreira novela"],
+                "luisão": ["Adélio Lima", "Adélio Lima ator", "Adélio Lima novela"],
+                "marlon": ["Humberto Morais", "Humberto Morais ator", "Humberto Morais novela"],
+                "natara": ["Carol Marra", "Carol Marra atriz", "Carol Marra novela"],
+                "nina": ["Flora Camolese", "Flora Camolese atriz", "Flora Camolese novela"],
+                "pam": ["Haonê Thinar", "Haonê Thinar atriz", "Haonê Thinar novela"],
+                "peter": ["Pedro Fernandes", "Pedro Fernandes ator", "Pedro Fernandes novela"],
+                "rosa": ["Suely Franco", "Suely Franco atriz", "Suely Franco novela"],
+                "ryan": ["L7nnon", "L7nnon ator", "L7nnon novela"],
+                "samuel": ["Juan Paiva", "Juan Paiva ator", "Juan Paiva novela"],
+                "seu manuel": ["Ernani Moraes", "Ernani Moraes ator", "Ernani Moraes novela"],
+                "sofia": ["Elis Cabral", "Elis Cabral atriz", "Elis Cabral novela"],
+                "stephany": ["Nikolly Fernandes", "Nikolly Fernandes atriz", "Nikolly Fernandes novela"],
+                "tânia": ["Aline Borges", "Aline Borges atriz", "Aline Borges novela"],
+                "vanderson": ["Armando Babaioff", "Armando Babaioff ator", "Armando Babaioff novela"],
+                "yara": ["Cyda Moreno", "Cyda Moreno atriz", "Cyda Moreno novela"],
+                
+                # Mapeamentos genéricos para fallback
                 "maria": ["Giulia Gayoso", "Giulia Gayoso atriz", "Giulia Gayoso novela"],
-                "joão": ["Gabriel Leone", "Gabriel Leone ator", "Gabriel Leone novela"],
-                "vilão": ["Marcos Palmeira", "Marcos Palmeira ator", "Marcos Palmeira novela"],
+                "joão": ["Marcos Pasquim", "Marcos Pasquim ator", "Marcos Pasquim novela"],
+                "vilão": ["Tony Ramos", "Tony Ramos ator", "Tony Ramos novela"],
                 "mocinha": ["Giulia Gayoso", "Giulia Gayoso atriz", "Giulia Gayoso novela"],
-                "mocinho": ["Gabriel Leone", "Gabriel Leone ator", "Gabriel Leone novela"]
+                "mocinho": ["Marcos Pasquim", "Marcos Pasquim ator", "Marcos Pasquim novela"]
             },
             "fuzuê": {
                 "luna": ["Larissa Manoela", "Larissa Manoela atriz", "Larissa Manoela novela"],
