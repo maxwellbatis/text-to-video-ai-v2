@@ -16,6 +16,7 @@ class CharacterImageGenerator:
             "dona de mim": {
                 "luana": ["Giulia Gayoso", "Giulia Gayoso atriz", "Giulia Gayoso novela"],
                 "marina": ["Sheron Menezzes", "Sheron Menezzes atriz", "Sheron Menezzes novela"],
+                "marina silva": ["Sheron Menezzes", "Sheron Menezzes atriz", "Sheron Menezzes novela"],
                 "ricardo": ["Gabriel Leone", "Gabriel Leone ator", "Gabriel Leone novela"],
                 "ricardo cuba": ["Gabriel Leone", "Gabriel Leone ator", "Gabriel Leone novela"],
                 "ricardo cubba": ["Gabriel Leone", "Gabriel Leone ator", "Gabriel Leone novela"],
