@@ -14,7 +14,7 @@ from typing import Optional, List
 from utility.script.novela_script_generator import generate_novela_script, extract_novela_info
 from utility.audio.audio_generator import generate_audio
 from utility.captions.timed_captions_generator import generate_timed_captions
-from utility.video.background_video_generator import generate_video_url
+from utility.video.background_video_generator import generate_video_url, getBestVideo
 from utility.video.character_image_generator import CharacterImageGenerator
 from utility.render.render_engine import get_output_media
 from utility.video.video_search_query_generator import getVideoSearchQueriesTimed, merge_empty_intervals
@@ -149,7 +149,8 @@ class NovelaVideoGenerator:
             for query_segment in search_queries:
                 time_range, queries = query_segment
                 for query in queries:
-                    video_url = generate_video_url(query)
+                    # Usar a função correta para buscar vídeos individuais
+                    video_url = getBestVideo(query, orientation_landscape=False)
                     if video_url:
                         video_urls.append((time_range, video_url))
                         break
