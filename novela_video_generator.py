@@ -143,33 +143,37 @@ class NovelaVideoGenerator:
             search_queries = getVideoSearchQueriesTimed(script, captions)
             print(f"✅ Consultas geradas: {len(search_queries)} segmentos")
             
-            # 5. Baixar vídeos de fundo e imagens de personagens
-            print("🎥 Baixando vídeos de fundo...")
-            video_urls = []
-            for query_segment in search_queries:
-                time_range, queries = query_segment
-                for query in queries:
-                    # Usar a função correta para buscar vídeos individuais
-                    video_url = getBestVideo(query, orientation_landscape=False)
-                    if video_url:
-                        video_urls.append((time_range, video_url))
-                        break
-            
-            print(f"✅ Vídeos baixados: {len(video_urls)} segmentos")
-            
-            # 5.1. Buscar imagens de personagens
-            print("🎭 Buscando imagens de personagens...")
-            character_images = []
+            # 5. Buscar imagens de personagens e criar vídeos baseados em imagens
+            print("🎭 Buscando imagens de personagens para criar vídeos...")
+            character_videos = []
             
             # Extrair personagens do script
             character_segments = self._extract_character_segments(script)
-            for segment in character_segments:
+            print(f"🔍 Segmentos com personagens encontrados: {len(character_segments)}")
+            
+            for i, segment in enumerate(character_segments):
+                print(f"🎭 Buscando imagem para: {segment[:50]}...")
                 image_url = self.character_generator.get_character_image(segment)
                 if image_url:
-                    character_images.append((segment, image_url))
-                    print(f"✅ Imagem de personagem encontrada: {segment}")
+                    # Criar vídeo baseado na imagem do personagem
+                    video_data = {
+                        'time_range': search_queries[i][0] if i < len(search_queries) else (i*5, (i+1)*5),
+                        'image_url': image_url,
+                        'character_name': self._extract_character_name(segment),
+                        'segment_text': segment
+                    }
+                    character_videos.append(video_data)
+                    print(f"✅ Vídeo de personagem criado: {video_data['character_name']}")
+                else:
+                    print(f"⚠️ Imagem não encontrada para: {segment[:50]}")
             
-            print(f"✅ Imagens de personagens: {len(character_images)} encontradas")
+            print(f"✅ Vídeos de personagens criados: {len(character_videos)}")
+            
+            # Converter para formato compatível com render_engine
+            video_urls = []
+            for video_data in character_videos:
+                # Usar a imagem como "vídeo" (será convertida para vídeo)
+                video_urls.append((video_data['time_range'], video_data['image_url']))
             
             # 6. Renderizar vídeo final
             print("🎬 Renderizando vídeo final...")
@@ -233,6 +237,7 @@ class NovelaVideoGenerator:
         # Palavras-chave relacionadas a personagens
         character_keywords = [
             'maria', 'joão', 'luna', 'dante', 'sol', 'daniel', 'alice', 'caio',
+            'lívia', 'rafael', 'carolina', 'ricardo', 'marina', 'cuba',
             'protagonista', 'vilão', 'antagonista', 'mocinha', 'mocinho',
             'personagem', 'ator', 'atriz', 'herói', 'heroína'
         ]
@@ -245,6 +250,29 @@ class NovelaVideoGenerator:
         
         # Limitar a 5 segmentos para não sobrecarregar
         return segments[:5]
+    
+    def _extract_character_name(self, segment: str) -> str:
+        """
+        Extrai o nome do personagem de um segmento
+        """
+        # Nomes de personagens conhecidos
+        character_names = [
+            'maria', 'joão', 'luna', 'dante', 'sol', 'daniel', 'alice', 'caio',
+            'lívia', 'rafael', 'carolina', 'ricardo', 'marina', 'cuba'
+        ]
+        
+        segment_lower = segment.lower()
+        for name in character_names:
+            if name in segment_lower:
+                return name.title()
+        
+        # Se não encontrar nome específico, extrair primeira palavra relevante
+        words = segment.split()
+        for word in words:
+            if len(word) > 3 and word.lower() not in ['que', 'com', 'para', 'essa', 'essa', 'foi', 'está', 'vai']:
+                return word.title()
+        
+        return "Personagem"
 
 async def main():
     """Função principal"""
