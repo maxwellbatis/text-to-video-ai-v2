@@ -14,6 +14,11 @@ class CharacterImageGenerator:
         # Mapeamento de atores/atrizes reais por novela
         self.actor_database = {
             "dona de mim": {
+                "luana": ["Giulia Gayoso", "Giulia Gayoso atriz", "Giulia Gayoso novela"],
+                "marina": ["Sheron Menezzes", "Sheron Menezzes atriz", "Sheron Menezzes novela"],
+                "ricardo": ["Gabriel Leone", "Gabriel Leone ator", "Gabriel Leone novela"],
+                "ricardo cuba": ["Gabriel Leone", "Gabriel Leone ator", "Gabriel Leone novela"],
+                "ricardo cubba": ["Gabriel Leone", "Gabriel Leone ator", "Gabriel Leone novela"],
                 "maria": ["Giulia Gayoso", "Giulia Gayoso atriz", "Giulia Gayoso novela"],
                 "joão": ["Gabriel Leone", "Gabriel Leone ator", "Gabriel Leone novela"],
                 "vilão": ["Marcos Palmeira", "Marcos Palmeira ator", "Marcos Palmeira novela"],
