@@ -90,6 +90,41 @@ class CharacterImageGenerator:
             "tipo": tipo
         }
     
+    def search_character_image_google(self, query: str) -> Optional[str]:
+        """
+        Busca imagem de personagem no Google Images
+        """
+        try:
+            # Usar a API do Google Custom Search para imagens
+            # Primeiro, vamos usar uma abordagem alternativa com requests
+            search_query = f"{query} ator atriz novela"
+            
+            # Construir URL do Google Images
+            encoded_query = quote_plus(search_query)
+            url = f"https://www.google.com/search?q={encoded_query}&tbm=isch&tbs=isz:l"
+            
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            
+            response = requests.get(url, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                # Extrair URLs de imagens da resposta HTML
+                import re
+                img_pattern = r'https://[^"]*\.(?:jpg|jpeg|png|webp)'
+                img_urls = re.findall(img_pattern, response.text)
+                
+                if img_urls:
+                    # Retornar a primeira imagem encontrada
+                    return img_urls[0]
+            
+            return None
+            
+        except Exception as e:
+            print(f"⚠️ Erro na busca Google: {e}")
+            return None
+
     def search_character_image_pexels(self, query: str, orientation: str = "portrait") -> Optional[str]:
         """
         Busca imagem de personagem no Pexels
@@ -221,14 +256,22 @@ class CharacterImageGenerator:
         
         print(f"🎭 Buscando imagem para: {character_info['personagem']} ({character_info['tipo']})")
         
-        # Tentar Pexels primeiro
+        # Tentar Google Images primeiro (para atores reais)
+        if character_info['personagem'] != "personagem":
+            for query in queries[:3]:  # Primeiras 3 consultas mais específicas
+                image_url = self.search_character_image_google(query)
+                if image_url:
+                    print(f"✅ Imagem encontrada no Google: {query}")
+                    return image_url
+        
+        # Tentar Pexels como fallback
         for query in queries:
             image_url = self.search_character_image_pexels(query)
             if image_url:
                 print(f"✅ Imagem encontrada no Pexels: {query}")
                 return image_url
         
-        # Tentar Unsplash como fallback
+        # Tentar Unsplash como último recurso
         for query in queries:
             image_url = self.search_character_image_unsplash(query)
             if image_url:
