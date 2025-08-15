@@ -17,6 +17,8 @@ class CharacterImageGenerator:
                 # Personagens principais mencionados no resumo
                 "luana": ["Giulia Gayoso", "Giulia Gayoso atriz", "Giulia Gayoso novela"],
                 "marina": ["Sheron Menezzes", "Sheron Menezzes atriz", "Sheron Menezzes novela"],
+                "marina silva": ["Sheron Menezzes", "Sheron Menezzes atriz", "Sheron Menezzes novela"],
+                "marina ricardo": ["Sheron Menezzes", "Sheron Menezzes atriz", "Sheron Menezzes novela"],
                 "ricardo": ["Marcos Pasquim", "Marcos Pasquim ator", "Marcos Pasquim novela"],
                 "ricardo cuba": ["Marcos Pasquim", "Marcos Pasquim ator", "Marcos Pasquim novela"],
                 "ricardo cubba": ["Marcos Pasquim", "Marcos Pasquim ator", "Marcos Pasquim novela"],
@@ -115,6 +117,14 @@ class CharacterImageGenerator:
                 personagem = actor_names[0]  # Nome real do ator
                 tipo = char_name
                 break
+        
+        # Buscar por padrões específicos no texto
+        if "marina" in text_lower and "continuou" in text_lower:
+            personagem = "Sheron Menezzes"
+            tipo = "marina"
+        elif "ricardo" in text_lower and ("cuba" in text_lower or "cubba" in text_lower):
+            personagem = "Marcos Pasquim"
+            tipo = "ricardo"
         
         # Buscar por tipos genéricos
         if "protagonista" in text_lower or "principal" in text_lower:

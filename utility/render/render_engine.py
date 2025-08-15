@@ -171,13 +171,15 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
             video_clip = image_clip.set_duration(duration)
             video_clip = video_clip.set_start(t1)
             video_clip = video_clip.set_end(t2)
-            # Resize to standard video dimensions
-            video_clip = video_clip.resize(width=1920, height=1080)
+            # Resize to vertical video dimensions (9:16 aspect ratio)
+            video_clip = video_clip.resize(width=1080, height=1920)
         else:
             # Create VideoFileClip from the downloaded video file
             video_clip = VideoFileClip(video_filename)
             video_clip = video_clip.set_start(t1)
             video_clip = video_clip.set_end(t2)
+            # Resize to vertical video dimensions (9:16 aspect ratio)
+            video_clip = video_clip.resize(width=1080, height=1920)
         
         visual_clips.append(video_clip)
     
