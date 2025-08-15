@@ -177,9 +177,11 @@ class NovelaVideoGenerator:
             
             # Aplicar template de novela
             if self.novela_template:
-                output_filename = self.template_render_engine.render_with_template(
-                    audio_filename, captions, video_urls, 
-                    self.novela_template, output_filename
+                # Primeiro gerar vídeo básico
+                temp_output = get_output_media(audio_filename, captions, video_urls, "temp_" + output_filename)
+                # Depois aplicar template
+                output_filename = self.template_render_engine.apply_template_to_video(
+                    temp_output, self.novela_template, audio_filename
                 )
             else:
                 output_filename = get_output_media(audio_filename, captions, video_urls, output_filename)
