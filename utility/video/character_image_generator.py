@@ -151,34 +151,63 @@ class CharacterImageGenerator:
         Busca imagem de personagem no Google Images
         """
         try:
-            # Usar a API do Google Custom Search para imagens
-            # Primeiro, vamos usar uma abordagem alternativa com requests
-            search_query = f"{query} ator atriz novela"
-            
-            # Construir URL do Google Images
-            encoded_query = quote_plus(search_query)
-            url = f"https://www.google.com/search?q={encoded_query}&tbm=isch&tbs=isz:l"
+            # Construir consultas mais específicas para atores
+            search_queries = [
+                f"{query} ator atriz novela globo",
+                f"{query} ator atriz novela 2024",
+                f"{query} ator atriz novela",
+                f"{query} ator atriz",
+                f"{query} novela"
+            ]
             
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'DNT': '1',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
             }
             
-            response = requests.get(url, headers=headers, timeout=10)
-            
-            if response.status_code == 200:
-                # Extrair URLs de imagens da resposta HTML
-                import re
-                img_pattern = r'https://[^"]*\.(?:jpg|jpeg|png|webp)'
-                img_urls = re.findall(img_pattern, response.text)
-                
-                if img_urls:
-                    # Retornar a primeira imagem encontrada
-                    return img_urls[0]
+            for search_query in search_queries:
+                try:
+                    # Construir URL do Google Images
+                    encoded_query = quote_plus(search_query)
+                    url = f"https://www.google.com/search?q={encoded_query}&tbm=isch&tbs=isz:l,itp:face"
+                    
+                    response = requests.get(url, headers=headers, timeout=15)
+                    
+                    if response.status_code == 200:
+                        # Extrair URLs de imagens da resposta HTML
+                        import re
+                        # Padrão mais específico para imagens do Google
+                        img_patterns = [
+                            r'https://[^"]*\.(?:jpg|jpeg|png|webp)(?:\?[^"]*)?',
+                            r'https://[^"]*\.googleusercontent\.com/[^"]*',
+                            r'https://[^"]*\.gstatic\.com/[^"]*'
+                        ]
+                        
+                        for pattern in img_patterns:
+                            img_urls = re.findall(pattern, response.text)
+                            if img_urls:
+                                # Filtrar URLs válidas
+                                valid_urls = [url for url in img_urls if 'http' in url and not url.endswith('.js')]
+                                if valid_urls:
+                                    print(f"🔍 Encontradas {len(valid_urls)} imagens para: {search_query}")
+                                    return valid_urls[0]
+                    
+                    # Pequena pausa entre requisições
+                    time.sleep(1)
+                    
+                except Exception as e:
+                    print(f"⚠️ Erro na busca específica '{search_query}': {e}")
+                    continue
             
             return None
             
         except Exception as e:
-            print(f"⚠️ Erro na busca Google: {e}")
+            print(f"⚠️ Erro geral na busca Google: {e}")
             return None
 
     def search_character_image_pexels(self, query: str, orientation: str = "portrait") -> Optional[str]:
@@ -312,22 +341,27 @@ class CharacterImageGenerator:
         
         print(f"🎭 Buscando imagem para: {character_info['personagem']} ({character_info['tipo']})")
         
-        # Tentar Google Images primeiro (para atores reais)
+        # Para atores reais, usar APENAS Google Images
         if character_info['personagem'] != "personagem":
-            for query in queries[:3]:  # Primeiras 3 consultas mais específicas
+            print(f"🔍 Buscando ator real: {character_info['personagem']}")
+            for query in queries[:5]:  # Mais consultas para atores reais
                 image_url = self.search_character_image_google(query)
                 if image_url:
                     print(f"✅ Imagem encontrada no Google: {query}")
                     return image_url
+            
+            # Se não encontrou no Google, não usar Pexels/Unsplash para atores reais
+            print(f"❌ Nenhuma imagem encontrada no Google para: {character_info['personagem']}")
+            return None
         
-        # Tentar Pexels como fallback
+        # Para personagens genéricos, usar Pexels/Unsplash
+        print(f"🔍 Buscando personagem genérico")
         for query in queries:
             image_url = self.search_character_image_pexels(query)
             if image_url:
                 print(f"✅ Imagem encontrada no Pexels: {query}")
                 return image_url
         
-        # Tentar Unsplash como último recurso
         for query in queries:
             image_url = self.search_character_image_unsplash(query)
             if image_url:
