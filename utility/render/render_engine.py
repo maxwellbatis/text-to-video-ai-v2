@@ -165,21 +165,40 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
         
         # Check if it's an image or video
         if video_url.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
-            # Convert image to video clip
-            image_clip = ImageClip(video_filename)
-            duration = t2 - t1
-            video_clip = image_clip.set_duration(duration)
-            video_clip = video_clip.set_start(t1)
-            video_clip = video_clip.set_end(t2)
-            # Resize to vertical video dimensions (9:16 aspect ratio)
-            video_clip = video_clip.resize(width=1080, height=1920)
+            # Convert image to video clip with explicit duration
+            try:
+                image_clip = ImageClip(video_filename)
+                duration = t2 - t1
+                video_clip = image_clip.set_duration(duration)
+                video_clip = video_clip.set_start(t1)
+                video_clip = video_clip.set_end(t2)
+                # Resize to vertical video dimensions (9:16 aspect ratio)
+                video_clip = video_clip.resize(width=1080, height=1920)
+                print(f"✅ Imagem convertida para vídeo: {video_filename}")
+            except Exception as e:
+                print(f"❌ Erro ao processar imagem {video_filename}: {e}")
+                # Criar um clip de cor sólida como fallback
+                from moviepy.video.VideoClip import ColorClip
+                video_clip = ColorClip(size=(1080, 1920), color=(0, 0, 0))
+                video_clip = video_clip.set_duration(t2 - t1)
+                video_clip = video_clip.set_start(t1)
+                video_clip = video_clip.set_end(t2)
         else:
             # Create VideoFileClip from the downloaded video file
-            video_clip = VideoFileClip(video_filename)
-            video_clip = video_clip.set_start(t1)
-            video_clip = video_clip.set_end(t2)
-            # Resize to vertical video dimensions (9:16 aspect ratio)
-            video_clip = video_clip.resize(width=1080, height=1920)
+            try:
+                video_clip = VideoFileClip(video_filename)
+                video_clip = video_clip.set_start(t1)
+                video_clip = video_clip.set_end(t2)
+                # Resize to vertical video dimensions (9:16 aspect ratio)
+                video_clip = video_clip.resize(width=1080, height=1920)
+            except Exception as e:
+                print(f"❌ Erro ao processar vídeo {video_filename}: {e}")
+                # Criar um clip de cor sólida como fallback
+                from moviepy.video.VideoClip import ColorClip
+                video_clip = ColorClip(size=(1080, 1920), color=(0, 0, 0))
+                video_clip = video_clip.set_duration(t2 - t1)
+                video_clip = video_clip.set_start(t1)
+                video_clip = video_clip.set_end(t2)
         
         visual_clips.append(video_clip)
     
