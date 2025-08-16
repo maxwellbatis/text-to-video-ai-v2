@@ -179,15 +179,43 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
         os.environ['IMAGEMAGICK_BINARY'] = '/usr/bin/convert'
     
     visual_clips = []
+    print(f"🎬 Processando {len(background_video_data)} segmentos de vídeo de fundo")
+    
     for (t1, t2), video_url in background_video_data:
+        print(f"📹 Segmento [{t1:.2f}s - {t2:.2f}s]: {video_url}")
+        
+        # Verificar se URL é válida
+        if not video_url or video_url == "":
+            print(f"⚠️ URL vazia para segmento [{t1:.2f}s - {t2:.2f}s], criando clip preto")
+            from moviepy.video.VideoClip import ColorClip
+            video_clip = ColorClip(size=(1080, 1920), color=(0, 0, 0))
+            video_clip = video_clip.set_duration(t2 - t1)
+            video_clip = video_clip.set_start(t1)
+            video_clip = video_clip.set_end(t2)
+            visual_clips.append(video_clip)
+            continue
+        
         # Download the file
         video_filename = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg').name
-        download_file(video_url, video_filename)
+        try:
+            download_file(video_url, video_filename)
+            print(f"✅ Download concluído: {video_filename}")
+        except Exception as e:
+            print(f"❌ Erro no download: {e}")
+            # Criar clip preto como fallback
+            from moviepy.video.VideoClip import ColorClip
+            video_clip = ColorClip(size=(1080, 1920), color=(0, 0, 0))
+            video_clip = video_clip.set_duration(t2 - t1)
+            video_clip = video_clip.set_start(t1)
+            video_clip = video_clip.set_end(t2)
+            visual_clips.append(video_clip)
+            continue
         
         # Check if it's an image or video
         if video_url.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
             # Convert image to video clip with explicit duration
             try:
+                print(f"🖼️ Processando imagem: {video_filename}")
                 image_clip = ImageClip(video_filename)
                 duration = t2 - t1
                 video_clip = image_clip.set_duration(duration)
@@ -207,11 +235,13 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
         else:
             # Create VideoFileClip from the downloaded video file
             try:
+                print(f"🎬 Processando vídeo: {video_filename}")
                 video_clip = VideoFileClip(video_filename)
                 video_clip = video_clip.set_start(t1)
                 video_clip = video_clip.set_end(t2)
                 # Resize to vertical video dimensions (9:16 aspect ratio)
                 video_clip = video_clip.resize(width=1080, height=1920)
+                print(f"✅ Vídeo processado com sucesso: {video_filename}")
             except Exception as e:
                 print(f"❌ Erro ao processar vídeo {video_filename}: {e}")
                 # Criar um clip de cor sólida como fallback
@@ -221,6 +251,7 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
                 video_clip = video_clip.set_start(t1)
                 video_clip = video_clip.set_end(t2)
         
+        print(f"📹 Adicionando clip ao composite: duração {t2-t1:.2f}s")
         visual_clips.append(video_clip)
     
     audio_clips = []
