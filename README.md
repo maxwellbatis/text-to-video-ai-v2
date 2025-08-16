@@ -20,6 +20,18 @@ If you enjoy using Text to Video AI, we'd appreciate your support with a star �
 
 ## 🆕 Melhorias Implementadas
 
+### 🎬 Vídeos Longos (1-10 Minutos) - NOVO!
+- **Duração flexível**: 1 a 10 minutos com estrutura adaptativa
+- **Scripts otimizados**: 150 palavras por minuto (aproximadamente)
+- **Pausas estratégicas**: Baseadas na duração do conteúdo
+- **Estrutura proporcional**: Abertura, desenvolvimento e fechamento adequados
+
+### 🙏 Template Específico para Orações - NOVO!
+- **Template `prayer_extended`**: Especializado em orações e conteúdo espiritual
+- **Estrutura tradicional**: Adoração, confissão, gratidão, petição
+- **Momentos de silêncio**: Pausas para contemplação e reflexão
+- **Vozes apropriadas**: Phillip e Deep Ray para conteúdo espiritual
+
 ### 📝 Prompts Aprimorados
 - **Vídeos mais longos**: 60-90 segundos (200-300 palavras)
 - **Estrutura profissional**: Abertura, desenvolvimento e fechamento claros
@@ -38,13 +50,30 @@ If you enjoy using Text to Video AI, we'd appreciate your support with a star �
 
 ### Steps to run
 
-#### 🎤 Vozes ElevenLabs (NOVO!)
-O sistema agora suporta vozes profissionais da ElevenLabs:
+#### 🎬 Vídeos Longos e Orações (NOVO!)
+O sistema agora suporta vídeos de 1-10 minutos e orações específicas:
 
 ```bash
+# Oração de 3 minutos
+python app.py "Oração pela família" --prayer --duration 3
+
+# Estudo bíblico de 5 minutos
+python app.py "Estudo sobre fé" --template prayer_extended --duration 5
+
+# Vídeo de curiosidades de 2 minutos
+python app.py "História do Brasil" --voice james --duration 2
+
 # Listar vozes disponíveis
 python app.py --list-voices
 
+# Listar templates disponíveis
+python app.py --list-templates
+```
+
+#### 🎤 Vozes ElevenLabs
+O sistema suporta vozes profissionais da ElevenLabs:
+
+```bash
 # Gerar vídeo com voz específica
 python app.py "Fatos curiosos sobre o Brasil" --voice james
 

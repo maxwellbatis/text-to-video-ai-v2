@@ -11,7 +11,7 @@ import sys
 sys.path.append(".")
 
 from utility.templates.template_manager import TemplateManager
-from utility.script.script_generator import generate_script
+from utility.script.script_generator import generate_script, generate_prayer_script
 
 class TemplateScriptGenerator:
     def __init__(self):
@@ -25,7 +25,7 @@ class TemplateScriptGenerator:
             print(f"❌ Erro ao carregar template '{template_id}': {e}")
             return None
     
-    def generate_script_for_template(self, topic: str, template_id: str) -> Dict:
+    def generate_script_for_template(self, topic: str, template_id: str, duration_minutes: int = 1) -> Dict:
         """Gera script baseado no template selecionado"""
         try:
             # Carregar template
@@ -33,12 +33,17 @@ class TemplateScriptGenerator:
             if not template:
                 raise Exception(f"Template '{template_id}' não encontrado")
             
-            # Gerar script base
-            script = generate_script(topic)
+            # Gerar script base baseado no template
+            if template_id == "prayer_extended":
+                script = generate_prayer_script(topic, duration_minutes)
+            else:
+                script = generate_script(topic, duration_minutes)
             
             # Aplicar adaptações específicas do template
             if template_id == "cinematic_religious":
                 script = self._adapt_for_religious_template(script, template)
+            elif template_id == "prayer_extended":
+                script = self._adapt_for_prayer_template(script, template, duration_minutes)
             elif template_id == "vsl_magnetic":
                 script = self._adapt_for_vsl_magnetic_template(script, template)
             elif template_id == "gaming_tutorial":
@@ -55,11 +60,11 @@ class TemplateScriptGenerator:
             print(f"❌ Erro ao gerar script para template: {e}")
             # Fallback para script normal
             return {
-                'script': generate_script(topic),
+                'script': generate_script(topic, duration_minutes),
                 'template': None
             }
     
-    def _generate_script_with_ai(self, topic: str, template: Dict) -> str:
+    def _generate_script_with_ai(self, topic: str, template: Dict, duration_minutes: int = 1) -> str:
         """Gera script usando IA com base no template"""
         try:
             from utility.script.script_generator import generate_script
@@ -69,7 +74,7 @@ class TemplateScriptGenerator:
             enhanced_topic = f"{topic} - {template.get('name', '')} - {template_context.get('tone', '')}"
             
             # Gerar script base
-            base_script = generate_script(enhanced_topic)
+            base_script = generate_script(enhanced_topic, duration_minutes)
             
             return base_script
             
@@ -77,6 +82,73 @@ class TemplateScriptGenerator:
             print(f"⚠️ Erro ao gerar script com IA: {e}")
             # Fallback para script padrão
             return f"Fatos interessantes sobre {topic}. Este é um conteúdo gerado automaticamente seguindo o estilo {template.get('name', '')}."
+    
+    def _adapt_for_prayer_template(self, script: str, template: Dict, duration_minutes: int) -> str:
+        """Adapta script para template de oração estendida"""
+        try:
+            # Extrair diretrizes do template
+            structure_guidelines = template.get('script_pattern', {}).get('video_structure', {})
+            content_types = template.get('script_pattern', {}).get('content_types', {})
+            tone_guidelines = template.get('script_pattern', {}).get('tone_guidelines', {})
+            
+            # Estrutura específica para orações
+            prayer_elements = {
+                "adoration": [
+                    "Senhor, nós Te adoramos e Te louvamos por quem Tu és",
+                    "Pai, Tu és digno de toda honra e glória",
+                    "Deus, nós Te exaltamos acima de tudo",
+                    "Senhor, Te bendizemos por Tua bondade e misericórdia"
+                ],
+                "thanksgiving": [
+                    "Agradecemos por Tua presença em nossas vidas",
+                    "Obrigado por Tua graça e amor incondicional",
+                    "Senhor, Te agradecemos por todas as bênçãos",
+                    "Pai, somos gratos por Tua fidelidade"
+                ],
+                "supplication": [
+                    "Senhor, Te pedimos que [petição específica]",
+                    "Pai, imploramos Tua ajuda para [necessidade]",
+                    "Deus, Te rogamos que [intercessão]",
+                    "Senhor, Te suplicamos que [pedido]"
+                ]
+            }
+            
+            # Adicionar momentos de silêncio estratégicos
+            silence_markers = ["[...]", "[pausa]", "[contemplação]", "[reflexão]"]
+            
+            # Estruturar o script com elementos de oração
+            enhanced_script = script
+            
+            # Adicionar elementos de oração se não estiverem presentes
+            if "adoração" not in script.lower() and "louvor" not in script.lower():
+                adoration = prayer_elements["adoration"][0]
+                enhanced_script = f"{adoration}. [...] {enhanced_script}"
+            
+            if "agradecemos" not in script.lower() and "obrigado" not in script.lower():
+                thanksgiving = prayer_elements["thanksgiving"][0]
+                enhanced_script = f"{enhanced_script} {thanksgiving}. [...]"
+            
+            # Garantir que termine com "Amém"
+            if not enhanced_script.strip().endswith("Amém"):
+                enhanced_script = f"{enhanced_script} Amém."
+            
+            # Adicionar pausas estratégicas baseadas na duração
+            if duration_minutes >= 3:
+                # Dividir o script em seções com pausas
+                sentences = enhanced_script.split('. ')
+                enhanced_sections = []
+                for i, sentence in enumerate(sentences):
+                    enhanced_sections.append(sentence)
+                    if i % 3 == 2 and i < len(sentences) - 1:  # Pausa a cada 3 frases
+                        enhanced_sections.append("[...]")
+                
+                enhanced_script = '. '.join(enhanced_sections)
+            
+            return enhanced_script
+            
+        except Exception as e:
+            print(f"⚠️ Erro ao adaptar para template de oração: {e}")
+            return script
     
     def _adapt_for_religious_template(self, script: str, template: Dict) -> str:
         """Adapta script para template religioso cinematográfico seguindo estrutura profissional"""
@@ -98,80 +170,40 @@ class TemplateScriptGenerator:
                 "Você já se perguntou por que Deus permite o sofrimento?",
                 "Sabe qual é o verdadeiro significado da fé?",
                 "Já parou para refletir sobre o propósito da sua vida?",
-                "O que realmente significa confiar em Deus?"
-            ]
-            
-            # Elementos de desenvolvimento
-            development_elements = [
-                "De acordo com as escrituras sagradas,",
-                "Como revelado nas palavras de Jesus,",
-                "Segundo a tradição cristã,",
-                "Conforme ensinam os textos sagrados,"
-            ]
-            
-            # Reflexões e exemplos práticos
-            practical_examples = [
-                "Assim como uma semente precisa de tempo para crescer, nossa fé também se desenvolve gradualmente.",
-                "Assim como um pai cuida de seus filhos, Deus cuida de cada um de nós com amor infinito.",
-                "Assim como a luz dissipa as trevas, a fé dissipa o medo e a dúvida.",
-                "Assim como uma âncora mantém o navio firme, nossa fé nos mantém firmes nas tempestades da vida."
+                "Conhece o poder transformador do amor de Deus?",
+                "Sabe como encontrar paz em meio às tempestades da vida?"
             ]
             
             # Conclusões inspiradoras
             inspiring_conclusions = [
                 "Lembre-se: Deus não prometeu uma vida sem problemas, mas prometeu estar conosco em todos os momentos.",
-                "A fé não remove todas as dificuldades, mas nos dá força para enfrentá-las com coragem.",
-                "Deus não nos dá o que queremos, mas o que precisamos para crescer espiritualmente.",
-                "A verdadeira paz não vem da ausência de problemas, mas da presença de Deus em nossa vida."
+                "Que a paz de Deus, que excede todo entendimento, guarde seu coração e sua mente.",
+                "Deus tem um plano perfeito para sua vida. Confie Nele e siga em frente com fé.",
+                "Que o Senhor te abençoe e te guarde, que Ele faça resplandecer o Seu rosto sobre ti.",
+                "Em Cristo, você é mais que vencedor. Mantenha a fé e persevere!"
             ]
             
-            # Chamadas à ação
-            call_to_action = [
-                "Deixe seu comentário, compartilhe com alguém que precisa ouvir isso!",
-                "Compartilhe este vídeo com quem precisa de esperança!",
-                "Deixe seu 'Amém' se esta mensagem tocou seu coração!",
-                "Compartilhe com alguém que precisa de força espiritual!"
-            ]
+            # Adaptar abertura se necessário
+            if not any(opening in script for opening in opening_elements):
+                import random
+                opening = random.choice(opening_elements)
+                question = random.choice(impact_questions)
+                script = f"{opening} {question} {script}"
             
-            import random
+            # Adaptar conclusão se necessário
+            if not any(conclusion in script for conclusion in inspiring_conclusions):
+                import random
+                conclusion = random.choice(inspiring_conclusions)
+                script = f"{script} {conclusion}"
             
-            # Construir script estruturado
-            structured_script = ""
+            # Garantir chamada à ação
+            if "deixe seu comentário" not in script.lower():
+                script = f"{script} Deixe seu comentário, compartilhe com alguém que precisa ouvir isso!"
             
-            # ABERTURA (5-15 segundos)
-            opening = random.choice(opening_elements)
-            impact_question = random.choice(impact_questions)
-            structured_script += f"{opening} {impact_question}\n\n"
-            
-            # DESENVOLVIMENTO (40-70 segundos)
-            development_intro = random.choice(development_elements)
-            structured_script += f"{development_intro} {script}\n\n"
-            
-            # Adicionar exemplo prático
-            practical_example = random.choice(practical_examples)
-            structured_script += f"{practical_example}\n\n"
-            
-            # FECHAMENTO (10-15 segundos)
-            conclusion = random.choice(inspiring_conclusions)
-            cta = random.choice(call_to_action)
-            structured_script += f"{conclusion} {cta}"
-            
-            return structured_script
+            return script
             
         except Exception as e:
-            print(f"⚠️ Erro ao adaptar script religioso: {e}")
-            # Fallback básico
-            religious_elements = [
-                "De acordo com as escrituras,",
-                "Segundo a tradição sagrada,",
-                "Como revelado nas escrituras,",
-                "Conforme ensinam os textos sagrados,"
-            ]
-            
-            import random
-            religious_intro = random.choice(religious_elements)
-            script = f"{religious_intro} {script}"
-            
+            print(f"⚠️ Erro ao adaptar para template religioso: {e}")
             return script
     
     def _adapt_for_vsl_magnetic_template(self, script: str, template: Dict) -> str:

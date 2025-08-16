@@ -89,8 +89,8 @@ def update_job_progress(job_id, progress, status=None):
             'status': jobs[job_id].status
         })
 
-async def generate_video_async(job_id, topic, template_id=None, voice_id=None, use_db=False):
-    """Gera vídeo de forma assíncrona com suporte a templates"""
+async def generate_video_async(job_id, topic, template_id=None, voice_id=None, use_db=False, duration_minutes=1):
+    """Gera vídeo de forma assíncrona com suporte a templates e duração personalizada"""
     try:
         job = jobs[job_id]
         update_job_progress(job_id, 10, "PROCESSING")
@@ -104,14 +104,14 @@ async def generate_video_async(job_id, topic, template_id=None, voice_id=None, u
         # 1. Gerar script (com template se especificado)
         update_job_progress(job_id, 20)
         if template_id:
-            script_data = template_script_generator.generate_script_for_template(topic, template_id)
+            script_data = template_script_generator.generate_script_for_template(topic, template_id, duration_minutes)
             response = script_data['script']
             template_config = script_data['template']
-            print(f"Script gerado com template '{template_id}': {response[:100]}...")
+            print(f"Script gerado com template '{template_id}' ({duration_minutes} min): {response[:100]}...")
         else:
-            response = generate_script(topic)
+            response = generate_script(topic, duration_minutes)
             template_config = None
-            print(f"Script gerado: {response[:100]}...")
+            print(f"Script gerado ({duration_minutes} min): {response[:100]}...")
         
         # 2. Gerar áudio
         update_job_progress(job_id, 40)
@@ -170,12 +170,12 @@ async def generate_video_async(job_id, topic, template_id=None, voice_id=None, u
         update_job_progress(job_id, 0, "FAILED")
         socketio.emit('job_failed', {'job_id': job_id, 'error': str(e)})
 
-def run_async_generation(job_id, topic, template_id=None, voice_id=None, use_db=False):
+def run_async_generation(job_id, topic, template_id=None, voice_id=None, use_db=False, duration_minutes=1):
     """Executa geração de vídeo em thread separada"""
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
-        loop.run_until_complete(generate_video_async(job_id, topic, template_id, voice_id, use_db))
+        loop.run_until_complete(generate_video_async(job_id, topic, template_id, voice_id, use_db, duration_minutes))
     finally:
         loop.close()
 
@@ -256,10 +256,15 @@ def create_job():
     job = VideoJob(topic)
     jobs[job.id] = job
     
+    # Obter duração (padrão: 1 minuto)
+    duration_minutes = int(data.get('duration_minutes', 1))
+    if duration_minutes < 1 or duration_minutes > 10:
+        duration_minutes = 1
+    
     # Iniciar geração em thread separada
     thread = threading.Thread(
         target=run_async_generation,
-        args=(job.id, topic, template_id, voice_id, DB_AVAILABLE)
+        args=(job.id, topic, template_id, voice_id, DB_AVAILABLE, duration_minutes)
     )
     thread.daemon = True
     thread.start()

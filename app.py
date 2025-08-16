@@ -4,7 +4,7 @@ import edge_tts
 import json
 import asyncio
 import whisper_timestamped as whisper
-from utility.script.script_generator import generate_script
+from utility.script.script_generator import generate_script, generate_prayer_script
 from utility.audio.audio_generator import generate_audio
 from utility.captions.timed_captions_generator import generate_timed_captions
 from utility.video.background_video_generator import generate_video_url
@@ -29,8 +29,8 @@ except Exception as e:
 template_script_generator = TemplateScriptGenerator()
 template_render_engine = TemplateRenderEngine()
 
-async def generate_video_with_db(topic: str, credentials_name: str = "default", use_db: bool = True, template_id: str = None, voice_name: str = None):
-    """Gera vídeo e salva no banco de dados com suporte a templates"""
+async def generate_video_with_db(topic: str, credentials_name: str = "default", use_db: bool = True, template_id: str = None, voice_name: str = None, duration_minutes: int = 1):
+    """Gera vídeo e salva no banco de dados com suporte a templates e duração personalizada"""
     
     db = None
     video_id = None
@@ -56,7 +56,7 @@ async def generate_video_with_db(topic: str, credentials_name: str = "default", 
                 
                 # Criar registro de vídeo
                 video = await db.create_video(
-                    title=f"Vídeo sobre {topic}",
+                    title=f"Vídeo sobre {topic} ({duration_minutes}min)",
                     topic=topic,
                     script="",  # Será atualizado depois
                     credentials_id=credentials.id
@@ -73,15 +73,15 @@ async def generate_video_with_db(topic: str, credentials_name: str = "default", 
     try:
         # Gerar script (com template se especificado)
         if template_id:
-            print(f"🎬 Usando template: {template_id}")
-            script_data = template_script_generator.generate_script_for_template(topic, template_id)
+            print(f"🎬 Usando template: {template_id} ({duration_minutes} minuto(s))")
+            script_data = template_script_generator.generate_script_for_template(topic, template_id, duration_minutes)
             response = script_data['script']
             template_config = script_data['template']
             print(f"Script gerado com template '{template_id}': {response[:100]}...")
         else:
-            response = generate_script(topic)
+            response = generate_script(topic, duration_minutes)
             template_config = None
-            print(f"Script gerado: {response[:100]}...")
+            print(f"Script gerado ({duration_minutes} minuto(s)): {response[:100]}...")
         
         # Atualizar script no banco se estiver usando
         if use_db and video_id:
@@ -113,123 +113,111 @@ async def generate_video_with_db(topic: str, credentials_name: str = "default", 
         if search_terms is not None:
             background_video_urls = generate_video_url(search_terms, VIDEO_SERVER)
             print(background_video_urls)
-        else:
-            print("No background video")
-        
-        background_video_urls = merge_empty_intervals(background_video_urls)
         
         # Renderizar vídeo final
-        if background_video_urls is not None:
-            output_video = get_output_media(SAMPLE_FILE_NAME, timed_captions, background_video_urls, VIDEO_SERVER)
-            
-            # Aplicar template se especificado
-            if template_id and template_config:
-                print(f"🎨 Aplicando template '{template_id}' ao vídeo...")
-                output_video = template_render_engine.apply_template_to_video(output_video, template_config, SAMPLE_FILE_NAME)
-                print(f"Template aplicado com sucesso!")
-            
-            print(f"Vídeo renderizado: {output_video}")
-            
-            # Atualizar banco com caminhos dos arquivos
-            if use_db and video_id:
-                await db.update_video_status(
-                    video_id=video_id,
-                    status="COMPLETED",
-                    audio_path=SAMPLE_FILE_NAME,
-                    video_path=output_video,
-                    duration=42.5  # Você pode calcular a duração real
-                )
-                print(f"✅ Vídeo '{topic}' gerado com sucesso!")
-                print(f"📁 Arquivo: {output_video}")
-                print(f"🆔 ID no banco: {video_id}")
-                if template_id:
-                    print(f"🎬 Template usado: {template_id}")
-            else:
-                print(f"✅ Vídeo '{topic}' gerado com sucesso!")
-                print(f"📁 Arquivo: {output_video}")
-                if template_id:
-                    print(f"🎬 Template usado: {template_id}")
-            
-        else:
-            if use_db and video_id:
-                await db.update_video_status(video_id, "FAILED")
-            print("❌ Falha ao gerar vídeo")
-            
-    except Exception as e:
-        print(f"❌ Erro: {e}")
+        output_filename = f"output_video_{video_id}.mp4" if video_id else "output_video.mp4"
+        get_output_media(SAMPLE_FILE_NAME, background_video_urls, timed_captions, output_filename)
+        
+        # Atualizar banco de dados
         if use_db and video_id:
-            await db.update_video_status(video_id, "FAILED")
-    
+            await db.update_video_status(video_id, "COMPLETED")
+            await db.update_video_output_path(video_id, output_filename)
+            print(f"✅ Vídeo salvo no banco: {video_id}")
+        
+        print(f"✅ Vídeo gerado com sucesso: {output_filename}")
+        return output_filename
+        
+    except Exception as e:
+        print(f"❌ Erro ao gerar vídeo: {e}")
+        if use_db and video_id:
+            await db.update_video_status(video_id, "ERROR")
+        raise e
     finally:
         if db:
-            await db.disconnect()
+            await db.close()
 
-def suggest_templates_for_topic(topic: str):
-    """Sugere templates apropriados para um tópico"""
-    try:
-        suggestions = template_script_generator.get_template_suggestions(topic)
-        print(f"\n🎯 Sugestões de templates para '{topic}':")
-        for i, suggestion in enumerate(suggestions, 1):
-            print(f"  {i}. {suggestion['name']} (Score: {suggestion['score']})")
-            print(f"     ID: {suggestion['template_id']}")
-            print(f"     Descrição: {suggestion['description']}")
-            for reason in suggestion['reasons']:
-                print(f"     - {reason}")
-            print()
-        return suggestions
-    except Exception as e:
-        print(f"❌ Erro ao sugerir templates: {e}")
-        return []
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate a video from a topic.")
-    parser.add_argument("topic", type=str, nargs='?', help="The topic for the video")
-    parser.add_argument("--credentials", type=str, default="default", help="Credentials name to use")
-    parser.add_argument("--no-db", action="store_true", help="Disable database integration")
-    parser.add_argument("--template", type=str, help="Template ID to use for video generation")
-    parser.add_argument("--voice", type=str, help="Voice to use (james, bill, neil, drew, phillip, deep_ray)")
-    parser.add_argument("--suggest-templates", action="store_true", help="Suggest templates for the topic")
-    parser.add_argument("--list-voices", action="store_true", help="List available voices and their descriptions")
-
+def main():
+    parser = argparse.ArgumentParser(description='Gerador de Vídeos com IA - Suporte a Templates e Vozes')
+    parser.add_argument('topic', nargs='?', help='Tópico do vídeo')
+    parser.add_argument('--credentials', '-c', default='default', help='Nome das credenciais (padrão: default)')
+    parser.add_argument('--no-db', action='store_true', help='Não usar banco de dados')
+    parser.add_argument('--template', '-t', help='ID do template a usar')
+    parser.add_argument('--voice', '-v', help='Nome da voz (james, bill, neil, drew, phillip, deep_ray)')
+    parser.add_argument('--duration', '-d', type=int, default=1, help='Duração em minutos (1-10, padrão: 1)')
+    parser.add_argument('--list-voices', action='store_true', help='Listar vozes disponíveis')
+    parser.add_argument('--list-templates', action='store_true', help='Listar templates disponíveis')
+    parser.add_argument('--prayer', action='store_true', help='Gerar oração específica')
+    
     args = parser.parse_args()
     
-    # Se solicitado, apenas listar vozes
+    # Validar duração
+    if args.duration < 1 or args.duration > 10:
+        print("❌ Duração deve estar entre 1 e 10 minutos")
+        return
+    
+    # Listar vozes disponíveis
     if args.list_voices:
         from utility.audio.audio_generator import list_available_voices
         voices_info = list_available_voices()
-        print("\n🎤 VOZES DISPONÍVEIS NO ELEVENLABS:")
+        print("\n🎤 Vozes Disponíveis:")
         print("=" * 50)
         
-        for voice_name, voice_data in voices_info["voices"].items():
-            print(f"\n🎵 {voice_name.upper()}")
-            print(f"   📝 {voice_data['description']}")
-            print(f"   🏷️  Categoria: {voice_data['category']}")
+        for category, voices in voices_info['recommendations'].items():
+            print(f"\n📚 {category}:")
+            for voice_id in voices:
+                voice_info = voices_info['voices'][voice_id]
+                print(f"  • {voice_id}: {voice_info['description']}")
         
-        print("\n📊 RECOMENDAÇÕES POR TIPO DE CONTEÚDO:")
+        print(f"\n🔄 Fallback: Edge TTS (pt-BR-AntonioNeural)")
+        return
+    
+    # Listar templates disponíveis
+    if args.list_templates:
+        from utility.templates.template_manager import TemplateManager
+        tm = TemplateManager()
+        templates = tm.list_templates()
+        
+        print("\n🎬 Templates Disponíveis:")
         print("=" * 50)
-        for content_type, voices in voices_info["recommendations"].items():
-            print(f"\n📖 {content_type}:")
-            for voice in voices:
-                voice_data = voices_info["voices"][voice]
-                print(f"   • {voice}: {voice_data['description']}")
         
-        print("\n💡 USO:")
-        print("   python app.py 'seu tópico' --voice james")
-        print("   python app.py 'seu tópico' --voice phillip")
-        exit(0)
+        for template_id, template_info in templates.items():
+            print(f"\n📋 {template_id}:")
+            print(f"  Nome: {template_info['name']}")
+            print(f"  Descrição: {template_info['description']}")
+            print(f"  Categoria: {template_info['category']}")
+        
+        return
     
-    # Se solicitado, apenas sugerir templates
-    if args.suggest_templates:
-        suggest_templates_for_topic(args.topic)
-        exit(0)
+    # Verificar se tópico foi fornecido
+    if not args.topic:
+        print("❌ Tópico é obrigatório!")
+        print("\n📖 Exemplos de uso:")
+        print("  python app.py 'Oração pela família' --prayer --duration 3")
+        print("  python app.py 'Estudo sobre fé' --template prayer_extended --duration 5")
+        print("  python app.py 'Fatos curiosos' --voice james --duration 2")
+        print("  python app.py --list-voices")
+        print("  python app.py --list-templates")
+        return
     
-    # Verificar se tópico foi fornecido (exceto para list-voices)
-    if not args.topic and not args.list_voices and not args.suggest_templates:
-        print("❌ Erro: Tópico é obrigatório para gerar vídeo")
-        print("💡 Use: python app.py 'seu tópico'")
-        print("💡 Ou: python app.py --list-voices")
-        exit(1)
+    # Configurar template padrão para orações
+    if args.prayer and not args.template:
+        args.template = "prayer_extended"
+        print("🙏 Usando template de oração por padrão")
     
-    if args.topic:
-        use_db = not args.no_db and DB_AVAILABLE
-        asyncio.run(generate_video_with_db(args.topic, args.credentials, use_db, args.template, args.voice))
+    # Executar geração
+    try:
+        asyncio.run(generate_video_with_db(
+            topic=args.topic,
+            credentials_name=args.credentials,
+            use_db=not args.no_db,
+            template_id=args.template,
+            voice_name=args.voice,
+            duration_minutes=args.duration
+        ))
+    except KeyboardInterrupt:
+        print("\n⚠️ Geração interrompida pelo usuário")
+    except Exception as e:
+        print(f"❌ Erro: {e}")
+
+if __name__ == "__main__":
+    main()

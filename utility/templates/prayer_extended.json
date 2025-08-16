@@ -1,0 +1,216 @@
+{
+  "name": "Oração e Conteúdo Espiritual Estendido",
+  "description": "Template para orações, estudos bíblicos e conteúdo espiritual de 1-10 minutos com estrutura aprofundada",
+  "category": "religioso_estendido",
+  "template_id": "prayer_extended",
+  "script_pattern": {
+    "style": "contemplative",
+    "tone": "reverent",
+    "structure": "narrative_extended",
+    "video_structure": {
+      "opening": {
+        "duration": "15-40 segundos",
+        "elements": [
+          "Saudação espiritual calorosa",
+          "Contextualização do tema",
+          "Preparação do coração",
+          "Versículo de abertura (opcional)"
+        ]
+      },
+      "development": {
+        "duration": "flexible (1-9 minutos)",
+        "elements": [
+          "Múltiplos pontos de desenvolvimento",
+          "Versículos bíblicos relevantes",
+          "Exemplos práticos e aplicações",
+          "Momentos de silêncio e contemplação",
+          "Transições suaves entre tópicos",
+          "Reflexões profundas",
+          "Testemunhos ou histórias (se aplicável)"
+        ]
+      },
+      "closing": {
+        "duration": "15-30 segundos",
+        "elements": [
+          "Resumo dos pontos principais",
+          "Oração de gratidão",
+          "Bênção final",
+          "Chamada à ação espiritual",
+          "Convite à interação"
+        ]
+      }
+    },
+    "voice_settings": {
+      "primary_voice": "phillip",
+      "secondary_voice": "deep_ray",
+      "rate": "slow",
+      "volume": 1.0,
+      "pitch": "low",
+      "pauses": "extended"
+    },
+    "content_types": {
+      "oracao_estendida": "Orações de 3-10 minutos com estrutura tradicional",
+      "estudo_biblico": "Estudos bíblicos aprofundados de 5-10 minutos",
+      "meditacao": "Meditações guiadas com momentos de silêncio",
+      "ensino_espiritual": "Ensino espiritual com múltiplos pontos",
+      "reflexao_profunda": "Reflexões profundas sobre temas espirituais",
+      "oracao_intercessao": "Orações de intercessão por necessidades específicas",
+      "louvor_adoracao": "Momentos de louvor e adoração",
+      "consolacao": "Mensagens de consolo e esperança"
+    },
+    "tone_guidelines": {
+      "oracao": {
+        "style": "Solene, contemplativo, com momentos de silêncio",
+        "voices": ["Phillip", "Deep Ray"],
+        "pauses": "Frequentes para contemplação"
+      },
+      "ensino": {
+        "style": "Acolhedor, didático, envolvente",
+        "voices": ["Phillip", "James"],
+        "pauses": "Estratégicas para assimilação"
+      },
+      "meditacao": {
+        "style": "Calmo, suave, contemplativo",
+        "voices": ["Drew", "Phillip"],
+        "pauses": "Longas para reflexão"
+      },
+      "consolacao": {
+        "style": "Empático, acolhedor, esperançoso",
+        "voices": ["Phillip", "Drew"],
+        "pauses": "Suaves para processamento emocional"
+      }
+    },
+    "pauses_strategy": {
+      "contemplation_pauses": [
+        {"position": 0.1, "duration": 1.0, "purpose": "preparation"},
+        {"position": 0.25, "duration": 0.8, "purpose": "reflection"},
+        {"position": 0.4, "duration": 0.6, "purpose": "meditation"},
+        {"position": 0.6, "duration": 0.8, "purpose": "contemplation"},
+        {"position": 0.75, "duration": 0.6, "purpose": "reflection"},
+        {"position": 0.9, "duration": 1.2, "purpose": "gratitude"}
+      ],
+      "natural_pauses": [
+        {"position": 0.15, "duration": 0.3},
+        {"position": 0.3, "duration": 0.3},
+        {"position": 0.45, "duration": 0.3},
+        {"position": 0.6, "duration": 0.3},
+        {"position": 0.75, "duration": 0.3},
+        {"position": 0.85, "duration": 0.3}
+      ],
+      "scripture_pauses": [
+        {"position": 0.2, "duration": 0.5, "purpose": "scripture_emphasis"},
+        {"position": 0.5, "duration": 0.5, "purpose": "scripture_reflection"},
+        {"position": 0.8, "duration": 0.5, "purpose": "scripture_application"}
+      ]
+    }
+  },
+  "visual_settings": {
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920",
+    "background_style": "spiritual_contemplative",
+    "color_palette": "warm_spiritual",
+    "transition_effects": [
+      "gentle_fade_in",
+      "soft_crossfade",
+      "gentle_fade_out"
+    ],
+    "text_style": {
+      "font": "Impact",
+      "font_size": 80,
+      "color": "white",
+      "stroke_color": "dark_gold",
+      "stroke_width": 3,
+      "position": "bottom",
+      "margin": 120,
+      "fade_in": 0.5,
+      "fade_out": 0.5,
+      "scripture_style": {
+        "font": "Times New Roman",
+        "font_size": 70,
+        "color": "gold",
+        "italic": true,
+        "position": "center"
+      }
+    },
+    "background_music": {
+      "style": "spiritual_contemplative",
+      "volume": 0.3,
+      "fade_in": 2.0,
+      "fade_out": 3.0,
+      "recommendations": [
+        "Piano suave",
+        "Harpa espiritual",
+        "Coral instrumental",
+        "Violão acústico",
+        "Música de meditação"
+      ]
+    }
+  },
+  "audio_settings": {
+    "voice_configuration": {
+      "primary": {
+        "voice": "phillip",
+        "stability": 0.8,
+        "similarity_boost": 0.85,
+        "style": 0.4,
+        "use_speaker_boost": true
+      },
+      "secondary": {
+        "voice": "deep_ray",
+        "stability": 0.9,
+        "similarity_boost": 0.9,
+        "style": 0.5,
+        "use_speaker_boost": true
+      }
+    },
+    "pauses_processing": {
+      "silence_detection": true,
+      "minimum_pause_duration": 0.5,
+      "maximum_pause_duration": 2.0,
+      "natural_breathing_pauses": true
+    }
+  },
+  "content_guidelines": {
+    "prayer_structure": {
+      "adoration": "Momento de adoração e louvor",
+      "confession": "Confissão e arrependimento (se aplicável)",
+      "thanksgiving": "Gratidão e agradecimento",
+      "supplication": "Petições e intercessões"
+    },
+    "bible_study_structure": {
+      "introduction": "Apresentação do tema",
+      "scripture_reading": "Leitura dos versículos",
+      "explanation": "Explicação e contexto",
+      "application": "Aplicação prática",
+      "reflection": "Momento de reflexão"
+    },
+    "meditation_structure": {
+      "centering": "Preparação e centralização",
+      "focus": "Foco no tema ou versículo",
+      "contemplation": "Contemplação profunda",
+      "integration": "Integração e aplicação"
+    }
+  },
+  "duration_adaptations": {
+    "1_minute": {
+      "words": 120,
+      "structure": "condensed",
+      "pauses": "minimal"
+    },
+    "3_minutes": {
+      "words": 360,
+      "structure": "standard",
+      "pauses": "moderate"
+    },
+    "5_minutes": {
+      "words": 600,
+      "structure": "detailed",
+      "pauses": "extended"
+    },
+    "10_minutes": {
+      "words": 1200,
+      "structure": "comprehensive",
+      "pauses": "contemplative"
+    }
+  }
+}
