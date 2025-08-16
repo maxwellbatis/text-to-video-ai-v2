@@ -89,7 +89,7 @@ def update_job_progress(job_id, progress, status=None):
             'status': jobs[job_id].status
         })
 
-async def generate_video_async(job_id, topic, template_id=None, voice_id=None, use_db=False, duration_minutes=1):
+async def generate_video_async(job_id, topic, template_id=None, voice_id=None, use_db=False, duration_minutes=1, background_music=None):
     """Gera vídeo de forma assíncrona com suporte a templates e duração personalizada"""
     try:
         job = jobs[job_id]
@@ -147,6 +147,11 @@ async def generate_video_async(job_id, topic, template_id=None, voice_id=None, u
             # 6.5. Aplicar template se especificado
             if template_id and template_config:
                 update_job_progress(job_id, 95)
+                # Adicionar música de fundo ao template config se especificada
+                if background_music:
+                    template_config['background_music'] = background_music
+                    print(f"🎵 Música de fundo adicionada ao template: {background_music}")
+                
                 output_video = template_render_engine.apply_template_to_video(output_video, template_config, audio_file)
                 print(f"Template '{template_id}' aplicado ao vídeo")
             
@@ -170,12 +175,12 @@ async def generate_video_async(job_id, topic, template_id=None, voice_id=None, u
         update_job_progress(job_id, 0, "FAILED")
         socketio.emit('job_failed', {'job_id': job_id, 'error': str(e)})
 
-def run_async_generation(job_id, topic, template_id=None, voice_id=None, use_db=False, duration_minutes=1):
+def run_async_generation(job_id, topic, template_id=None, voice_id=None, use_db=False, duration_minutes=1, background_music=None):
     """Executa geração de vídeo em thread separada"""
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
-        loop.run_until_complete(generate_video_async(job_id, topic, template_id, voice_id, use_db, duration_minutes))
+        loop.run_until_complete(generate_video_async(job_id, topic, template_id, voice_id, use_db, duration_minutes, background_music))
     finally:
         loop.close()
 
@@ -248,6 +253,7 @@ def create_job():
     topic = data.get('topic', '').strip()
     template_id = data.get('template_id', '').strip() or None
     voice_id = data.get('voice_id', '').strip() or None
+    background_music = data.get('background_music', '').strip() or None
     
     if not topic:
         return jsonify({'error': 'Tópico é obrigatório'}), 400
@@ -264,7 +270,7 @@ def create_job():
     # Iniciar geração em thread separada
     thread = threading.Thread(
         target=run_async_generation,
-        args=(job.id, topic, template_id, voice_id, DB_AVAILABLE, duration_minutes)
+        args=(job.id, topic, template_id, voice_id, DB_AVAILABLE, duration_minutes, background_music)
     )
     thread.daemon = True
     thread.start()
@@ -273,7 +279,8 @@ def create_job():
         'job_id': job.id,
         'message': 'Job criado com sucesso',
         'status': job.status,
-        'template_id': template_id
+        'template_id': template_id,
+        'background_music': background_music
     }), 201
 
 @app.route('/api/jobs/<job_id>', methods=['GET'])

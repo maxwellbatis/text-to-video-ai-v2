@@ -104,9 +104,11 @@ class AssetManager:
         tracks = {
             "cinematic": [],
             "suspense": [],
-            "atmospheric": []
+            "atmospheric": [],
+            "religious": []
         }
         
+        # Músicas cinematográficas
         music_dir = self.assets_root / "TRILHA SONORA" / "CINEMATIC"
         if music_dir.exists():
             for file in music_dir.glob("*.mp3"):
@@ -121,6 +123,12 @@ class AssetManager:
             for file in music_dir.glob("*.aac"):
                 if "suspense" in file.name.lower():
                     tracks["suspense"].append(str(file))
+        
+        # Músicas religiosas
+        religious_dir = self.assets_root / "TRILHA SONORA" / "Biblic"
+        if religious_dir.exists():
+            for file in religious_dir.glob("*.mp3"):
+                tracks["religious"].append(str(file))
         
         return tracks
     
@@ -148,6 +156,33 @@ class AssetManager:
                 return tracks[index]
         return None
     
+    def get_religious_music_by_name(self, music_name: str) -> Optional[str]:
+        """Obtém uma música religiosa específica pelo nome"""
+        religious_tracks = self.music_tracks.get("religious", [])
+        
+        # Mapeamento de nomes para arquivos
+        music_mapping = {
+            "piano-worship": "piano-worship-184108.mp3",
+            "worship-piano": "worship-piano-instrumental-peaceful-prayer-music-223373.mp3",
+            "guitar-worship": "instrumental-guitar-worship-to-jesus-301253.mp3",
+            "piano-christian": "instrumental-piano-christian-worship-of-jesus-301250.mp3",
+            "cherry-blossom": "cherry-blossom-christian-worship-music-for-jesus-christ-312719.mp3",
+            "morning-light": "morningx27s-first-light-worship-music-to-jesus-christ-our-god-312717.mp3",
+            "peaceful-piano": "peaceful-piano-soaking-instrumental-worship-track-loops-223094.mp3",
+            "gospel-worship": "gospel-worship-church-prayer-music-343269.mp3",
+            "christian-piano": "christian-instrumental-piano-worship-calm-emotional-soaking-prayer-249459.mp3",
+            "worship-gospel": "worship-gospel-christian-church-music-351228.mp3"
+        }
+        
+        target_file = music_mapping.get(music_name)
+        if target_file:
+            for track in religious_tracks:
+                if target_file in track:
+                    return track
+        
+        # Se não encontrar, retornar a primeira música religiosa disponível
+        return religious_tracks[0] if religious_tracks else None
+    
     def list_available_assets(self) -> Dict:
         """Lista todos os assets disponíveis"""
         return {
@@ -156,15 +191,24 @@ class AssetManager:
             "music_tracks": self.music_tracks
         }
     
-    def get_assets_for_template(self, template_id: str) -> Dict:
+    def get_assets_for_template(self, template_id: str, background_music_choice: str = None) -> Dict:
         """Obtém assets recomendados para um template específico"""
-        if template_id == "cinematic_religious":
+        if template_id == "cinematic_religious" or template_id == "prayer_extended":
+            # Para templates religiosos, usar música religiosa se especificada
+            if background_music_choice:
+                background_music = self.get_religious_music_by_name(background_music_choice)
+            else:
+                # Usar música religiosa aleatória
+                import random
+                religious_tracks = self.music_tracks["religious"]
+                background_music = random.choice(religious_tracks) if religious_tracks else self.get_music_track("cinematic", 0)
+            
             return {
-                "background_music": self.get_music_track("cinematic", 0),  # Cinematic_principal.mp3
+                "background_music": background_music,
                 "tension_effect": self.get_audio_effect("cinematic", 0),    # Orchestra build up 01.mp3
                 "impact_effect": self.get_audio_effect("impacts", 0),       # Primeiro impacto disponível
-                "film_overlay": None,  # Não disponível no VPS
-                "light_leak": None,    # Não disponível no VPS
+                "film_overlay": self.get_video_effect("film_old", 0),       # Filme antigo
+                "light_leak": self.get_video_effect("light_leaks", 0),      # Light leak
                 "drones": None,        # Não disponível no VPS
                 "reverse": None        # Não disponível no VPS
             }

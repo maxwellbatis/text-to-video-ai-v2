@@ -277,6 +277,24 @@
                 <small style="opacity: 0.8;">Marque para usar template de oração automaticamente</small>
             </div>
             
+            <div style="margin: 15px 0;">
+                <label for="backgroundMusicSelect">🎵 Música de Fundo (Religiosa):</label>
+                <select id="backgroundMusicSelect">
+                    <option value="">🎯 Automática (Baseada no Template)</option>
+                    <option value="piano-worship">🎹 Piano Worship - Calmo e Emocional</option>
+                    <option value="worship-piano">🎼 Worship Piano - Pacífico e Oracional</option>
+                    <option value="guitar-worship">🎸 Guitarra Worship - Instrumental para Jesus</option>
+                    <option value="piano-christian">🎹 Piano Cristão - Adoração Instrumental</option>
+                    <option value="cherry-blossom">🌸 Cherry Blossom - Música Cristã para Jesus</option>
+                    <option value="morning-light">🌅 Morning Light - Música de Adoração</option>
+                    <option value="peaceful-piano">🕊️ Piano Pacífico - Soaking Instrumental</option>
+                    <option value="gospel-worship">⛪ Gospel Worship - Música de Igreja</option>
+                    <option value="christian-piano">🎹 Piano Cristão - Calmo e Emocional</option>
+                    <option value="worship-gospel">🎵 Worship Gospel - Música Cristã</option>
+                </select>
+                <small style="opacity: 0.8;">Escolha uma música de fundo religiosa específica</small>
+            </div>
+            
             <button type="submit" class="btn">🚀 Gerar Vídeo</button>
         </form>
         
@@ -369,6 +387,7 @@
                 const voiceId = document.getElementById('voiceSelect').value;
                 const duration = parseInt(document.getElementById('durationSelect').value);
                 const isPrayer = document.getElementById('prayerCheckbox').checked;
+                const backgroundMusic = document.getElementById('backgroundMusicSelect').value;
                 
                 const requestBody = { 
                     topic: topic,
@@ -385,6 +404,10 @@
                 
                 if (isPrayer) {
                     requestBody.prayer = true;
+                }
+                
+                if (backgroundMusic) {
+                    requestBody.background_music = backgroundMusic;
                 }
                 
                 const response = await fetch('/api/jobs', {

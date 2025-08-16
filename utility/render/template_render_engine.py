@@ -183,10 +183,13 @@ class TemplateRenderEngine:
             
             # Obter assets para o template
             template_id = template_config.get('template_id', 'default')
+            background_music_choice = template_config.get('background_music')
             print(f"🎵 Aplicando áudio para template: {template_id}")
+            if background_music_choice:
+                print(f"🎵 Música de fundo escolhida: {background_music_choice}")
             
             if ASSETS_AVAILABLE:
-                assets = asset_manager.get_assets_for_template(template_id)
+                assets = asset_manager.get_assets_for_template(template_id, background_music_choice)
                 print(f"🎵 Assets de áudio encontrados: {list(assets.keys())}")
                 
                 # Adicionar música de fundo
