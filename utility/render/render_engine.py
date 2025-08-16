@@ -94,38 +94,51 @@ def generate_colored_text_clips(processed_text, start_time, end_time):
         # Criar clip para cada palavra individual
         txt = word.upper()
         
-        # Criar múltiplas camadas para texto mais grosso
-        # Camada 1: Contorno preto espesso
-        txt_clip_bg = (TextClip(txt=txt,
-                                fontsize=90,  # Fonte grande e impactante
-                                font="Impact",  # Fonte Impact (mais chamativa)
-                                color="white",  # Cor preta para contorno
-                                stroke_color="black",  # Contorno preto
-                                stroke_width=12,  # Contorno muito espesso
-                                method="label")
-                       .set_start(word_start)
-                       .set_end(word_end)
-                       .fadein(0.1)  # Fade-in rápido
-                       .fadeout(0.1)  # Fade-out rápido
-                       .set_position(("center", "center")))  # Centralizado na tela
+        # Limpar texto de caracteres problemáticos
+        txt = re.sub(r'[^\w\s]', '', txt)  # Remove caracteres especiais
+        txt = txt.strip()  # Remove espaços extras
         
-        # Camada 2: Texto branco principal
-        txt_clip_main = (TextClip(txt=txt,
-                                  fontsize=90,  # Fonte grande e impactante
-                                  font="Impact",  # Fonte Impact (mais chamativa)
-                                  color="white",  # Cor branca
-                                  stroke_color="white",  # Contorno preto
-                                  stroke_width=8,  # Contorno espesso
-                                  method="label")
-                         .set_start(word_start)
-                         .set_end(word_end)
-                         .fadein(0.1)  # Fade-in rápido
-                         .fadeout(0.1)  # Fade-out rápido
-                         .set_position(("center", "center")))  # Centralizado na tela
+        # Pular palavras vazias ou muito curtas
+        if len(txt) < 1:
+            continue
         
-        # Adicionar ambas as camadas
-        clips.append(txt_clip_bg)
-        clips.append(txt_clip_main)
+        try:
+            # Criar múltiplas camadas para texto mais grosso
+            # Camada 1: Contorno preto espesso
+            txt_clip_bg = (TextClip(txt=txt,
+                                    fontsize=90,  # Fonte grande e impactante
+                                    font="Impact",  # Fonte Impact (mais chamativa)
+                                    color="white",  # Cor preta para contorno
+                                    stroke_color="black",  # Contorno preto
+                                    stroke_width=12,  # Contorno muito espesso
+                                    method="label")
+                           .set_start(word_start)
+                           .set_end(word_end)
+                           .fadein(0.1)  # Fade-in rápido
+                           .fadeout(0.1)  # Fade-out rápido
+                           .set_position(("center", "center")))  # Centralizado na tela
+        
+            # Camada 2: Texto branco principal
+            txt_clip_main = (TextClip(txt=txt,
+                                      fontsize=90,  # Fonte grande e impactante
+                                      font="Impact",  # Fonte Impact (mais chamativa)
+                                      color="white",  # Cor branca
+                                      stroke_color="white",  # Contorno preto
+                                      stroke_width=8,  # Contorno espesso
+                                      method="label")
+                             .set_start(word_start)
+                             .set_end(word_end)
+                             .fadein(0.1)  # Fade-in rápido
+                             .fadeout(0.1)  # Fade-out rápido
+                             .set_position(("center", "center")))  # Centralizado na tela
+            
+            # Adicionar ambas as camadas
+            clips.append(txt_clip_bg)
+            clips.append(txt_clip_main)
+            
+        except Exception as e:
+            print(f"⚠️ Erro ao criar clip de texto para '{txt}': {e}")
+            continue
     
     return clips
 
