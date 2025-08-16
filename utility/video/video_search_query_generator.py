@@ -241,9 +241,9 @@ def fix_json(json_str):
     except:
         pass
     
-    # Se tudo falhar, retornar JSON padrão
+    # Se tudo falhar, retornar estrutura padrão
     print("⚠️ Não foi possível corrigir JSON, usando padrão")
-    return "[[[0, 10], [\"storm clouds\", \"dark sky\", \"church\"]]]"
+    return [[[0, 10], ["storm clouds", "dark sky", "church"]]]
 
 def generate_manual_json(script, duration):
     """Gera JSON manualmente baseado no conteúdo do script"""
@@ -322,8 +322,8 @@ def generate_manual_json(script, duration):
         
     except Exception as e:
         print(f"❌ Erro ao gerar JSON manual: {e}")
-        # Fallback simples
-        return "[[[0, 10], [\"storm clouds\", \"dark sky\", \"church\"]]]"
+        # Fallback simples - retornar estrutura Python
+        return [[[0, 10], ["storm clouds", "dark sky", "church"]]]
 
 def getVideoSearchQueriesTimed(script,captions_timed):
     """Gera termos de busca para vídeos de fundo com fallback robusto"""
