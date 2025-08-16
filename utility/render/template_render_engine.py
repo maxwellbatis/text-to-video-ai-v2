@@ -11,6 +11,14 @@ from moviepy.editor import AudioFileClip, CompositeVideoClip, CompositeAudioClip
 from moviepy.audio.fx.audio_normalize import audio_normalize
 from moviepy.audio.fx.audio_loop import audio_loop
 
+# Patch para compatibilidade com Pillow 10.x (ANTIALIAS foi removido)
+try:
+    from PIL import Image
+    if not hasattr(Image, 'ANTIALIAS'):
+        Image.ANTIALIAS = Image.Resampling.LANCZOS
+except ImportError:
+    pass
+
 # Importar AssetManager
 try:
     from utility.assets.asset_manager import asset_manager

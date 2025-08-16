@@ -12,6 +12,14 @@ from moviepy.audio.fx.audio_loop import audio_loop
 from moviepy.audio.fx.audio_normalize import audio_normalize
 import requests
 
+# Patch para compatibilidade com Pillow 10.x (ANTIALIAS foi removido)
+try:
+    from PIL import Image
+    if not hasattr(Image, 'ANTIALIAS'):
+        Image.ANTIALIAS = Image.Resampling.LANCZOS
+except ImportError:
+    pass
+
 def process_text_for_captions(text):
     """
     Processa texto para legendas seguindo as especificações:
