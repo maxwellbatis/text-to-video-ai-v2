@@ -1,0 +1,198 @@
+{
+  "name": "Resumo de Novela",
+  "description": "Template para vídeos de resumos de novelas com estilo dramático e envolvente",
+  "category": "entretenimento",
+  "template_id": "novela_resumo",
+  "script_pattern": {
+    "style": "dramatic",
+    "tone": "entertaining",
+    "structure": "narrative",
+    "video_structure": {
+      "opening": {
+        "duration": "5-10 segundos",
+        "elements": [
+          "Saudação envolvente (ex: 'Fala galera!', 'Oi pessoal!')",
+          "Anúncio da novela (ex: 'Resumo da semana de Dona de Mim')",
+          "Hook dramático (ex: 'Você não vai acreditar no que aconteceu!')"
+        ]
+      },
+      "development": {
+        "duration": "45-75 segundos",
+        "elements": [
+          "Resumo dos principais acontecimentos",
+          "Destaque dos personagens principais",
+          "Conflitos e reviravoltas",
+          "Cenas mais marcantes da semana"
+        ]
+      },
+      "closing": {
+        "duration": "10-15 segundos",
+        "elements": [
+          "Teaser para próxima semana",
+          "Convite para comentários",
+          "'Não perca o próximo capítulo!'",
+          "'Deixe seu comentário, qual foi sua cena favorita?'"
+        ]
+      }
+    },
+    "voice_settings": {
+      "voice": "pt-BR-FranciscoNeural",
+      "rate": "medium",
+      "volume": 1.0,
+      "pitch": "medium"
+    },
+    "content_types": {
+      "resumo_semanal": "Resumo dos principais acontecimentos da semana",
+      "resumo_capitulo": "Resumo de um capítulo específico",
+      "analise_personagem": "Análise de um personagem específico",
+      "previsoes": "Previsões para próximos capítulos",
+      "curiosidades": "Curiosidades sobre a novela",
+      "behind_scenes": "Detalhes de bastidores"
+    },
+    "tone_guidelines": {
+      "resumo_dramatico": {
+        "style": "Dramático, envolvente, com suspense",
+        "voices": ["Francisco", "Maria"]
+      },
+      "analise_leve": {
+        "style": "Leve, divertido, comentarista",
+        "voices": ["Francisco", "Maria"]
+      },
+      "teaser": {
+        "style": "Misterioso, intrigante, com suspense",
+        "note": "Use pausas dramáticas para criar expectativa"
+      }
+    },
+    "pauses_strategy": {
+      "dramatic_pauses": [
+        {"position": 0.2, "duration": 0.3, "purpose": "suspense"},
+        {"position": 0.5, "duration": 0.4, "purpose": "dramatic_effect"},
+        {"position": 0.8, "duration": 0.5, "purpose": "climax"}
+      ],
+      "natural_pauses": [
+        {"position": 0.15, "duration": 0.2},
+        {"position": 0.35, "duration": 0.2},
+        {"position": 0.65, "duration": 0.2},
+        {"position": 0.85, "duration": 0.2}
+      ]
+    }
+  },
+  "visual_settings": {
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920",
+    "background_style": "dramatic",
+    "color_palette": "vibrant",
+    "transition_effects": [
+      "fade_in",
+      "crossfade",
+      "slide_transition",
+      "fade_out"
+    ],
+    "text_style": {
+      "font": "Impact",
+      "font_size": 85,
+      "color": "white",
+      "stroke_color": "black",
+      "stroke_width": 4,
+      "position": "bottom",
+      "margin": 100,
+      "fade_in": 0.3,
+      "fade_out": 0.3
+    },
+    "character_images": {
+      "enabled": true,
+      "position": "top_right",
+      "size": "medium",
+      "border_radius": 10,
+      "border_color": "white",
+      "border_width": 3,
+      "shadow": true,
+      "fade_in": 0.5,
+      "fade_out": 0.5,
+      "max_images_per_scene": 2
+    }
+  },
+  "audio_settings": {
+    "background_music": {
+      "type": "dramatic",
+      "style": "Dramática, envolvente, com tensão - Tons de suspense, emoção e drama",
+      "note": "Música que acompanhe o ritmo dramático da novela",
+      "volume": 0.2,
+      "fade_in": 2.0,
+      "fade_out": 3.0
+    },
+    "sound_effects": {
+      "volume": 0.25,
+      "types": ["dramatic", "impact", "suspense"]
+    },
+    "voice_processing": {
+      "normalize": true,
+      "compression": true,
+      "reverb": 0.05
+    }
+  },
+  "assets_config": {
+    "use_local_assets": true,
+    "background_music": "assets/TRILHA SONORA/CINEMATIC/cinematic_suspense01.mp3",
+    "dramatic_effect": "assets/EFEITOS SONOROS/CINEMATIC/Orchestra build up 01.mp3",
+    "impact_effect": "assets/EFEITOS SONOROS/IMPACTOS/Scary impact.mp3",
+    "suspense_effect": "assets/EFEITOS SONOROS/CINEMATIC/Heartbeat progressive, slow to fast.mp3"
+  },
+  "content_guidelines": {
+    "topics": ["novela", "resumo", "drama", "entretenimento", "televisão"],
+    "keywords": ["novela", "capítulo", "personagem", "drama", "romance", "conflito", "revelação"],
+    "avoid": ["spoilers_excessivos", "críticas_negativas", "política"],
+    "tone": "entertaining",
+    "duration_target": 60,
+    "word_count": "200-300 palavras",
+    "structure_requirements": {
+      "opening": "Saudação + Anúncio da novela + Hook",
+      "development": "Principais acontecimentos + Personagens + Conflitos",
+      "closing": "Teaser + Chamada à ação"
+    }
+  },
+  "search_terms": {
+    "dramatic": ["dramatic scene", "emotional moment", "conflict", "tension"],
+    "romance": ["romantic scene", "love story", "couple", "romance"],
+    "urban": ["city life", "urban scene", "modern life", "contemporary"],
+    "people": ["dramatic people", "emotional faces", "conflict scene", "tension"]
+  },
+  "effects": {
+    "visual": [
+      "dramatic_lighting",
+      "color_grading",
+      "motion_blur",
+      "cinematic_transitions"
+    ],
+    "audio": [
+      "dramatic_music",
+      "suspense_sounds",
+      "emotional_swells",
+      "impact_effects"
+    ]
+  },
+  "novela_specific": {
+    "current_novelas": [
+      "Dona de Mim",
+      "Fuzuê",
+      "Vai na Fé",
+      "Terra e Paixão"
+    ],
+    "common_themes": [
+      "amor_proibido",
+      "vingança",
+      "mistério",
+      "família",
+      "trabalho",
+      "amizade"
+    ],
+    "character_types": [
+      "protagonista",
+      "antagonista",
+      "mocinho",
+      "mocinha",
+      "vilão",
+      "comediante"
+    ]
+  }
+} 
