@@ -409,14 +409,35 @@ def getVideoSearchQueriesTimed(script,captions_timed):
         except Exception as e3:
             print(f"❌ Erro ao gerar estrutura básica: {e3}")
         
-        # Fallback final
-        print("⚠️ Usando fallback padrão")
-        return [[[0, end], ["storm clouds", "dark sky", "church"]]]
+        # Fallback final - Gerar múltiplos segmentos
+        print("⚠️ Usando fallback padrão com múltiplos segmentos")
+        fallback_segments = []
+        segment_duration = min(5, end / 10)  # 5 segundos ou dividir em 10 segmentos
+        current_time = 0
+        
+        while current_time < end:
+            next_time = min(current_time + segment_duration, end)
+            fallback_segments.append([[current_time, next_time], ["storm clouds", "dark sky", "church"]])
+            current_time = next_time
+        
+        print(f"✅ Fallback gerado: {len(fallback_segments)} segmentos")
+        return fallback_segments
         
     except Exception as e:
         print(f"❌ Erro geral em getVideoSearchQueriesTimed: {e}")
-        # Retornar estrutura padrão em caso de falha
-        return [[[0, captions_timed[-1][0][1] if captions_timed else 10], ["storm clouds", "dark sky", "church"]]]
+        # Retornar estrutura padrão com múltiplos segmentos em caso de falha
+        end = captions_timed[-1][0][1] if captions_timed else 10
+        fallback_segments = []
+        segment_duration = min(5, end / 10)  # 5 segundos ou dividir em 10 segmentos
+        current_time = 0
+        
+        while current_time < end:
+            next_time = min(current_time + segment_duration, end)
+            fallback_segments.append([[current_time, next_time], ["storm clouds", "dark sky", "church"]])
+            current_time = next_time
+        
+        print(f"✅ Fallback final gerado: {len(fallback_segments)} segmentos")
+        return fallback_segments
 
 def call_OpenAI(script,captions_timed):
     user_content = """Script: {}
