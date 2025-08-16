@@ -324,6 +324,7 @@ def getVideoSearchQueriesTimed(script,captions_timed):
     """Gera termos de busca para vídeos de fundo com fallback robusto"""
     try:
         end = captions_timed[-1][0][1]
+        print(f"🎯 Duração total do vídeo: {end:.2f} segundos")
         
         # Tentar gerar termos de busca
         content = call_OpenAI(script,captions_timed).replace("'",'"')
@@ -350,15 +351,18 @@ def getVideoSearchQueriesTimed(script,captions_timed):
         # Terceira tentativa: Gerar JSON manualmente baseado no script
         try:
             print("🔄 Gerando JSON manualmente...")
+            print(f"📝 Script detectado: {script[:100]}...")
             manual_json = generate_manual_json(script, end)
+            print(f"📋 JSON manual criado: {manual_json[:200]}...")
             out = json.loads(manual_json)
             if out and len(out) > 0:
                 print("✅ JSON manual gerado com sucesso")
                 return out
         except Exception as e3:
             print(f"❌ Erro ao gerar JSON manual: {e3}")
+            print(f"🔍 Detalhes do erro: {str(e3)}")
         
-        # Terceira tentativa: Gerar estrutura básica baseada no script
+        # Quarta tentativa: Gerar estrutura básica baseada no script
         try:
             # Extrair palavras-chave do script
             words = script.lower().split()
