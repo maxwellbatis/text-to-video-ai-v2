@@ -116,7 +116,7 @@ async def generate_video_with_db(topic: str, credentials_name: str = "default", 
         
         # Renderizar vídeo final
         output_filename = f"output_video_{video_id}.mp4" if video_id else "output_video.mp4"
-        get_output_media(SAMPLE_FILE_NAME, background_video_urls, timed_captions, output_filename)
+        get_output_media(SAMPLE_FILE_NAME, timed_captions, background_video_urls, VIDEO_SERVER)
         
         # Atualizar banco de dados
         if use_db and video_id:
