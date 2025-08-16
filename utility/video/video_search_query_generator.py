@@ -310,10 +310,15 @@ def generate_manual_json(script, duration):
             current_time = next_time
             keyword_index += 1
         
-        # Montar JSON final
-        manual_json = "[" + ",".join(segments) + "]"
-        print(f"📝 JSON manual gerado: {len(segments)} segmentos")
-        return manual_json
+        # Montar estrutura Python (não JSON string)
+        manual_structure = []
+        for segment in segments:
+            # Converter string JSON para estrutura Python
+            segment_data = json.loads(segment)
+            manual_structure.append(segment_data)
+        
+        print(f"📝 JSON manual gerado: {len(manual_structure)} segmentos")
+        return manual_structure
         
     except Exception as e:
         print(f"❌ Erro ao gerar JSON manual: {e}")
@@ -352,12 +357,11 @@ def getVideoSearchQueriesTimed(script,captions_timed):
         try:
             print("🔄 Gerando JSON manualmente...")
             print(f"📝 Script detectado: {script[:100]}...")
-            manual_json = generate_manual_json(script, end)
-            print(f"📋 JSON manual criado: {manual_json[:200]}...")
-            out = json.loads(manual_json)
-            if out and len(out) > 0:
+            manual_structure = generate_manual_json(script, end)
+            print(f"📋 Estrutura manual criada: {len(manual_structure)} segmentos")
+            if manual_structure and len(manual_structure) > 0:
                 print("✅ JSON manual gerado com sucesso")
-                return out
+                return manual_structure
         except Exception as e3:
             print(f"❌ Erro ao gerar JSON manual: {e3}")
             print(f"🔍 Detalhes do erro: {str(e3)}")
