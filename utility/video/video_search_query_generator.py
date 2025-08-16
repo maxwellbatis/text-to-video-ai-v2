@@ -245,6 +245,81 @@ def fix_json(json_str):
     print("⚠️ Não foi possível corrigir JSON, usando padrão")
     return "[[[0, 10], [\"storm clouds\", \"dark sky\", \"church\"]]]"
 
+def generate_manual_json(script, duration):
+    """Gera JSON manualmente baseado no conteúdo do script"""
+    try:
+        # Dividir o script em segmentos de tempo
+        segment_duration = min(4, duration / 10)  # Máximo 4 segundos por segmento
+        segments = []
+        current_time = 0
+        
+        # Palavras-chave baseadas no conteúdo
+        script_lower = script.lower()
+        
+        # Detectar tipo de conteúdo
+        if any(word in script_lower for word in ['senhor', 'deus', 'jesus', 'oração', 'fé', 'espiritual']):
+            keywords = [
+                ["praying hands", "church interior", "spiritual atmosphere"],
+                ["worship", "adoration", "divine presence"],
+                ["peaceful atmosphere", "calmness", "serenity"],
+                ["heavenly light", "divine guidance", "spiritual wisdom"],
+                ["bible reading", "scripture study", "religious text"],
+                ["family prayer", "group worship", "community faith"],
+                ["gratitude", "thankfulness", "blessed moment"],
+                ["inner peace", "spiritual reflection", "meditation"],
+                ["god's love", "divine mercy", "heavenly grace"],
+                ["faith journey", "spiritual growth", "religious devotion"]
+            ]
+        elif any(word in script_lower for word in ['família', 'pais', 'filhos', 'amor', 'casa']):
+            keywords = [
+                ["family gathering", "loving family", "home interior"],
+                ["parents and children", "family love", "togetherness"],
+                ["happy family", "family unity", "domestic life"],
+                ["family meal", "family time", "family bonding"],
+                ["family celebration", "family joy", "family happiness"],
+                ["family support", "family care", "family protection"],
+                ["family values", "family tradition", "family heritage"],
+                ["family home", "family comfort", "family warmth"],
+                ["family connection", "family relationship", "family bond"],
+                ["family future", "family hope", "family dreams"]
+            ]
+        else:
+            keywords = [
+                ["nature landscape", "beautiful scenery", "peaceful environment"],
+                ["sunrise", "morning light", "new day"],
+                ["mountain view", "forest path", "natural beauty"],
+                ["ocean waves", "beach sunset", "coastal beauty"],
+                ["city life", "urban landscape", "modern living"],
+                ["technology", "innovation", "future world"],
+                ["education", "learning", "knowledge"],
+                ["success", "achievement", "goal reaching"],
+                ["friendship", "community", "social connection"],
+                ["inspiration", "motivation", "positive energy"]
+            ]
+        
+        # Gerar segmentos
+        keyword_index = 0
+        while current_time < duration:
+            next_time = min(current_time + segment_duration, duration)
+            
+            # Usar keywords em ciclo
+            current_keywords = keywords[keyword_index % len(keywords)]
+            
+            segments.append(f'[[{current_time:.1f}, {next_time:.1f}], {json.dumps(current_keywords)}]')
+            
+            current_time = next_time
+            keyword_index += 1
+        
+        # Montar JSON final
+        manual_json = "[" + ",".join(segments) + "]"
+        print(f"📝 JSON manual gerado: {len(segments)} segmentos")
+        return manual_json
+        
+    except Exception as e:
+        print(f"❌ Erro ao gerar JSON manual: {e}")
+        # Fallback simples
+        return "[[[0, 10], [\"storm clouds\", \"dark sky\", \"church\"]]]"
+
 def getVideoSearchQueriesTimed(script,captions_timed):
     """Gera termos de busca para vídeos de fundo com fallback robusto"""
     try:
@@ -271,6 +346,17 @@ def getVideoSearchQueriesTimed(script,captions_timed):
             print(f"❌ Erro crítico ao processar JSON: {e2}")
             print(f"Content original: {content[:200]}...")
             print(f"Content limpo: {cleaned_content[:200]}...")
+        
+        # Terceira tentativa: Gerar JSON manualmente baseado no script
+        try:
+            print("🔄 Gerando JSON manualmente...")
+            manual_json = generate_manual_json(script, end)
+            out = json.loads(manual_json)
+            if out and len(out) > 0:
+                print("✅ JSON manual gerado com sucesso")
+                return out
+        except Exception as e3:
+            print(f"❌ Erro ao gerar JSON manual: {e3}")
         
         # Terceira tentativa: Gerar estrutura básica baseada no script
         try:
