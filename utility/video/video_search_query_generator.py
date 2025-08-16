@@ -70,8 +70,13 @@ CRITICAL: For religious/biblical content, use more general, visually appealing t
 - Instead of "fatima", use "portugal landscape", "church building", "pilgrimage"
 - Instead of "666", use "numbers", "symbols", "mysterious", "dark"
 - Instead of "antichrist", use "dark figure", "shadow", "mysterious person"
+- Instead of "prayer", use "praying hands", "church interior", "candles"
+- Instead of "family", use "family gathering", "home interior", "loving family"
+- Instead of "god", use "heavenly light", "divine presence", "spiritual atmosphere"
 
 Focus on visual elements that are commonly available in stock video libraries.
+
+CRITICAL JSON FORMAT: Ensure your response is valid JSON. Do not include any text before or after the JSON array. The format must be exactly: [[[time1, time2], ["keyword1", "keyword2", "keyword3"]], ...]
 
 Note: Your response should be the response only and no extra text or data.
   """
@@ -98,6 +103,17 @@ def fix_json(json_str):
     
     # Corrigir aspas problemáticas específicas
     json_str = json_str.replace('"you"re"', '"you\'re"')
+    
+    # Corrigir problemas específicos de vírgulas e colchetes
+    json_str = re.sub(r',\s*]', ']', json_str)  # Remove vírgulas antes de ]
+    json_str = re.sub(r',\s*}', '}', json_str)  # Remove vírgulas antes de }
+    
+    # Corrigir aspas duplas malformadas
+    json_str = re.sub(r'([^\\])"([^"]*?)([^\\])"', r'\1"\2\3"', json_str)
+    
+    # Garantir que arrays estejam bem formados
+    json_str = re.sub(r'\[\[\[', '[[[', json_str)
+    json_str = re.sub(r'\]\]\]', ']]]', json_str)
     json_str = json_str.replace('"you"re missing"', '"you\'re missing"')
     json_str = json_str.replace('"you"re missing out"', '"you\'re missing out"')
     json_str = json_str.replace('"what you"re"', '"what you\'re"')
@@ -247,10 +263,17 @@ def getVideoSearchQueriesTimed(script,captions_timed):
             keywords = []
             
             # Palavras-chave religiosas
-            religious_keywords = ['deus', 'jesus', 'bíblia', 'igreja', 'fé', 'espiritual', 'sagrado']
+            religious_keywords = ['deus', 'jesus', 'bíblia', 'igreja', 'fé', 'espiritual', 'sagrado', 'oração', 'pai', 'senhor']
             for word in words:
                 if any(keyword in word for keyword in religious_keywords):
-                    keywords.extend(['church', 'spiritual', 'religious'])
+                    keywords.extend(['church', 'spiritual', 'religious', 'prayer'])
+                    break
+            
+            # Palavras-chave de família
+            family_keywords = ['família', 'pais', 'filhos', 'irmãos', 'amor', 'casa']
+            for word in words:
+                if any(keyword in word for keyword in family_keywords):
+                    keywords.extend(['family', 'home', 'love', 'togetherness'])
                     break
             
             # Palavras-chave de natureza
@@ -264,8 +287,16 @@ def getVideoSearchQueriesTimed(script,captions_timed):
             if not keywords:
                 keywords = ['storm clouds', 'dark sky', 'church']
             
-            # Criar estrutura básica
-            basic_structure = [[[0, end], keywords]]
+            # Criar estrutura básica com múltiplos segmentos
+            segment_duration = min(10, end / 3)  # Dividir em 3 segmentos ou 10s cada
+            basic_structure = []
+            current_time = 0
+            
+            while current_time < end:
+                next_time = min(current_time + segment_duration, end)
+                basic_structure.append([[current_time, next_time], keywords])
+                current_time = next_time
+            
             print(f"✅ Usando estrutura básica: {basic_structure}")
             return basic_structure
             
