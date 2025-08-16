@@ -78,6 +78,13 @@ Focus on visual elements that are commonly available in stock video libraries.
 
 CRITICAL JSON FORMAT: Ensure your response is valid JSON. Do not include any text before or after the JSON array. The format must be exactly: [[[time1, time2], ["keyword1", "keyword2", "keyword3"]], ...]
 
+IMPORTANT: 
+- Each array must have exactly 3 keywords
+- Time segments must be consecutive and cover the entire duration
+- Use only English keywords
+- Avoid special characters or accents
+- Ensure all quotes are properly closed
+
 Note: Your response should be the response only and no extra text or data.
   """
 
@@ -124,6 +131,15 @@ def fix_json(json_str):
     
     # Corrigir aspas duplas múltiplas
     json_str = re.sub(r'""+', '"', json_str)
+    
+    # NOVA: Corrigir problemas específicos de vírgulas antes de fechamentos
+    json_str = re.sub(r',\s*(\]|\})', r'\1', json_str)
+    
+    # NOVA: Corrigir arrays malformados com vírgulas extras
+    json_str = re.sub(r'\[\[\[([^\]]+)\],\s*\[([^\]]+)\],\s*\]', r'[[[\1], [\2]]', json_str)
+    
+    # NOVA: Corrigir problemas de aspas não fechadas
+    json_str = re.sub(r'"([^"]*?)(?=\]|,|$)', r'"\1"', json_str)
     
     # NOVA: Tentar encontrar JSON válido por partes
     try:
