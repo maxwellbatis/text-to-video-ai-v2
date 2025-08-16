@@ -227,6 +227,7 @@
                 <select id="templateSelect" onchange="showTemplateInfo()">
                     <option value="">🎬 Sem Template</option>
                     <option value="cinematic_religious">⛪ Cinematográfico Religioso</option>
+                    <option value="prayer_extended">🙏 Oração e Conteúdo Espiritual Estendido</option>
                     <option value="vsl_magnetic">🧲 VSL Magnético</option>
                     <option value="gaming_tutorial">🎮 Gaming Tutorial</option>
                     <option value="gaming_highlights">⚡ Gaming Highlights</option>
@@ -245,9 +246,35 @@
                     <option value="drew">🧘 Drew - Reflexivo</option>
                     <option value="phillip">⛪ Phillip - Espiritual</option>
                     <option value="deep_ray">🙏 Deep Ray - Voz de Deus</option>
+                    <option value="readwell">📖 Readwell - Deep and Narrative</option>
                 </select>
                 <small style="opacity: 0.8;">Deixe vazio para detecção automática baseada no conteúdo</small>
                 <div id="voiceInfo" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; display: none;"></div>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <label for="durationSelect">⏱️ Duração (Minutos):</label>
+                <select id="durationSelect">
+                    <option value="1">1 minuto</option>
+                    <option value="2">2 minutos</option>
+                    <option value="3" selected>3 minutos</option>
+                    <option value="4">4 minutos</option>
+                    <option value="5">5 minutos</option>
+                    <option value="6">6 minutos</option>
+                    <option value="7">7 minutos</option>
+                    <option value="8">8 minutos</option>
+                    <option value="9">9 minutos</option>
+                    <option value="10">10 minutos</option>
+                </select>
+                <small style="opacity: 0.8;">Duração do vídeo em minutos (1-10)</small>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="prayerCheckbox" style="width: auto; margin-right: 10px;">
+                    🙏 Gerar Oração Específica
+                </label>
+                <small style="opacity: 0.8;">Marque para usar template de oração automaticamente</small>
             </div>
             
             <button type="submit" class="btn">🚀 Gerar Vídeo</button>
@@ -340,7 +367,13 @@
             try {
                 const templateId = document.getElementById('templateSelect').value;
                 const voiceId = document.getElementById('voiceSelect').value;
-                const requestBody = { topic: topic };
+                const duration = parseInt(document.getElementById('durationSelect').value);
+                const isPrayer = document.getElementById('prayerCheckbox').checked;
+                
+                const requestBody = { 
+                    topic: topic,
+                    duration_minutes: duration
+                };
                 
                 if (templateId) {
                     requestBody.template_id = templateId;
@@ -348,6 +381,10 @@
                 
                 if (voiceId) {
                     requestBody.voice_id = voiceId;
+                }
+                
+                if (isPrayer) {
+                    requestBody.prayer = true;
                 }
                 
                 const response = await fetch('/api/jobs', {
@@ -634,6 +671,11 @@
                     description: 'Template para vídeos religiosos com estilo cinematográfico, pausas estratégicas e efeitos dramáticos',
                     features: ['🎬 Efeitos cinematográficos', '⏱️ Pausas estratégicas', '🎵 Música de fundo', '📖 Conteúdo religioso']
                 },
+                'prayer_extended': {
+                    name: 'Oração e Conteúdo Espiritual Estendido',
+                    description: 'Template especializado para orações, estudos bíblicos e conteúdo espiritual de 1-10 minutos com estrutura aprofundada',
+                    features: ['🙏 Estrutura de oração tradicional', '⏱️ Duração flexível (1-10 min)', '🎭 Vozes espirituais', '📖 Conteúdo bíblico']
+                },
                 'vsl_magnetic': {
                     name: 'VSL Magnético',
                     description: 'Template para vídeos de vendas magnéticos em formato vertical (720x1280) - ideal para Reels, TikTok e Shorts',
@@ -717,6 +759,12 @@
                     description: 'Voz muito profunda e suave, perfeita para "voz de Deus" em leituras bíblicas',
                     category: 'Conteúdo religioso ou bíblico',
                     features: ['🙏 Profunda', '⛪ Sagrada', '📖 Bíblica', '🎭 Solene']
+                },
+                'readwell': {
+                    name: 'Readwell - Deep and Narrative',
+                    description: 'Voz profunda e narrativa, perfeita para leituras dramáticas e conteúdo envolvente',
+                    category: 'Narrativas dramáticas',
+                    features: ['📖 Profunda', '🎭 Narrativa', '🎬 Dramática', '🎯 Envolvente']
                 }
             };
             
@@ -744,6 +792,20 @@
 
         // Auto-refresh vídeos recentes a cada 30 segundos
         setInterval(loadRecentVideos, 30000);
+        
+        // Lógica para checkbox de oração
+        document.getElementById('prayerCheckbox').addEventListener('change', function() {
+            const templateSelect = document.getElementById('templateSelect');
+            if (this.checked) {
+                // Se marcou oração, selecionar template de oração
+                templateSelect.value = 'prayer_extended';
+                showTemplateInfo();
+            } else {
+                // Se desmarcou, limpar template
+                templateSelect.value = '';
+                showTemplateInfo();
+            }
+        });
     </script>
 </body>
 </html> 
