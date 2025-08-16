@@ -180,11 +180,40 @@ async def generate_audio(text: str, output_filename: str, voice_name: Optional[s
     if await generate_audio_elevenlabs(text, output_filename, voice_name):
         return
     
-    # Fallback para Edge TTS
+    # Fallback para Edge TTS com retry automático
     print("🔄 Usando Edge TTS como fallback...")
-    communicate = edge_tts.Communicate(text, "pt-BR-AntonioNeural", rate="-20%")
-    await communicate.save(output_filename)
-    print(f"✅ Áudio gerado com Edge TTS: {output_filename}")
+    
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            print(f"🎤 Tentativa {attempt + 1}/{max_retries} - Gerando áudio com Edge TTS...")
+            
+            # Criar nova instância do Communicate para gerar novo token
+            communicate = edge_tts.Communicate(text, "pt-BR-AntonioNeural", rate="-20%")
+            await communicate.save(output_filename)
+            
+            print(f"✅ Áudio gerado com Edge TTS: {output_filename}")
+            return
+            
+        except Exception as e:
+            error_msg = str(e)
+            print(f"⚠️ Tentativa {attempt + 1} falhou: {error_msg}")
+            
+            if "403" in error_msg or "Invalid response status" in error_msg:
+                print("🔄 Token expirado, tentando novamente...")
+                # Aguardar um pouco antes da próxima tentativa
+                import asyncio
+                await asyncio.sleep(2)
+                continue
+            elif attempt == max_retries - 1:
+                print(f"❌ Todas as tentativas falharam. Erro final: {e}")
+                raise e
+            else:
+                print(f"🔄 Tentando novamente em 1 segundo...")
+                import asyncio
+                await asyncio.sleep(1)
+    
+    print(f"❌ Falha ao gerar áudio após {max_retries} tentativas")
 
 def list_available_voices() -> Dict[str, Any]:
     """
