@@ -37,6 +37,11 @@ ELEVENLABS_VOICES = {
         "voice_id": "pFZP5JQG7iQjIQuC4Bku",  # Deep Ray - Deep Voice of God
         "description": "Voz muito profunda e suave, perfeita para 'voz de Deus' em leituras bíblicas",
         "category": "spiritual"
+    },
+    "readwell": {
+        "voice_id": "VR6AewLTigWG4xSOukaG",  # Readwell - Deep and Narrative
+        "description": "Voz profunda e narrativa, perfeita para leituras dramáticas e conteúdo envolvente",
+        "category": "narrative"
     }
 }
 
@@ -77,7 +82,7 @@ def get_recommended_voice(content_category: str) -> str:
     Retorna a voz recomendada baseada na categoria do conteúdo
     """
     if content_category == "spiritual":
-        return "phillip"  # Phillip para conteúdo espiritual
+        return "readwell"  # Readwell para conteúdo espiritual (deep and narrative)
     elif content_category == "reflection":
         return "drew"     # Drew para conteúdo reflexivo
     else:
@@ -126,9 +131,15 @@ async def generate_audio_elevenlabs(text: str, output_filename: str, voice_name:
         # Ajustes específicos por categoria
         if voice_config["category"] == "spiritual":
             voice_settings.update({
-                "stability": 0.7,  # Mais estável para conteúdo solene
-                "similarity_boost": 0.8,
-                "style": 0.3  # Mais expressivo
+                "stability": 0.8,  # Mais estável para conteúdo solene
+                "similarity_boost": 0.85,
+                "style": 0.4  # Mais expressivo
+            })
+        elif voice_config["category"] == "narrative":
+            voice_settings.update({
+                "stability": 0.9,  # Muito estável para narrativas
+                "similarity_boost": 0.9,
+                "style": 0.5  # Muito expressivo
             })
         elif voice_config["category"] == "reflection":
             voice_settings.update({
@@ -189,6 +200,7 @@ def list_available_voices() -> Dict[str, Any]:
         "recommendations": {
             "Fatos curiosos / Documentários": ["james", "bill", "neil"],
             "Reflexão / Mistério / Filosófico": ["drew"],
-            "Conteúdo religioso ou bíblico": ["phillip", "deep_ray"]
+            "Conteúdo religioso ou bíblico": ["readwell", "deep_ray"],
+            "Narrativas dramáticas": ["readwell", "phillip"]
         }
     }
