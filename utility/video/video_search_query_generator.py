@@ -357,7 +357,15 @@ def getVideoSearchQueriesTimed(script,captions_timed):
         print(f"🎯 Duração total do vídeo: {end:.2f} segundos")
         
         # Tentar gerar termos de busca
-        content = call_OpenAI(script,captions_timed).replace("'",'"')
+        content = call_OpenAI(script,captions_timed)
+        if content is None:
+            print("⚠️ API falhou, usando JSON manual...")
+            manual_structure = generate_manual_json(script, end)
+            if manual_structure and len(manual_structure) > 0:
+                print("✅ JSON manual gerado com sucesso")
+                return manual_structure
+        
+        content = content.replace("'",'"')
         
         # Primeira tentativa: JSON direto
         try:
@@ -469,25 +477,50 @@ def getVideoSearchQueriesTimed(script,captions_timed):
         return fallback_segments
 
 def call_OpenAI(script,captions_timed):
-    user_content = """Script: {}
+    try:
+        user_content = """Script: {}
 Timed Captions:{}
 """.format(script,"".join(map(str,captions_timed)))
-    print("Content", user_content)
-    
-    response = client.chat.completions.create(
-        model= model,
-        temperature=1,
-        messages=[
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": user_content}
-        ]
-    )
-    
-    text = response.choices[0].message.content.strip()
-    text = re.sub('\s+', ' ', text)
-    print("Text", text)
-    log_response(LOG_TYPE_GPT,script,text)
-    return text
+        print("Content", user_content)
+        
+        # Adicionar timeout para evitar travamento
+        import signal
+        
+        def timeout_handler(signum, frame):
+            raise TimeoutError("Timeout na chamada da API")
+        
+        # Definir timeout de 30 segundos
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(30)
+        
+        try:
+            response = client.chat.completions.create(
+                model= model,
+                temperature=1,
+                messages=[
+                    {"role": "system", "content": prompt},
+                    {"role": "user", "content": user_content}
+                ]
+            )
+            
+            signal.alarm(0)  # Cancelar alarme
+            
+            text = response.choices[0].message.content.strip()
+            text = re.sub('\s+', ' ', text)
+            print("Text", text)
+            log_response(LOG_TYPE_GPT,script,text)
+            return text
+            
+        except TimeoutError:
+            print("⚠️ Timeout na API, usando fallback...")
+            return None
+        except Exception as e:
+            print(f"❌ Erro na API: {e}")
+            return None
+            
+    except Exception as e:
+        print(f"❌ Erro geral em call_OpenAI: {e}")
+        return None
 
 def merge_empty_intervals(segments):
     merged = []
