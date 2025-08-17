@@ -268,7 +268,17 @@ def generate_manual_json(script, duration):
                 ["gratitude", "thankfulness", "blessed moment"],
                 ["inner peace", "spiritual reflection", "meditation"],
                 ["god's love", "divine mercy", "heavenly grace"],
-                ["faith journey", "spiritual growth", "religious devotion"]
+                ["faith journey", "spiritual growth", "religious devotion"],
+                ["candlelight", "sacred space", "religious ceremony"],
+                ["stained glass", "cathedral", "church architecture"],
+                ["sunset", "golden hour", "divine light"],
+                ["nature", "creation", "god's beauty"],
+                ["cross", "religious symbol", "faith"],
+                ["community", "togetherness", "unity"],
+                ["hope", "inspiration", "divine guidance"],
+                ["peace", "tranquility", "spiritual calm"],
+                ["love", "compassion", "divine love"],
+                ["wisdom", "knowledge", "spiritual insight"]
             ]
         elif any(word in script_lower for word in ['família', 'pais', 'filhos', 'amor', 'casa']):
             keywords = [
@@ -307,11 +317,11 @@ def generate_manual_json(script, duration):
             # Escolher keywords de forma mais diversificada
             if len(keywords) > 0:
                 # Usar índice baseado no tempo para garantir diversidade
-                keyword_index = (i * 3) % len(keywords)  # Multiplicar por 3 para mais variação
+                keyword_index = (i * 5) % len(keywords)  # Multiplicar por 5 para mais variação
                 selected_keywords = keywords[keyword_index]
                 
-                # Adicionar variação aleatória
-                if random.random() < 0.3:  # 30% de chance de usar keywords alternativas
+                # Adicionar variação aleatória mais frequente
+                if random.random() < 0.5:  # 50% de chance de usar keywords alternativas
                     alt_keywords = [
                         ["peaceful moment", "calm atmosphere", "serenity"],
                         ["spiritual reflection", "meditation", "inner peace"],
@@ -322,9 +332,28 @@ def generate_manual_json(script, duration):
                         ["wisdom", "guidance", "direction"],
                         ["comfort", "support", "care"],
                         ["joy", "happiness", "celebration"],
-                        ["strength", "courage", "perseverance"]
+                        ["strength", "courage", "perseverance"],
+                        ["sunset", "golden light", "divine beauty"],
+                        ["nature", "creation", "god's world"],
+                        ["community", "togetherness", "unity"],
+                        ["peace", "tranquility", "spiritual calm"],
+                        ["love", "compassion", "divine love"]
                     ]
                     selected_keywords = random.choice(alt_keywords)
+                
+                # Adicionar variação adicional baseada no tempo
+                if i % 3 == 0:  # A cada 3 segmentos, usar keywords completamente diferentes
+                    time_based_keywords = [
+                        ["candlelight", "sacred space", "religious ceremony"],
+                        ["stained glass", "cathedral", "church architecture"],
+                        ["cross", "religious symbol", "faith"],
+                        ["bible", "scripture", "holy text"],
+                        ["prayer", "worship", "devotion"],
+                        ["heaven", "divine realm", "spiritual world"],
+                        ["grace", "mercy", "divine forgiveness"],
+                        ["blessing", "divine favor", "god's gift"]
+                    ]
+                    selected_keywords = random.choice(time_based_keywords)
             else:
                 selected_keywords = ["peaceful atmosphere", "calm moment", "serenity"]
             

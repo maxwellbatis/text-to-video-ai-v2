@@ -43,6 +43,10 @@ def getBestVideo(query_string, orientation_landscape=True, used_vids=[]):
     # Sort the filtered videos by duration in ascending order
     sorted_videos = sorted(filtered_videos, key=lambda x: abs(15-int(x['duration'])))
 
+    # Adicionar aleatoriedade para evitar repetição
+    import random
+    random.shuffle(sorted_videos)
+
     # Extract the top 3 videos' URLs
     for video in sorted_videos:
         for video_file in video['video_files']:
@@ -62,15 +66,33 @@ def generate_video_url(timed_video_searches,video_server):
         timed_video_urls = []
         if video_server == "pexel":
             used_links = []
+            import random
+            
             for (t1, t2), search_terms in timed_video_searches:
                 url = ""
                 # Verificar se search_terms não é None e é uma lista
                 if search_terms and isinstance(search_terms, list):
-                    for query in search_terms:
+                    # Embaralhar os termos de busca para mais diversidade
+                    shuffled_terms = search_terms.copy()
+                    random.shuffle(shuffled_terms)
+                    
+                    for query in shuffled_terms:
                         url = getBestVideo(query, orientation_landscape=False, used_vids=used_links)
                         if url:
                             used_links.append(url.split('.hd')[0])
+                            print(f"🎬 Vídeo encontrado para '{query}': {url[:50]}...")
                             break
+                    
+                    # Se não encontrou vídeo, tentar com termos alternativos
+                    if not url:
+                        print(f"⚠️ Nenhum vídeo encontrado para {search_terms}, tentando alternativas...")
+                        alternative_queries = ["peaceful atmosphere", "spiritual calm", "divine presence", "church interior", "praying hands"]
+                        for alt_query in alternative_queries:
+                            url = getBestVideo(alt_query, orientation_landscape=False, used_vids=used_links)
+                            if url:
+                                used_links.append(url.split('.hd')[0])
+                                print(f"✅ Vídeo alternativo encontrado: {alt_query}")
+                                break
                 timed_video_urls.append([[t1, t2], url])
         elif video_server == "stable_diffusion":
             timed_video_urls = get_images_for_video(timed_video_searches)
