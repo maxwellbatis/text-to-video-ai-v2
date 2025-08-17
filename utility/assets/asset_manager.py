@@ -205,8 +205,6 @@ class AssetManager:
             
             return {
                 "background_music": background_music,
-                "tension_effect": self.get_audio_effect("cinematic", 0),    # Orchestra build up 01.mp3
-                "impact_effect": self.get_audio_effect("impacts", 0),       # Primeiro impacto disponível
                 "film_overlay": self.get_video_effect("film_old", 0),       # Filme antigo
                 "light_leak": self.get_video_effect("light_leaks", 0),      # Light leak
                 "drones": None,        # Não disponível no VPS
