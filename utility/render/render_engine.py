@@ -202,38 +202,22 @@ def generate_colored_text_clips(processed_text, start_time, end_time, template_i
         word_color = get_word_color(word, template_id)
         
         try:
-            # Criar múltiplas camadas para texto mais elegante
-            # Camada 1: Contorno preto fino
-            txt_clip_bg = (TextClip(txt=txt,
-                                    fontsize=90,  # Fonte grande e impactante
-                                    font="Impact",  # Fonte Impact (mais chamativa)
-                                    color="black",  # Cor preta para contorno
-                                    stroke_color="black",  # Contorno preto
-                                    stroke_width=3,  # Contorno fino e elegante
-                                    method="label")
-                           .set_start(word_start)
-                           .set_end(word_end)
-                           .fadein(0.1)  # Fade-in rápido
-                           .fadeout(0.1)  # Fade-out rápido
-                           .set_position(("center", "center")))  # Centralizado na tela
-        
-            # Camada 2: Texto colorido principal
-            txt_clip_main = (TextClip(txt=txt,
-                                      fontsize=90,  # Fonte grande e impactante
-                                      font="Impact",  # Fonte Impact (mais chamativa)
-                                      color=word_color,  # Cor baseada na palavra
-                                      stroke_color="black",  # Contorno preto
-                                      stroke_width=2,  # Contorno fino
-                                      method="label")
-                             .set_start(word_start)
-                             .set_end(word_end)
-                             .fadein(0.1)  # Fade-in rápido
-                             .fadeout(0.1)  # Fade-out rápido
-                             .set_position(("center", "center")))  # Centralizado na tela
+            # Criar texto com borda bem sutil
+            txt_clip = (TextClip(txt=txt,
+                                 fontsize=90,  # Fonte grande e impactante
+                                 font="Impact",  # Fonte Impact (mais chamativa)
+                                 color=word_color,  # Cor baseada na palavra
+                                 stroke_color="black",  # Contorno preto
+                                 stroke_width=1,  # Borda bem sutil
+                                 method="label")
+                        .set_start(word_start)
+                        .set_end(word_end)
+                        .fadein(0.1)  # Fade-in rápido
+                        .fadeout(0.1)  # Fade-out rápido
+                        .set_position(("center", "center")))  # Centralizado na tela
             
-            # Adicionar ambas as camadas
-            clips.append(txt_clip_bg)
-            clips.append(txt_clip_main)
+            # Adicionar clip
+            clips.append(txt_clip)
             
         except Exception as e:
             print(f"⚠️ Erro ao criar clip de texto para '{txt}': {e}")
