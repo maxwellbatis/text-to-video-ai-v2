@@ -99,19 +99,19 @@
       "fade_out": 0.3
     }
   },
-  "audio_settings": {
-    "background_music": {
-      "type": "ambient",
-      "style": "Suave, instrumental, espiritual - Tons de piano, harpa, violão ou coral leve",
-      "note": "Evite música com letra cantada enquanto fala (pode distrair)",
-      "volume": 0.15,
-      "fade_in": 2.0,
-      "fade_out": 3.0
-    },
-    "sound_effects": {
-      "volume": 0.3,
-      "types": ["impact", "atmospheric"]
-    },
+      "audio_settings": {
+      "background_music": {
+        "type": "ambient",
+        "style": "Suave, instrumental, espiritual - Tons de piano, harpa, violão ou coral leve",
+        "note": "Evite música com letra cantada enquanto fala (pode distrair)",
+        "volume": 0.08,
+        "fade_in": 2.0,
+        "fade_out": 3.0
+      },
+      "sound_effects": {
+        "volume": 0.15,
+        "types": ["impact", "atmospheric"]
+      },
     "voice_processing": {
       "normalize": true,
       "compression": true,
