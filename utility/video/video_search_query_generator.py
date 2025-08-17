@@ -243,7 +243,7 @@ def fix_json(json_str):
     
     # Se tudo falhar, retornar estrutura padrão
     print("⚠️ Não foi possível corrigir JSON, usando padrão")
-    return [[[0, 10], ["storm clouds", "dark sky", "church"]]]
+    return "[[[0, 10], [\"storm clouds\", \"dark sky\", \"church\"]]]"
 
 def generate_manual_json(script, duration):
     """Gera JSON manualmente baseado no conteúdo do script"""
@@ -335,19 +335,22 @@ def generate_manual_json(script, duration):
             segments.append(json.dumps(segment))
             current_time = end_time
         
-        # Montar estrutura Python (não JSON string)
+        # Montar estrutura Python no formato correto [[time1, time2], [keywords]]
         manual_structure = []
         for segment in segments:
             # Converter string JSON para estrutura Python
             segment_data = json.loads(segment)
-            manual_structure.append(segment_data)
+            # Converter para o formato esperado: [[time1, time2], [keywords]]
+            time_range = segment_data["time"]
+            keywords = segment_data["keywords"]
+            manual_structure.append([time_range, keywords])
         
         print(f"📝 JSON manual gerado: {len(manual_structure)} segmentos")
         return manual_structure
         
     except Exception as e:
         print(f"❌ Erro ao gerar JSON manual: {e}")
-        # Fallback simples - retornar estrutura Python
+        # Fallback simples - retornar estrutura Python no formato correto
         return [[[0, 10], ["storm clouds", "dark sky", "church"]]]
 
 def getVideoSearchQueriesTimed(script,captions_timed):
