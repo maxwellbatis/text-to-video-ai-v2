@@ -72,7 +72,9 @@ def interpolateTimeFromDict(word_position, d):
     return None
 
 def getCaptionsWithTime(whisper_analysis, maxCaptionSize=15, considerPunctuation=False):
-   
+    """
+    Gera legendas cronometradas com detecção de pausas melhorada
+    """
     wordLocationToTime = getTimestampMapping(whisper_analysis)
     position = 0
     start_time = 0
@@ -86,11 +88,29 @@ def getCaptionsWithTime(whisper_analysis, maxCaptionSize=15, considerPunctuation
         words = text.split()
         words = [cleanWord(word) for word in splitWordsBySize(words, maxCaptionSize)]
     
+    # Filtrar palavras vazias
+    words = [word for word in words if word.strip()]
+    
     for word in words:
         position += len(word) + 1
         end_time = interpolateTimeFromDict(position, wordLocationToTime)
+        
         if end_time and word:
-            CaptionsPairs.append(((start_time, end_time), word))
+            # Verificar se há pausa muito longa (mais de 1 segundo)
+            if end_time - start_time > 1.0:
+                # Dividir pausas longas em segmentos menores
+                pause_duration = end_time - start_time
+                if pause_duration > 2.0:  # Pausas muito longas
+                    print(f"⚠️ Pausa longa detectada: {pause_duration:.2f}s - pulando")
+                    start_time = end_time
+                    continue
+                else:
+                    # Pausa moderada, manter mas ajustar timing
+                    adjusted_start = start_time + (pause_duration * 0.1)  # Começar 10% depois
+                    CaptionsPairs.append(((adjusted_start, end_time), word))
+            else:
+                CaptionsPairs.append(((start_time, end_time), word))
+            
             start_time = end_time
 
     return CaptionsPairs

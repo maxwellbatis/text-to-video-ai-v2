@@ -79,6 +79,7 @@ def process_text_for_captions(text):
 def generate_colored_text_clips(processed_text, start_time, end_time):
     """
     Gera clips de texto palavra por palavra, sincronizados com o áudio
+    Melhorado para lidar com pausas e sincronização precisa
     """
     words = processed_text.split()
     clips = []
@@ -86,14 +87,17 @@ def generate_colored_text_clips(processed_text, start_time, end_time):
     if not words:
         return clips
     
-    # Calcular duração por palavra
+    # Calcular duração por palavra com buffer de sincronização
     total_duration = end_time - start_time
     word_duration = total_duration / len(words)
     
+    # Buffer de sincronização para melhor timing
+    sync_buffer = 0.05  # 50ms de buffer
+    
     for i, word in enumerate(words):
-        # Calcular timing para esta palavra
-        word_start = start_time + (i * word_duration)
-        word_end = min(start_time + ((i + 1) * word_duration), end_time)
+        # Calcular timing para esta palavra com buffer
+        word_start = max(0, start_time + (i * word_duration) - sync_buffer)
+        word_end = min(end_time, start_time + ((i + 1) * word_duration) + sync_buffer)
         
         # Garantir que não ultrapasse o tempo total
         if word_start >= end_time:
@@ -102,12 +106,16 @@ def generate_colored_text_clips(processed_text, start_time, end_time):
         # Criar clip para cada palavra individual
         txt = word.upper()
         
-        # Limpar texto de caracteres problemáticos
-        txt = re.sub(r'[^\w\s]', '', txt)  # Remove caracteres especiais
+        # Limpar texto mantendo pontuação importante
+        txt = re.sub(r'[^\w\s\.\,\!\?\-\'\"]', '', txt)
         txt = txt.strip()  # Remove espaços extras
         
         # Pular palavras vazias ou muito curtas
         if len(txt) < 1:
+            continue
+        
+        # Verificar se a palavra tem duração mínima
+        if word_end - word_start < 0.1:  # Mínimo 100ms por palavra
             continue
         
         try:
@@ -258,6 +266,12 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
     audio_file_clip = AudioFileClip(audio_file_path)
     audio_clips.append(audio_file_clip)
 
+    # Detectar pausas no áudio e ajustar legendas
+    audio_file_clip = AudioFileClip(audio_file_path)
+    audio_duration = audio_file_clip.duration
+    
+    # Filtrar legendas que correspondem a pausas ou silêncio
+    filtered_captions = []
     for (t1, t2), text in timed_captions:
         # Pular legendas muito curtas ou vazias
         if len(text.strip()) < 2:
@@ -267,13 +281,21 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
         segment_duration = t2 - t1
         
         # Ajustar timing para melhor distribuição - reduzir limite mínimo
-        if segment_duration < 0.5:  # Segmentos muito curtos
+        if segment_duration < 0.3:  # Reduzido de 0.5s para 0.3s
+            continue
+        
+        # Verificar se há áudio real neste segmento (não apenas pausa)
+        # Se a duração for muito longa sem palavras suficientes, pode ser pausa
+        words = text.split()
+        if segment_duration > 2.0 and len(words) < 3:
+            print(f"⚠️ Possível pausa detectada [{t1:.2f}s - {t2:.2f}s]: '{text}' - pulando")
             continue
         
         # Processar texto para quebra de linhas adequada
         processed_text = process_text_for_captions(text)
         
-        # Limpar texto de caracteres especiais que podem causar problemas
+        # Limpar texto mantendo pontuação importante
+        processed_text = re.sub(r'[^\w\s\.\,\!\?\-\'\"]', '', processed_text)
         processed_text = processed_text.replace('\n', ' ').strip()
         
         # Filtrar palavras muito curtas ou irrelevantes
@@ -281,11 +303,18 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
         if len(words) < 1:  # Pular se não tiver palavras
             continue
         
-        # Gerar clips de texto palavra por palavra
+        # Adicionar à lista filtrada
+        filtered_captions.append(((t1, t2), processed_text))
+    
+    print(f"📝 Legendas filtradas: {len(filtered_captions)} de {len(timed_captions)} originais")
+    
+    # Aplicar legendas filtradas com melhor sincronização
+    for (t1, t2), processed_text in filtered_captions:
+        # Gerar clips de texto palavra por palavra com sincronização melhorada
         text_clips = generate_colored_text_clips(processed_text, t1, t2)
         if text_clips:  # Só adicionar se houver clips gerados
             visual_clips.extend(text_clips)
-            print(f"✅ Legendas geradas para '{processed_text[:30]}...' ({len(text_clips)} palavras)")
+            print(f"✅ Legendas sincronizadas para '{processed_text[:30]}...' ({len(text_clips)} palavras)")
         else:
             print(f"⚠️ Nenhuma legenda gerada para '{processed_text[:30]}...'")
 
