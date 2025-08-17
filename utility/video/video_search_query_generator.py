@@ -382,13 +382,175 @@ def generate_manual_json(script, duration):
         # Fallback simples - retornar estrutura Python no formato correto
         return [[[0, 10], ["storm clouds", "dark sky", "church"]]]
 
+def generate_content_based_segments(script, captions_timed):
+    """Gera segmentos baseados no conteúdo real do script usando legendas cronometradas"""
+    try:
+        segments = []
+        
+        # Palavras-chave religiosas baseadas no conteúdo
+        religious_keywords = [
+            ["praying hands", "church interior", "spiritual atmosphere"],
+            ["worship", "adoration", "divine presence"],
+            ["peaceful atmosphere", "calmness", "serenity"],
+            ["heavenly light", "divine guidance", "spiritual wisdom"],
+            ["bible reading", "scripture study", "religious text"],
+            ["family prayer", "group worship", "community faith"],
+            ["gratitude", "thankfulness", "blessed moment"],
+            ["inner peace", "spiritual reflection", "meditation"],
+            ["god's love", "divine mercy", "heavenly grace"],
+            ["faith journey", "spiritual growth", "religious devotion"],
+            ["candlelight", "sacred space", "religious ceremony"],
+            ["stained glass", "cathedral", "church architecture"],
+            ["sunset", "golden hour", "divine light"],
+            ["nature", "creation", "god's beauty"],
+            ["cross", "religious symbol", "faith"],
+            ["community", "togetherness", "unity"],
+            ["hope", "inspiration", "divine guidance"],
+            ["peace", "tranquility", "spiritual calm"],
+            ["love", "compassion", "divine love"],
+            ["wisdom", "knowledge", "spiritual insight"]
+        ]
+        
+        # Palavras-chave de família
+        family_keywords = [
+            ["family gathering", "loving family", "home interior"],
+            ["parents and children", "family love", "togetherness"],
+            ["happy family", "family unity", "domestic life"],
+            ["family meal", "family time", "family bonding"],
+            ["family celebration", "family joy", "family happiness"],
+            ["family support", "family care", "family protection"],
+            ["family values", "family tradition", "family heritage"],
+            ["family home", "family comfort", "family warmth"],
+            ["family connection", "family relationship", "family bond"],
+            ["family future", "family hope", "family dreams"]
+        ]
+        
+        # Palavras-chave gerais
+        general_keywords = [
+            ["nature landscape", "beautiful scenery", "peaceful environment"],
+            ["sunrise", "morning light", "new day"],
+            ["mountain view", "forest path", "natural beauty"],
+            ["ocean waves", "beach sunset", "coastal beauty"],
+            ["city life", "urban landscape", "modern living"],
+            ["technology", "innovation", "future world"],
+            ["education", "learning", "knowledge"],
+            ["success", "achievement", "goal reaching"],
+            ["friendship", "community", "social connection"],
+            ["inspiration", "motivation", "positive energy"]
+        ]
+        
+        # Detectar tipo de conteúdo
+        script_lower = script.lower()
+        if any(word in script_lower for word in ['senhor', 'deus', 'jesus', 'oração', 'fé', 'espiritual']):
+            base_keywords = religious_keywords
+        elif any(word in script_lower for word in ['família', 'pais', 'filhos', 'amor', 'casa']):
+            base_keywords = family_keywords
+        else:
+            base_keywords = general_keywords
+        
+        # Agrupar legendas por conteúdo semântico
+        import random
+        
+        # Dividir legendas em grupos baseados no conteúdo
+        caption_groups = []
+        current_group = []
+        current_start = 0
+        
+        for i, ((start, end), text) in enumerate(captions_timed):
+            # Detectar mudança de tópico baseada no conteúdo
+            text_lower = text.lower()
+            
+            # Se é início de nova frase ou tópico
+            if (i == 0 or 
+                any(word in text_lower for word in ['senhor', 'deus', 'jesus', 'oração', 'fé']) or
+                any(word in text_lower for word in ['família', 'pais', 'filhos', 'amor']) or
+                any(word in text_lower for word in ['agradecemos', 'obrigado', 'graças']) or
+                any(word in text_lower for word in ['amém', 'assim seja']) or
+                len(current_group) >= 5):  # Máximo 5 legendas por grupo
+                
+                # Finalizar grupo atual
+                if current_group:
+                    caption_groups.append({
+                        'start': current_start,
+                        'end': end,
+                        'texts': current_group
+                    })
+                
+                # Iniciar novo grupo
+                current_group = [text]
+                current_start = start
+            else:
+                current_group.append(text)
+        
+        # Adicionar último grupo
+        if current_group:
+            caption_groups.append({
+                'start': current_start,
+                'end': captions_timed[-1][0][1],
+                'texts': current_group
+            })
+        
+        # Gerar segmentos baseados nos grupos de conteúdo
+        for i, group in enumerate(caption_groups):
+            start_time = group['start']
+            end_time = group['end']
+            group_texts = group['texts']
+            
+            # Escolher keywords baseadas no conteúdo do grupo
+            combined_text = ' '.join(group_texts).lower()
+            
+            # Selecionar keywords baseadas no conteúdo específico
+            if any(word in combined_text for word in ['senhor', 'deus', 'jesus', 'oração', 'fé', 'espiritual']):
+                selected_keywords = random.choice(religious_keywords)
+            elif any(word in combined_text for word in ['família', 'pais', 'filhos', 'amor', 'casa']):
+                selected_keywords = random.choice(family_keywords)
+            elif any(word in combined_text for word in ['agradecemos', 'obrigado', 'graças']):
+                selected_keywords = ["gratitude", "thankfulness", "blessed moment"]
+            elif any(word in combined_text for word in ['amém', 'assim seja']):
+                selected_keywords = ["praying hands", "church interior", "spiritual atmosphere"]
+            else:
+                selected_keywords = random.choice(base_keywords)
+            
+            # Adicionar variação aleatória
+            if random.random() < 0.4:  # 40% de chance de variação
+                alt_keywords = [
+                    ["peaceful moment", "calm atmosphere", "serenity"],
+                    ["spiritual reflection", "meditation", "inner peace"],
+                    ["divine presence", "heavenly light", "sacred space"],
+                    ["family love", "togetherness", "unity"],
+                    ["gratitude", "thankfulness", "blessing"],
+                    ["hope", "faith", "trust"],
+                    ["wisdom", "guidance", "direction"],
+                    ["comfort", "support", "care"],
+                    ["joy", "happiness", "celebration"],
+                    ["strength", "courage", "perseverance"]
+                ]
+                selected_keywords = random.choice(alt_keywords)
+            
+            segments.append([[start_time, end_time], selected_keywords])
+        
+        print(f"📝 Segmentos baseados no conteúdo: {len(segments)} grupos")
+        return segments
+        
+    except Exception as e:
+        print(f"❌ Erro ao gerar segmentos baseados no conteúdo: {e}")
+        # Fallback para método anterior
+        return generate_manual_json(script, duration)
+
 def getVideoSearchQueriesTimed(script,captions_timed):
     """Gera termos de busca para vídeos de fundo com fallback robusto"""
     try:
         end = captions_timed[-1][0][1]
         print(f"🎯 Duração total do vídeo: {end:.2f} segundos")
         
-        # Tentar gerar termos de busca
+        # Tentar gerar termos de busca baseados no conteúdo real
+        print("🎯 Gerando segmentos baseados no conteúdo do script...")
+        content_based_structure = generate_content_based_segments(script, captions_timed)
+        if content_based_structure and len(content_based_structure) > 0:
+            print("✅ Segmentos baseados no conteúdo gerados com sucesso")
+            return content_based_structure
+        
+        # Fallback: tentar API OpenAI
         content = call_OpenAI(script,captions_timed)
         if content is None:
             print("⚠️ API falhou, usando JSON manual...")
