@@ -57,6 +57,8 @@ class VideoJob:
         self.updated_at = datetime.now()
         self.video_path = None
         self.audio_path = None
+        self.srt_file = None
+        self.vtt_file = None
         self.duration = None
         self.error = None
 
@@ -70,6 +72,8 @@ class VideoJob:
             'updated_at': self.updated_at.isoformat(),
             'video_path': self.video_path,
             'audio_path': self.audio_path,
+            'srt_file': self.srt_file,
+            'vtt_file': self.vtt_file,
             'duration': self.duration,
             'error': self.error
         }
@@ -120,10 +124,16 @@ async def generate_video_async(job_id, topic, template_id=None, voice_id=None, u
         job.audio_path = audio_file
         print(f"Áudio gerado: {audio_file}")
         
-        # 3. Gerar legendas
+        # 3. Gerar legendas e arquivos SRT/VTT
         update_job_progress(job_id, 60)
-        timed_captions = generate_timed_captions(audio_file)
+        from utility.captions.timed_captions_generator import generate_subtitle_files
+        
+        subtitle_data = generate_subtitle_files(audio_file)
+        timed_captions = subtitle_data['captions_pairs']
+        job.srt_file = subtitle_data['srt_file']
+        job.vtt_file = subtitle_data['vtt_file']
         print(f"Legendas geradas: {len(timed_captions)} segmentos")
+        print(f"Arquivos SRT/VTT: {job.srt_file}, {job.vtt_file}")
         
         # 4. Gerar termos de busca
         update_job_progress(job_id, 70)
@@ -307,6 +317,34 @@ def download_video(job_id):
         return jsonify({'error': 'Arquivo de vídeo não encontrado'}), 404
     
     return send_file(video_path, as_attachment=True)
+
+@app.route('/api/videos/<job_id>/srt', methods=['GET'])
+def download_srt(job_id):
+    """Download do arquivo SRT"""
+    if job_id not in completed_videos:
+        return jsonify({'error': 'Vídeo não encontrado'}), 404
+    
+    video_data = completed_videos[job_id]
+    srt_path = video_data.get('srt_file')
+    
+    if not srt_path or not os.path.exists(srt_path):
+        return jsonify({'error': 'Arquivo SRT não encontrado'}), 404
+    
+    return send_file(srt_path, as_attachment=True, download_name=f"legendas_{job_id}.srt")
+
+@app.route('/api/videos/<job_id>/vtt', methods=['GET'])
+def download_vtt(job_id):
+    """Download do arquivo VTT"""
+    if job_id not in completed_videos:
+        return jsonify({'error': 'Vídeo não encontrado'}), 404
+    
+    video_data = completed_videos[job_id]
+    vtt_path = video_data.get('vtt_file')
+    
+    if not vtt_path or not os.path.exists(vtt_path):
+        return jsonify({'error': 'Arquivo VTT não encontrado'}), 404
+    
+    return send_file(vtt_path, as_attachment=True, download_name=f"legendas_{job_id}.vtt")
 
 @app.route('/gallery')
 def gallery():

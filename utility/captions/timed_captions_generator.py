@@ -1,5 +1,7 @@
 import whisper
 import re
+import os
+from datetime import timedelta
 
 def generate_timed_captions(audio_filename, model_size="base"):
     WHISPER_MODEL = whisper.load_model(model_size)
@@ -20,6 +22,75 @@ def generate_timed_captions(audio_filename, model_size="base"):
     )
     
     return getCaptionsWithTime(result)
+
+def generate_srt_file(captions_pairs, output_filename):
+    """
+    Gera arquivo SRT a partir das legendas cronometradas
+    """
+    try:
+        with open(output_filename, 'w', encoding='utf-8') as f:
+            for i, ((start_time, end_time), text) in enumerate(captions_pairs, 1):
+                # Converter segundos para formato SRT (HH:MM:SS,mmm)
+                start_str = str(timedelta(seconds=int(start_time))) + f",{int((start_time % 1) * 1000):03d}"
+                end_str = str(timedelta(seconds=int(end_time))) + f",{int((end_time % 1) * 1000):03d}"
+                
+                # Formatar linha SRT
+                f.write(f"{i}\n")
+                f.write(f"{start_str} --> {end_str}\n")
+                f.write(f"{text}\n\n")
+        
+        print(f"✅ Arquivo SRT gerado: {output_filename}")
+        return True
+    except Exception as e:
+        print(f"❌ Erro ao gerar SRT: {e}")
+        return False
+
+def generate_vtt_file(captions_pairs, output_filename):
+    """
+    Gera arquivo VTT a partir das legendas cronometradas
+    """
+    try:
+        with open(output_filename, 'w', encoding='utf-8') as f:
+            # Cabeçalho VTT
+            f.write("WEBVTT\n\n")
+            
+            for i, ((start_time, end_time), text) in enumerate(captions_pairs, 1):
+                # Converter segundos para formato VTT (HH:MM:SS.mmm)
+                start_str = str(timedelta(seconds=int(start_time))) + f".{int((start_time % 1) * 1000):03d}"
+                end_str = str(timedelta(seconds=int(end_time))) + f".{int((end_time % 1) * 1000):03d}"
+                
+                # Formatar linha VTT
+                f.write(f"{start_str} --> {end_str}\n")
+                f.write(f"{text}\n\n")
+        
+        print(f"✅ Arquivo VTT gerado: {output_filename}")
+        return True
+    except Exception as e:
+        print(f"❌ Erro ao gerar VTT: {e}")
+        return False
+
+def generate_subtitle_files(audio_filename, output_dir="."):
+    """
+    Gera legendas cronometradas e arquivos SRT/VTT
+    """
+    # Gerar legendas cronometradas
+    captions_pairs = generate_timed_captions(audio_filename)
+    
+    # Nome base do arquivo
+    base_name = os.path.splitext(os.path.basename(audio_filename))[0]
+    
+    # Gerar arquivos SRT e VTT
+    srt_filename = os.path.join(output_dir, f"{base_name}.srt")
+    vtt_filename = os.path.join(output_dir, f"{base_name}.vtt")
+    
+    generate_srt_file(captions_pairs, srt_filename)
+    generate_vtt_file(captions_pairs, vtt_filename)
+    
+    return {
+        'captions_pairs': captions_pairs,
+        'srt_file': srt_filename,
+        'vtt_file': vtt_filename
+    }
 
 def splitWordsBySize(words, maxCaptionSize):
    
