@@ -76,10 +76,90 @@ def process_text_for_captions(text):
     
     return '\n'.join(lines)
 
-def generate_colored_text_clips(processed_text, start_time, end_time):
+def get_word_color(word, template_id=None):
     """
-    Gera clips de texto palavra por palavra, sincronizados com o áudio
-    Melhorado para lidar com pausas e sincronização precisa
+    Define a cor para cada palavra baseada em seu significado e template
+    """
+    word_lower = word.lower().strip()
+    
+    # Configurações de cores por template
+    color_schemes = {
+        'cinematic_religious': {
+            'divine': "#FFD700",      # Dourado para palavras divinas
+            'faith': "#87CEEB",       # Azul claro para fé
+            'prayer': "#90EE90",      # Verde claro para oração
+            'family': "#FFB6C1",      # Rosa claro para família
+            'wisdom': "#DDA0DD",      # Roxo claro para sabedoria
+            'strength': "#FFA500",    # Laranja para força
+            'time': "#D3D3D3",        # Cinza claro para tempo
+            'default': "white"        # Branco padrão
+        },
+        'vsl_magnetic': {
+            'divine': "#FF6B6B",      # Vermelho vibrante
+            'faith': "#4ECDC4",       # Turquesa
+            'prayer': "#45B7D1",      # Azul
+            'family': "#96CEB4",      # Verde suave
+            'wisdom': "#FFEAA7",      # Amarelo
+            'strength': "#DDA0DD",    # Roxo
+            'time': "#F8BBD9",        # Rosa
+            'default': "#FFFFFF"      # Branco
+        },
+        'default': {
+            'divine': "#FFD700",      # Dourado
+            'faith': "#87CEEB",       # Azul claro
+            'prayer': "#90EE90",      # Verde claro
+            'family': "#FFB6C1",      # Rosa claro
+            'wisdom': "#DDA0DD",      # Roxo claro
+            'strength': "#FFA500",    # Laranja
+            'time': "#D3D3D3",        # Cinza claro
+            'default': "white"        # Branco
+        }
+    }
+    
+    # Selecionar esquema de cores baseado no template
+    scheme = color_schemes.get(template_id, color_schemes['default'])
+    
+    # Palavras divinas/espirituais
+    divine_words = ['deus', 'senhor', 'jesus', 'cristo', 'espírito', 'santo', 'divino', 'celestial', 'sagrado']
+    if word_lower in divine_words:
+        return scheme['divine']
+    
+    # Palavras de fé/esperança
+    faith_words = ['fé', 'esperança', 'amor', 'paz', 'graça', 'bênção', 'salvação', 'redenção', 'milagre']
+    if word_lower in faith_words:
+        return scheme['faith']
+    
+    # Palavras de oração/adoração
+    prayer_words = ['oração', 'adoração', 'louvor', 'agradecemos', 'obrigado', 'amém', 'aleluia']
+    if word_lower in prayer_words:
+        return scheme['prayer']
+    
+    # Palavras de família/relacionamento
+    family_words = ['família', 'pais', 'filhos', 'casa', 'lar', 'união', 'juntos', 'cuidado']
+    if word_lower in family_words:
+        return scheme['family']
+    
+    # Palavras de sabedoria/conhecimento
+    wisdom_words = ['sabedoria', 'conhecimento', 'ensinamento', 'palavra', 'bíblia', 'versículo', 'profecia']
+    if word_lower in wisdom_words:
+        return scheme['wisdom']
+    
+    # Palavras de força/coragem
+    strength_words = ['força', 'coragem', 'vitória', 'poder', 'guerra', 'luta', 'resistência']
+    if word_lower in strength_words:
+        return scheme['strength']
+    
+    # Palavras de tempo/momento
+    time_words = ['hoje', 'agora', 'sempre', 'eternamente', 'momento', 'tempo', 'dia', 'noite']
+    if word_lower in time_words:
+        return scheme['time']
+    
+    # Padrão
+    return scheme['default']
+
+def generate_colored_text_clips(processed_text, start_time, end_time, template_id=None):
+    """
+    Gera clips de texto palavra por palavra com cores diferentes para palavras-chave
     """
     words = processed_text.split()
     clips = []
@@ -118,13 +198,16 @@ def generate_colored_text_clips(processed_text, start_time, end_time):
         if word_end - word_start < 0.1:  # Mínimo 100ms por palavra
             continue
         
+        # Obter cor para esta palavra baseada no template
+        word_color = get_word_color(word, template_id)
+        
         try:
             # Criar múltiplas camadas para texto mais grosso
             # Camada 1: Contorno preto espesso
             txt_clip_bg = (TextClip(txt=txt,
                                     fontsize=90,  # Fonte grande e impactante
                                     font="Impact",  # Fonte Impact (mais chamativa)
-                                    color="white",  # Cor preta para contorno
+                                    color="black",  # Cor preta para contorno
                                     stroke_color="black",  # Contorno preto
                                     stroke_width=12,  # Contorno muito espesso
                                     method="label")
@@ -134,12 +217,12 @@ def generate_colored_text_clips(processed_text, start_time, end_time):
                            .fadeout(0.1)  # Fade-out rápido
                            .set_position(("center", "center")))  # Centralizado na tela
         
-            # Camada 2: Texto branco principal
+            # Camada 2: Texto colorido principal
             txt_clip_main = (TextClip(txt=txt,
                                       fontsize=90,  # Fonte grande e impactante
                                       font="Impact",  # Fonte Impact (mais chamativa)
-                                      color="white",  # Cor branca
-                                      stroke_color="white",  # Contorno preto
+                                      color=word_color,  # Cor baseada na palavra
+                                      stroke_color="black",  # Contorno preto
                                       stroke_width=8,  # Contorno espesso
                                       method="label")
                              .set_start(word_start)
@@ -177,7 +260,7 @@ def get_program_path(program_name):
     program_path = search_program(program_name)
     return program_path
 
-def get_output_media(audio_file_path, timed_captions, background_video_data, video_server):
+def get_output_media(audio_file_path, timed_captions, background_video_data, video_server, template_id=None):
     OUTPUT_FILE_NAME = "rendered_video.mp4"
     magick_path = get_program_path("magick")
     print(magick_path)
@@ -311,7 +394,7 @@ def get_output_media(audio_file_path, timed_captions, background_video_data, vid
     # Aplicar legendas filtradas com melhor sincronização
     for (t1, t2), processed_text in filtered_captions:
         # Gerar clips de texto palavra por palavra com sincronização melhorada
-        text_clips = generate_colored_text_clips(processed_text, t1, t2)
+        text_clips = generate_colored_text_clips(processed_text, t1, t2, template_id)
         if text_clips:  # Só adicionar se houver clips gerados
             visual_clips.extend(text_clips)
             print(f"✅ Legendas sincronizadas para '{processed_text[:30]}...' ({len(text_clips)} palavras)")

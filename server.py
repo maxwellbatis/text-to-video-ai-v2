@@ -152,7 +152,7 @@ async def generate_video_async(job_id, topic, template_id=None, voice_id=None, u
         update_job_progress(job_id, 90)
         if background_video_urls:
             # Usar renderização normal com legendas
-            output_video = get_output_media(audio_file, timed_captions, background_video_urls, "pexel")
+            output_video = get_output_media(audio_file, timed_captions, background_video_urls, "pexel", template_id)
             
             # 6.5. Aplicar template se especificado
             if template_id and template_config:
