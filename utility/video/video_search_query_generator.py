@@ -532,10 +532,13 @@ def generate_content_based_segments(script, captions_timed):
         print(f"📝 Segmentos baseados no conteúdo: {len(segments)} grupos")
         return segments
         
-    except Exception as e:
-        print(f"❌ Erro ao gerar segmentos baseados no conteúdo: {e}")
-        # Fallback para método anterior
-        return generate_manual_json(script, duration)
+         except Exception as e:
+         print(f"❌ Erro ao gerar segmentos baseados no conteúdo: {e}")
+         # Fallback para método anterior
+         try:
+             return generate_manual_json(script, captions_timed[-1][0][1])
+         except:
+             return [[[0, 10], ["storm clouds", "dark sky", "church"]]]
 
 def getVideoSearchQueriesTimed(script,captions_timed):
     """Gera termos de busca para vídeos de fundo com fallback robusto"""
@@ -545,10 +548,16 @@ def getVideoSearchQueriesTimed(script,captions_timed):
         
         # Tentar gerar termos de busca baseados no conteúdo real
         print("🎯 Gerando segmentos baseados no conteúdo do script...")
-        content_based_structure = generate_content_based_segments(script, captions_timed)
-        if content_based_structure and len(content_based_structure) > 0:
-            print("✅ Segmentos baseados no conteúdo gerados com sucesso")
-            return content_based_structure
+        try:
+            content_based_structure = generate_content_based_segments(script, captions_timed)
+            if content_based_structure and len(content_based_structure) > 0:
+                print("✅ Segmentos baseados no conteúdo gerados com sucesso")
+                return content_based_structure
+            else:
+                print("⚠️ Segmentos baseados no conteúdo falharam, usando fallback...")
+        except Exception as e:
+            print(f"❌ Erro ao gerar segmentos baseados no conteúdo: {e}")
+            print("⚠️ Usando fallback...")
         
         # Fallback: tentar API OpenAI
         content = call_OpenAI(script,captions_timed)
@@ -677,40 +686,65 @@ Timed Captions:{}
 """.format(script,"".join(map(str,captions_timed)))
         print("Content", user_content)
         
-        # Adicionar timeout para evitar travamento
-        import signal
-        
-        def timeout_handler(signum, frame):
-            raise TimeoutError("Timeout na chamada da API")
-        
-        # Definir timeout de 30 segundos
-        signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(30)
-        
-        try:
-            response = client.chat.completions.create(
-                model= model,
-                temperature=1,
-                messages=[
-                    {"role": "system", "content": prompt},
-                    {"role": "user", "content": user_content}
-                ]
-            )
+        # Verificar se estamos na thread principal antes de usar signal
+        import threading
+        if threading.current_thread() is threading.main_thread():
+            # Adicionar timeout para evitar travamento (apenas na thread principal)
+            import signal
             
-            signal.alarm(0)  # Cancelar alarme
+            def timeout_handler(signum, frame):
+                raise TimeoutError("Timeout na chamada da API")
             
-            text = response.choices[0].message.content.strip()
-            text = re.sub('\s+', ' ', text)
-            print("Text", text)
-            log_response(LOG_TYPE_GPT,script,text)
-            return text
+            # Definir timeout de 30 segundos
+            signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(30)
             
-        except TimeoutError:
-            print("⚠️ Timeout na API, usando fallback...")
-            return None
-        except Exception as e:
-            print(f"❌ Erro na API: {e}")
-            return None
+            try:
+                response = client.chat.completions.create(
+                    model= model,
+                    temperature=1,
+                    messages=[
+                        {"role": "system", "content": prompt},
+                        {"role": "user", "content": user_content}
+                    ]
+                )
+                
+                signal.alarm(0)  # Cancelar alarme
+                
+                text = response.choices[0].message.content.strip()
+                text = re.sub('\s+', ' ', text)
+                print("Text", text)
+                log_response(LOG_TYPE_GPT,script,text)
+                return text
+                
+            except TimeoutError:
+                print("⚠️ Timeout na API, usando fallback...")
+                return None
+            except Exception as e:
+                print(f"❌ Erro na API: {e}")
+                return None
+        else:
+            # Se não estamos na thread principal, fazer chamada sem timeout
+            print("⚠️ Executando em thread secundária, sem timeout...")
+            try:
+                response = client.chat.completions.create(
+                    model= model,
+                    temperature=1,
+                    messages=[
+                        {"role": "system", "content": prompt},
+                        {"role": "user", "content": user_content}
+                    ]
+                )
+                
+                text = response.choices[0].message.content.strip()
+                text = re.sub('\s+', ' ', text)
+                print("Text", text)
+                log_response(LOG_TYPE_GPT,script,text)
+                return text
+                
+            except Exception as e:
+                print(f"❌ Erro na API: {e}")
+                return None
             
     except Exception as e:
         print(f"❌ Erro geral em call_OpenAI: {e}")
