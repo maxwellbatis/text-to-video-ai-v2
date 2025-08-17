@@ -202,14 +202,14 @@ def generate_colored_text_clips(processed_text, start_time, end_time, template_i
         word_color = get_word_color(word, template_id)
         
         try:
-            # Criar múltiplas camadas para texto mais grosso
-            # Camada 1: Contorno preto espesso
+            # Criar múltiplas camadas para texto mais elegante
+            # Camada 1: Contorno preto fino
             txt_clip_bg = (TextClip(txt=txt,
                                     fontsize=90,  # Fonte grande e impactante
                                     font="Impact",  # Fonte Impact (mais chamativa)
                                     color="black",  # Cor preta para contorno
                                     stroke_color="black",  # Contorno preto
-                                    stroke_width=12,  # Contorno muito espesso
+                                    stroke_width=3,  # Contorno fino e elegante
                                     method="label")
                            .set_start(word_start)
                            .set_end(word_end)
@@ -223,7 +223,7 @@ def generate_colored_text_clips(processed_text, start_time, end_time, template_i
                                       font="Impact",  # Fonte Impact (mais chamativa)
                                       color=word_color,  # Cor baseada na palavra
                                       stroke_color="black",  # Contorno preto
-                                      stroke_width=8,  # Contorno espesso
+                                      stroke_width=2,  # Contorno fino
                                       method="label")
                              .set_start(word_start)
                              .set_end(word_end)
