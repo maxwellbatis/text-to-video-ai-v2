@@ -532,13 +532,13 @@ def generate_content_based_segments(script, captions_timed):
         print(f"📝 Segmentos baseados no conteúdo: {len(segments)} grupos")
         return segments
         
-         except Exception as e:
-         print(f"❌ Erro ao gerar segmentos baseados no conteúdo: {e}")
-         # Fallback para método anterior
-         try:
-             return generate_manual_json(script, captions_timed[-1][0][1])
-         except:
-             return [[[0, 10], ["storm clouds", "dark sky", "church"]]]
+    except Exception as e:
+        print(f"❌ Erro ao gerar segmentos baseados no conteúdo: {e}")
+        # Fallback para método anterior
+        try:
+            return generate_manual_json(script, captions_timed[-1][0][1])
+        except:
+            return [[[0, 10], ["storm clouds", "dark sky", "church"]]]
 
 def getVideoSearchQueriesTimed(script,captions_timed):
     """Gera termos de busca para vídeos de fundo com fallback robusto"""
