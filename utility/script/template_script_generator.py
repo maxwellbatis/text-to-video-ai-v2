@@ -150,60 +150,37 @@ class TemplateScriptGenerator:
             print(f"⚠️ Erro ao adaptar para template de oração: {e}")
             return script
     
-    def _adapt_for_religious_template(self, script: str, template: Dict) -> str:
-        """Adapta script para template religioso cinematográfico seguindo estrutura profissional"""
+    def _adapt_for_religious_template(self, script: str) -> str:
+        """Adapta o script para template religioso com linguagem mais natural"""
         try:
-            # Extrair diretrizes do template
-            structure_guidelines = template.get('script_pattern', {}).get('video_structure', {})
-            content_types = template.get('script_pattern', {}).get('content_types', {})
-            
-            # Estrutura profissional para vídeos religiosos
-            opening_elements = [
-                "A paz do Senhor! Que Deus abençoe sua vida!",
-                "Que a graça de Deus esteja com você!",
-                "Bem-vindo a mais um momento de reflexão espiritual!",
-                "Que o amor de Cristo ilumine seu caminho!"
-            ]
-            
-            # Perguntas impactantes para abertura
-            impact_questions = [
-                "Você já se perguntou por que Deus permite o sofrimento?",
-                "Sabe qual é o verdadeiro significado da fé?",
-                "Já parou para refletir sobre o propósito da sua vida?",
-                "Conhece o poder transformador do amor de Deus?",
-                "Sabe como encontrar paz em meio às tempestades da vida?"
-            ]
-            
-            # Conclusões inspiradoras
-            inspiring_conclusions = [
-                "Lembre-se: Deus não prometeu uma vida sem problemas, mas prometeu estar conosco em todos os momentos.",
-                "Que a paz de Deus, que excede todo entendimento, guarde seu coração e sua mente.",
-                "Deus tem um plano perfeito para sua vida. Confie Nele e siga em frente com fé.",
-                "Que o Senhor te abençoe e te guarde, que Ele faça resplandecer o Seu rosto sobre ti.",
-                "Em Cristo, você é mais que vencedor. Mantenha a fé e persevere!"
-            ]
-            
-            # Adaptar abertura se necessário
-            if not any(opening in script for opening in opening_elements):
-                import random
-                opening = random.choice(opening_elements)
-                question = random.choice(impact_questions)
-                script = f"{opening} {question} {script}"
-            
-            # Adaptar conclusão se necessário
-            if not any(conclusion in script for conclusion in inspiring_conclusions):
-                import random
-                conclusion = random.choice(inspiring_conclusions)
-                script = f"{script} {conclusion}"
-            
-            # Garantir chamada à ação
-            if "deixe seu comentário" not in script.lower():
-                script = f"{script} Deixe seu comentário, compartilhe com alguém que precisa ouvir isso!"
-            
-            return script
+            # Versão melhorada - mais natural e emocional
+            improved_script = f"""
+A paz do Senhor, querido irmão, querida irmã!
+
+Você já parou para pensar na incrível presença de Deus em sua vida? Cada manhã que amanhece, cada respiração que damos, é um presente Dele.
+
+Hoje quero compartilhar com você algo que mudou minha vida. No Salmo 4, versículo 8, encontramos uma promessa poderosa: "Em paz também me deitarei e dormirei, porque só Tu, Senhor, me fazes habitar em segurança."
+
+Imagine isso: Deus promete que podemos dormir em paz, não importa o que esteja acontecendo ao nosso redor. Que promessa incrível, não é?
+
+Mas sabe o que mais me impressiona? No Salmo 25, versículo 9, Deus nos diz: "Ele guia os humildes na justiça e lhes ensina o seu caminho."
+
+Deus não quer que sejamos perfeitos. Ele quer que sejamos humildes, que reconheçamos que precisamos Dele. E quando fazemos isso, Ele mesmo nos guia, passo a passo.
+
+Pense na sua vida hoje. Quantas vezes você se sentiu perdido, sem saber qual caminho seguir? Deus está dizendo: "Confie em mim. Eu te guio."
+
+E sabe o que acontece quando confiamos? Nos tornamos instrumentos da paz e do amor de Deus. Nossa vida se transforma em um farol de esperança para outros.
+
+Imagine o impacto que você pode ter na vida de alguém hoje. Um sorriso, uma palavra de ânimo, um gesto de amor. Tudo isso pode ser usado por Deus para tocar o coração de alguém que está precisando.
+
+Que hoje você seja essa luz. Que sua vida seja uma fonte de inspiração. Que através de você, outros encontrem em Deus seu refúgio e fortaleza.
+
+Deixe seu comentário, compartilhe com alguém que precisa ouvir isso. Que Deus abençoe sua vida hoje e sempre. Amém!
+"""
+            return improved_script.strip()
             
         except Exception as e:
-            print(f"⚠️ Erro ao adaptar para template religioso: {e}")
+            print(f"⚠️ Erro ao adaptar script religioso: {e}")
             return script
     
     def _adapt_for_vsl_magnetic_template(self, script: str, template: Dict) -> str:

@@ -82,7 +82,7 @@ def get_recommended_voice(content_category: str) -> str:
     Retorna a voz recomendada baseada na categoria do conteúdo
     """
     if content_category == "spiritual":
-        return "readwell"  # Readwell para conteúdo espiritual (deep and narrative)
+        return "phillip"  # Phillip para conteúdo espiritual (voz de autoridade)
     elif content_category == "reflection":
         return "drew"     # Drew para conteúdo reflexivo
     else:
