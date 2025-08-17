@@ -297,18 +297,43 @@ def generate_manual_json(script, duration):
                 ["inspiration", "motivation", "positive energy"]
             ]
         
-        # Gerar segmentos
-        keyword_index = 0
-        while current_time < duration:
-            next_time = min(current_time + segment_duration, duration)
+        # Gerar segmentos com mais diversidade
+        import random
+        
+        for i in range(int(duration / segment_duration) + 1):
+            start_time = current_time
+            end_time = min(current_time + segment_duration, duration)
             
-            # Usar keywords em ciclo
-            current_keywords = keywords[keyword_index % len(keywords)]
+            # Escolher keywords de forma mais diversificada
+            if len(keywords) > 0:
+                # Usar índice baseado no tempo para garantir diversidade
+                keyword_index = (i * 3) % len(keywords)  # Multiplicar por 3 para mais variação
+                selected_keywords = keywords[keyword_index]
+                
+                # Adicionar variação aleatória
+                if random.random() < 0.3:  # 30% de chance de usar keywords alternativas
+                    alt_keywords = [
+                        ["peaceful moment", "calm atmosphere", "serenity"],
+                        ["spiritual reflection", "meditation", "inner peace"],
+                        ["divine presence", "heavenly light", "sacred space"],
+                        ["family love", "togetherness", "unity"],
+                        ["gratitude", "thankfulness", "blessing"],
+                        ["hope", "faith", "trust"],
+                        ["wisdom", "guidance", "direction"],
+                        ["comfort", "support", "care"],
+                        ["joy", "happiness", "celebration"],
+                        ["strength", "courage", "perseverance"]
+                    ]
+                    selected_keywords = random.choice(alt_keywords)
+            else:
+                selected_keywords = ["peaceful atmosphere", "calm moment", "serenity"]
             
-            segments.append(f'[[{current_time:.1f}, {next_time:.1f}], {json.dumps(current_keywords)}]')
-            
-            current_time = next_time
-            keyword_index += 1
+            segment = {
+                "time": [start_time, end_time],
+                "keywords": selected_keywords
+            }
+            segments.append(json.dumps(segment))
+            current_time = end_time
         
         # Montar estrutura Python (não JSON string)
         manual_structure = []

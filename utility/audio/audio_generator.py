@@ -150,7 +150,7 @@ async def generate_audio_elevenlabs(text: str, output_filename: str, voice_name:
         
         data = {
             "text": text,
-            "model_id": "eleven_turbo_v2",  # Modelo mais recente
+            "model_id": "eleven_multilingual_v2",  # Modelo multilíngue para português
             "voice_settings": voice_settings
         }
         
